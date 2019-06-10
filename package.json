@@ -10,14 +10,14 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:extension.helloWorld"
+		"onCommand:firstextension.showPanel"
 	],
 	"main": "./out/extension/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "extension.helloWorld",
-				"title": "Hello World"
+				"command": "firstextension.showPanel",
+				"title": "ONNX: Run validation"
 			}
 		]
 	},

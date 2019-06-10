@@ -11,10 +11,10 @@ export function activate(context: vscode.ExtensionContext) {
 	const contentProvider = new ContentProvider();
 	let currentPanel : vscode.WebviewPanel | undefined = undefined;
 
-	// The command has been defined in the package.json file
+	// The command has been declared in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('extension.helloWorld', () => {
+	let disposable = vscode.commands.registerCommand('firstextension.showPanel', () => {
 
 		if (currentPanel) {
 			currentPanel.reveal(vscode.ViewColumn.Two);
@@ -32,7 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
 		currentPanel.webview.html = contentProvider.getProdContent(context);
 
 		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World!');
+		vscode.window.showInformationMessage('Panel should be displayed');
 	});
 
 	context.subscriptions.push(disposable);
