@@ -29,7 +29,7 @@
 		"test": "npm run compile && node ./node_modules/vscode/bin/test",
 		"build-ui" : "npx webpack --env.production --config webpack.config.js",
 		"test-ui" : "npx webpack-dev-server --env.development --config webpack.config.js",
-		"build": "npm run clean && npm run compile",
+		"build": "npm run clean && npm run compile && npm run build-ui",
 		"clean": "npx rimraf out/"
 	},
 	"devDependencies": {
