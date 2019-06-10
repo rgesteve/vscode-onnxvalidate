@@ -27,15 +27,27 @@
 		"watch": "tsc -watch -p ./src/extension --project ./tsconfig.json",
 		"postinstall": "node ./node_modules/vscode/bin/install",
 		"test": "npm run compile && node ./node_modules/vscode/bin/test",
-		"build" : "npm run clean && npm run compile",
-		"clean" : "npx rimraf out/"
+		"build-ui" : "npx webpack --env.production --config webpack.config.js",
+		"test-ui" : "npx webpack-dev-server --env.development --config webpack.config.js",
+		"build": "npm run clean && npm run compile",
+		"clean": "npx rimraf out/"
 	},
 	"devDependencies": {
 		"@types/mocha": "^2.2.42",
 		"@types/node": "^10.12.21",
+		"@types/react": "^16.8.19",
+		"@types/react-dom": "^16.8.4",
 		"rimraf": "^2.6.3",
+		"ts-loader": "^6.0.2",
 		"tslint": "^5.12.1",
 		"typescript": "^3.3.1",
-		"vscode": "^1.1.28"
+		"vscode": "^1.1.28",
+		"webpack": "^4.33.0",
+		"webpack-cli": "^3.3.3",
+		"webpack-dev-server": "^3.7.1"
+	},
+	"dependencies": {
+		"react": "^16.8.6",
+		"react-dom": "^16.8.6"
 	}
 }
