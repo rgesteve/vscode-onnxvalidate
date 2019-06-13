@@ -31,7 +31,7 @@ const App = () => {
                     {"make":"Porsche","model":"Boxter","price":72000},
                     {"make":"Toyota","model":"Celica","price":35000},
                 ]
-    }
+    };
 
     return (
         // todo -- connect with a file-picker (directory and file) and kick off verification
