@@ -27,8 +27,8 @@
 		"watch": "tsc -watch -p ./src/extension --project ./tsconfig.json",
 		"postinstall": "node ./node_modules/vscode/bin/install",
 		"test": "npm run compile && node ./node_modules/vscode/bin/test",
-		"build-ui" : "npx webpack --env.production --config webpack.config.js",
-		"test-ui" : "npx webpack-dev-server --env.development --config webpack.config.js",
+		"build-ui": "npx webpack --env.production --config webpack.config.js",
+		"test-ui": "npx webpack-dev-server --env.development --config webpack.config.js",
 		"build": "npm run clean && npm run compile && npm run build-ui",
 		"clean": "npx rimraf out/"
 	},
@@ -37,6 +37,7 @@
 		"@types/node": "^10.12.21",
 		"@types/react": "^16.8.19",
 		"@types/react-dom": "^16.8.4",
+		"office-ui-fabric-react": "^7.0.2",
 		"rimraf": "^2.6.3",
 		"ts-loader": "^6.0.2",
 		"tslint": "^5.12.1",
