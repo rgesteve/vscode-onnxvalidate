@@ -11,9 +11,6 @@ export function activate(context: vscode.ExtensionContext) {
 	const contentProvider = new ContentProvider();
 	let currentPanel : vscode.WebviewPanel | undefined = undefined;
 
-	// The command has been declared in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
 	let disposable = vscode.commands.registerCommand('firstextension.showPanel', () => {
 
 		if (currentPanel) {
@@ -22,12 +19,24 @@ export function activate(context: vscode.ExtensionContext) {
 			currentPanel = vscode.window.createWebviewPanel(
 				"onnxvalidate",
 				"ONNXValidate",
-				vscode.ViewColumn.Two,
+				vscode.ViewColumn.One,
 				{
 					enableScripts : true,
 					retainContextWhenHidden : true
 				}
 			);
+			currentPanel.webview.onDidReceiveMessage(msg => {
+				let txtMessage = "generic command";
+				if (msg.command === 'setInputFile') {
+					vscode.window.showOpenDialog({
+						openLabel : 'Select file containing input file'
+					}).then( (uri) => {
+						vscode.window.showInformationMessage(`Seems like I should be opening ${uri}!`);
+					});
+					txtMessage = "should be asking for opening a file";
+				}
+				vscode.window.showInformationMessage(`Seems like I got a message ${txtMessage}!`);
+			}, undefined, context.subscriptions);
 		}
 		currentPanel.webview.html = contentProvider.getProdContent(context);
 
@@ -36,6 +45,10 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	context.subscriptions.push(disposable);
+
+	context.subscriptions.push(vscode.commands.registerCommand('firstextension.addCountToPanel', () => {
+		vscode.window.showInformationMessage("This is a new command registered");
+	}));
 }
 
 // this method is called when your extension is deactivated
