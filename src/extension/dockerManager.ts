@@ -137,9 +137,9 @@ export class DockerManager {
                     vscode.window.showInformationMessage("Validation done!");
                     console.log("Validation done!");
                     let datajson = fs.readFileSync(path.join(os.tmpdir(), "result.json"), "utf8");
-                    let result_json = JSON.parse(datajson);
+                    //let result_json = JSON.parse(datajson);
                     if (currentPanel) {
-                        currentPanel.webview.postMessage(result_json);
+                        currentPanel.webview.postMessage({command: "result", payload: datajson});
                     }
                     
                 }

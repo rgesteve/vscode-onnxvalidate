@@ -90,6 +90,8 @@ export function activate(context: vscode.ExtensionContext) {
 									inputFolders = value.fsPath;
 								});
 							}
+							if (currentPanel)
+								currentPanel.webview.postMessage({command: "inputFile", payload: inputFolders})
 							vscode.window.showInformationMessage(`Seems like I should be opening ${folderUris}!`);
 						});
 						break;
@@ -107,6 +109,8 @@ export function activate(context: vscode.ExtensionContext) {
 									refFolders = value.fsPath;
 								});
 							}
+							if (currentPanel)
+								currentPanel.webview.postMessage({command: "outputFile", payload: refFolders})
 							vscode.window.showInformationMessage(`Seems like I should be opening ${folderUris}!`);
 						});
 						break;

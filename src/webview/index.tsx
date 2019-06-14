@@ -37,12 +37,30 @@ const App : React.SFC = () => {
     };
 
     const [count, setCount] = React.useState(0);
+    const [inputFile, setInputFile] = React.useState("");
+    const [outputFile, setOutputFile] = React.useState("");
+    const [result, setResult] = React.useState(null);
 
     React.useEffect( () => {
         window.addEventListener('message', (ev) => {
             //ev.data
-            console.log(`Got a message from the host ${ev.data}`);
-            setCount(count + 1);
+            switch(ev.data.command) {
+                case "inputFile": {
+                    console.log(`Got a message from the host ${ev.data}`);
+                    setInputFile(ev.data.payload);
+                    break;
+                }
+                case "outputFile": {
+                    console.log(`Got a message from the host ${ev.data}`);
+                    setOutputFile(ev.data.payload);
+                    break;
+                }
+                case "result": {
+                    console.log(`Got a message from the host ${ev.data}`);
+                    setResult(ev.data.payload);
+                    break;
+                }
+            }
         });
     }, []);
 
@@ -91,9 +109,9 @@ const App : React.SFC = () => {
             <Stack tokens={tokens.fiveGapStack}>
                 <Stack.Item align="stretch">
                     <span>Enter directory containing inputs</span>
-                    <TextField value= { `The count should be ${count} here...`} placeholder="Inputs..." />
+                    <TextField value= { `${inputFile}`} placeholder="Inputs..." />
                     <span>Enter file containing validation</span>
-                    <TextField value={`Properties of vscode API are ${Object.keys(vscode).join(',')} .`} placeholder="Reference outputs..." />
+                    <TextField value={`${outputFile}`} placeholder="Reference outputs..." />
                 </Stack.Item>
                 <Stack.Item align="center">
                     <PrimaryButton onClick={inputHandler}>Select test input</PrimaryButton>
