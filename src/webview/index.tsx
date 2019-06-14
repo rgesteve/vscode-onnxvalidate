@@ -38,16 +38,17 @@ const App : React.SFC = () => {
 
     const [count, setCount] = React.useState(0);
 
+    React.useEffect( () => {
+        window.addEventListener('message', (ev) => {
+            //ev.data
+            console.log(`Got a message from the host ${ev.data}`);
+            setCount(count + 1);
+        });
+    }, []);
+
     let objectsInVSCode = Object.keys(vscode).join(',');
 
     let clickHandler = () => {
-        /*
-        // apparently cannot use hooks outside of render loops
-        React.useEffect(() => {
-            setCount(count + 1);
-        });
-        */
-
         window.console.log(`Curious to see where ${count} value is.`);
         vscode.postMessage({
             command : 'startVerification',
@@ -114,7 +115,9 @@ const App : React.SFC = () => {
 
 ReactDOM.render(<App />, document.getElementById('root'));
 
+/*
 window.addEventListener('message', (ev) => {
     //ev.data
     console.log(`Got a message from the host ${ev.data}`);
 });
+*/
