@@ -9,7 +9,7 @@ import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 declare var acquireVsCodeApi : any;
 const vscode = acquireVsCodeApi();
 
-const App = () => {
+const App : React.SFC = () => {
 
     const tokens = {
         fiveGapStack : {
@@ -42,6 +42,7 @@ const App = () => {
 
     let clickHandler = () => {
         /*
+        // apparently cannot use hooks outside of render loops
         React.useEffect(() => {
             setCount(count + 1);
         });
@@ -57,7 +58,6 @@ const App = () => {
     };
 
     return (
-        // todo -- connect with a file-picker (directory and file) and kick off verification
         <div>
             <Stack tokens={tokens.fiveGapStack}>
                 <Stack.Item align="stretch">
@@ -68,6 +68,7 @@ const App = () => {
                 </Stack.Item>
                 <Stack.Item align="center">
                     <PrimaryButton onClick={clickHandler}>Start verification</PrimaryButton>
+                    <PrimaryButton onClick={() => { setCount(count + 1); }}>Up the counter</PrimaryButton>
                 </Stack.Item>
                 <Stack.Item>
                     <div className="ag-theme-balham"
@@ -81,3 +82,7 @@ const App = () => {
 };
 
 ReactDOM.render(<App />, document.getElementById('root'));
+
+window.addEventListener('message', (ev) => {
+    console.log('Got a message from the host');
+});
