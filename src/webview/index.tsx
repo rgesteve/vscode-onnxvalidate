@@ -39,7 +39,7 @@ const App : React.SFC = () => {
     const [count, setCount] = React.useState(0);
     const [inputFile, setInputFile] = React.useState("");
     const [outputFile, setOutputFile] = React.useState("");
-    const [result, setResult] = React.useState(null);
+    const [result, setResult] = React.useState("");
 
     React.useEffect( () => {
         window.addEventListener('message', (ev) => {
@@ -109,7 +109,7 @@ const App : React.SFC = () => {
             <Stack tokens={tokens.fiveGapStack}>
                 <Stack.Item align="stretch">
                     <span>Enter directory containing inputs</span>
-                    <TextField value= { `${inputFile}`} placeholder="Inputs..." />
+                    <TextField value= { `${inputFile}` }placeholder="Inputs..." />
                     <span>Enter file containing validation</span>
                     <TextField value={`${outputFile}`} placeholder="Reference outputs..." />
                 </Stack.Item>
@@ -121,7 +121,7 @@ const App : React.SFC = () => {
                     <PrimaryButton onClick={() => { setCount(count + 1); }}>Up the counter</PrimaryButton>
                 </Stack.Item>
                 <Stack.Item>
-                    <div className="ag-theme-balham"
+                    <div hidden={`${result}`== ""} className="ag-theme-balham"
                          style={{height: '200px', width:'600px'}}>
                         <AgGridReact columnDefs={state.columnDefs} rowData={state.rowData}></AgGridReact>
                     </div>
