@@ -47,7 +47,10 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(disposable);
 
 	context.subscriptions.push(vscode.commands.registerCommand('firstextension.addCountToPanel', () => {
-		vscode.window.showInformationMessage("This is a new command registered");
+		if (currentPanel !== undefined) {
+			currentPanel.webview.postMessage({ command: 'testCommand', payload: 'just some data'});
+		}
+		vscode.window.showInformationMessage("Just sent message to view, check console");
 	}));
 }
 
