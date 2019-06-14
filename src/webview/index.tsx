@@ -40,6 +40,13 @@ const App : React.SFC = () => {
 
     let objectsInVSCode = Object.keys(vscode).join(',');
 
+    React.useEffect(() => {
+        window.addEventListener('message', (ev) => {
+            console.log(`Somehow inside useeffect, with ${ev.data}.`);
+            setCount(count + 1);
+        });
+    });
+
     let clickHandler = () => {
         /*
         // apparently cannot use hooks outside of render loops
@@ -114,7 +121,9 @@ const App : React.SFC = () => {
 
 ReactDOM.render(<App />, document.getElementById('root'));
 
+/*
 window.addEventListener('message', (ev) => {
     //ev.data
     console.log(`Got a message from the host ${ev.data}`);
 });
+*/
