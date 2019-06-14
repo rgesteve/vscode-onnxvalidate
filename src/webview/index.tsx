@@ -50,8 +50,36 @@ const App : React.SFC = () => {
 
         window.console.log(`Curious to see where ${count} value is.`);
         vscode.postMessage({
-            command : 'setInputFile',
+            command : 'startVerification',
             text: 'check out from host'
+        });
+        window.console.log(`Sent message to host.`);
+
+    };
+    let inputHandler = () => {
+        window.console.log("Select test input");
+        vscode.postMessage({
+            command : 'setInputFile',
+            text: 'Select test input'
+        });
+        window.console.log(`Sent message to host.`);
+
+    };
+    let outputHandler = () => {
+        window.console.log("Select reference output");
+        vscode.postMessage({
+            command : 'setOutputFile',
+            text: 'Select reference output'
+        });
+        window.console.log(`Sent message to host.`);
+
+    };
+
+    let cancelHandler = () => {
+        window.console.log("Select reference output");
+        vscode.postMessage({
+            command : 'cancel',
+            text: 'Cancel'
         });
         window.console.log(`Sent message to host.`);
 
@@ -67,7 +95,10 @@ const App : React.SFC = () => {
                     <TextField value={`Properties of vscode API are ${Object.keys(vscode).join(',')} .`} placeholder="Reference outputs..." />
                 </Stack.Item>
                 <Stack.Item align="center">
+                    <PrimaryButton onClick={inputHandler}>Select test input</PrimaryButton>
+                    <PrimaryButton onClick={outputHandler}>Select reference output</PrimaryButton>
                     <PrimaryButton onClick={clickHandler}>Start verification</PrimaryButton>
+                    <PrimaryButton onClick={cancelHandler}>Cancel</PrimaryButton>
                     <PrimaryButton onClick={() => { setCount(count + 1); }}>Up the counter</PrimaryButton>
                 </Stack.Item>
                 <Stack.Item>
@@ -84,5 +115,6 @@ const App : React.SFC = () => {
 ReactDOM.render(<App />, document.getElementById('root'));
 
 window.addEventListener('message', (ev) => {
-    console.log('Got a message from the host');
+    //ev.data
+    console.log(`Got a message from the host ${ev.data}`);
 });

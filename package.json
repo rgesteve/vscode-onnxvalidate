@@ -10,21 +10,54 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:firstextension.showPanel",
+		"onCommand:extension.startOnnxEcosystem",
 		"onCommand:firstextension.addCountToPanel"
 	],
 	"main": "./out/extension/extension.js",
 	"contributes": {
-		"commands": [
-			{
-				"command": "firstextension.showPanel",
-				"title": "ONNX: Run validation"
-			},
-			{
-				"command": "firstextension.addCountToPanel",
-				"title": "ONNX: Test count"
-			}
-		]
+	     "commands": [
+	     {
+	     	"command": "firstextension.showPanel",
+                "title": "ONNX: Run validation"
+             },
+             {
+                "command": "extension.startOnnxEcosystem",
+                "title": "Start ONNX ecosystem"
+             },
+	     {
+	    	"command": "firstextension.addCountToPanel",
+		"title": "ONNX: Test count"
+	     },
+             {
+                "command": "extension.Convert",
+                "title": "Convert to ONNX"
+             },
+             {
+                "command": "extension.Quantize",
+                "title": "Quantize"
+             },
+             {
+                "command": "extension.Validate",
+                "title": "Validate"
+	     },
+	     {
+                "command": "extension.RunValidation",
+                "title": "Run Validation"
+             }
+        ],
+        "menus": {
+            "explorer/context": [
+                {
+                    "command": "extension.Convert"
+                },
+                {
+                    "command": "extension.Quantize"
+                },
+                {
+                    "command": "extension.Validate"
+                }
+            ]
+        }
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run build",
