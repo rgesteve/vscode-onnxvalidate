@@ -19,9 +19,9 @@ const App : React.SFC = () => {
 
     const state = {
         columnDefs : [
-            {headerName : 'Make',  field : 'make'},
-            {headerName : 'Model', field : 'model'},
-            {headerName : 'Price', field : 'price'},
+            {headerName : 'Inputs',  field : 'make'},
+            {headerName : 'Actual', field : 'model'},
+            {headerName : 'Predicted', field : 'price'},
         ],
         rowData : [{"make":"Toyota","model":"Celica","price":35000},
                     {"make":"Ford","model":"Mondeo","price":32000},

@@ -34,7 +34,7 @@ export class DockerManager {
             this._imageIds.push(allImages.trim().split(/\s+ \s+/)[4].split('\n')[1]);
 
             //if (vscode.window.activeTextEditor) {
-            if (!vscode.window.activeTextEditor) {
+            if (vscode.window.activeTextEditor) {
                 //let folder = vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri);
                 if (this._workspace && vscode.workspace.workspaceFolders) {
                     let userWorkspaceMount: string = `source=${this._workspace.uri.fsPath},target=C:\\${path.basename(this._workspace.uri.fsPath)},type=bind`;
@@ -77,8 +77,8 @@ export class DockerManager {
         console.log("here");
         if (this._workspace && vscode.workspace.workspaceFolders) {
             console.log(`Location: C:\\${path.basename(this._workspace.uri.fsPath)}\\tf_onnx.py C:\\${path.basename(this._workspace.uri.fsPath)}\\${path.basename(fileuri.fsPath)}`);
-            //let exec = cp.spawn('docker', ['exec',  this._containerIds[0], 'python', `C:\\${path.basename(this._workspace.uri.fsPath)}\\tf_onnx.py`, `C:\\${path.basename(this._workspace.uri.fsPath)}\\${path.basename(fileuri.fsPath)}`]);
-            let exec = cp.spawn('docker', ['exec',  "23870d17e4e8", 'python', `C:\\${path.basename(this._workspace.uri.fsPath)}\\tf_onnx.py`, `C:\\${path.basename(this._workspace.uri.fsPath)}\\${path.basename(fileuri.fsPath)}`]);
+            let exec = cp.spawn('docker', ['exec',  this._containerIds[0], 'python', `C:\\${path.basename(this._workspace.uri.fsPath)}\\tf_onnx.py`, `C:\\${path.basename(this._workspace.uri.fsPath)}\\${path.basename(fileuri.fsPath)}`]);
+            //let exec = cp.spawn('docker', ['exec',  "23870d17e4e8", 'python', `C:\\${path.basename(this._workspace.uri.fsPath)}\\tf_onnx.py`, `C:\\${path.basename(this._workspace.uri.fsPath)}\\${path.basename(fileuri.fsPath)}`]);
 
             console.log("Converting...");
             exec.on('error', (err) => {
@@ -117,15 +117,17 @@ export class DockerManager {
             //let exec = cp.spawn('docker', ['exec',  this._containerIds[0], 'python', `C:\\scripts\\mnist_validate.py`, `C:\\${path.basename(this._workspace.uri.fsPath)}\\${path.basename(fileuri.fsPath)}`]);
             //let exec = cp.spawn('docker', ['exec',  this._containerIds[0], 'python', `C:\\scratch\\mnist\\test\\mnist_validate.py`, containerInputPath, containerRefPath]);
             //let exec = cp.spawn('docker', ['exec',  "23870d17e4e8", 'python', `C:\\scratch\\mnist\\test\\mnist_validate.py`, containerInputPath, containerRefPath]);
-            let exec = cp.spawn('docker', ['exec', '-w', "C:\\scratch\\mnist\\test", "a4ed5339cf21", 'python', `C:\\scratch\\mnist\\test\\mnist_validate.py`, containerInputPath, containerRefPath]);
+            //let exec = cp.spawn('docker', ['exec', '-w', "C:\\scratch\\mnist\\test", "a4ed5339cf21", 'python', `C:\\scratch\\mnist\\test\\mnist_validate.py`, containerInputPath, containerRefPath]);
+            let exec = cp.spawn('docker', ['exec', '-w', "C:\\scratch\\mnist\\test", this._containerIds[0], 'python', `C:\\scratch\\mnist\\test\\mnist_validate.py`, containerInputPath, containerRefPath]);
             console.log(containerInputPath);
             console.log(containerRefPath);
-            console.log("Converting...");
+
             exec.on('error', (err) => {
                 console.log('Running validation failed.');
             });
             exec.stdout.on('data', (data: string) => {
-                console.log(`Got this data while running validation ${data.toString()}`);
+                //console.log(`Got this data while running validation ${data.toString()}`);
+                console.log("Running validation...");
                 
             });
             exec.on('exit', (err: any) => {
@@ -141,7 +143,7 @@ export class DockerManager {
                     if (currentPanel) {
                         currentPanel.webview.postMessage({command: "result", payload: datajson});
                     }
-                    
+                    console.log(`Result: \n ${datajson}`)
                 }
             });
         }
