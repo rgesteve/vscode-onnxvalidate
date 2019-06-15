@@ -16,33 +16,33 @@
 	"main": "./out/extension/extension.js",
 	"contributes": {
 	     "commands": [
-	     {
-	     	"command": "firstextension.showPanel",
+	     	{
+	     		"command": "firstextension.showPanel",
                 "title": "ONNX: Run validation"
-             },
-             {
+            },
+            {
                 "command": "extension.startOnnxEcosystem",
-                "title": "Start ONNX ecosystem"
-             },
-	     {
-	    	"command": "firstextension.addCountToPanel",
-		"title": "ONNX: Test count"
-	     },
-             {
+                "title": "ONNX: Start ONNX ecosystem"
+            },
+	     	{
+	    		"command": "firstextension.addCountToPanel",
+				"title": "ONNX: Test count"
+	    	},
+            {
                 "command": "extension.Convert",
-                "title": "Convert to ONNX"
-             },
-             {
+                "title": "ONNX: Convert to ONNX"
+            },
+            {
                 "command": "extension.Quantize",
-                "title": "Quantize"
-             },
-             {
+                "title": "ONNX: Quantize"
+            },
+            {
                 "command": "extension.Validate",
-                "title": "Validate"
-	     },
-	     {
+                "title": "ONNX: Validate"
+	     	},
+	     	{
                 "command": "extension.RunValidation",
-                "title": "Run Validation"
+                "title": "ONNX: Run Validation"
              }
         ],
         "menus": {
