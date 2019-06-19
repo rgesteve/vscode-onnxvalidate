@@ -137,11 +137,18 @@ export function activate(context: vscode.ExtensionContext) {
 		console.log("Validate...."); 
 
 	});
+
+	let testResults = vscode.commands.registerCommand('firstextension.tryResults', () => {
+		vscode.window.showInformationMessage("Should be reading results");
+		console.log("This should show up in the debug panel");
+	});
+
     context.subscriptions.push(startDocker);
     context.subscriptions.push(convert);
     context.subscriptions.push(quantize);
 	context.subscriptions.push(dockerManager);
 	context.subscriptions.push(validate);
+	context.subscriptions.push(testResults);
 
 
 
