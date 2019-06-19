@@ -1,13 +1,12 @@
 import * as vscode from 'vscode';
 import ContentProvider from './ContentProvider';
 import { DockerManager } from './dockerManager';
-import { basename } from 'path';
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
+import { basename, join } from 'path';
+import * as fs from 'fs';
+
 export function activate(context: vscode.ExtensionContext) {
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
 	console.log(`Extension "first-extension" is now active from path ${context.extensionPath}!!`);
 	let currentPanel : vscode.WebviewPanel | undefined = undefined;
 
@@ -139,8 +138,21 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	let testResults = vscode.commands.registerCommand('firstextension.tryResults', () => {
+		//const unBundleDiskPath = Uri.file(join(context.extensionPath, "out", "webview", "webview.bundle.js"));
+		const testDataPath : string = join(context.extensionPath, 'src', 'test','data','verification_data.json');
+		if (fs.existsSync(testDataPath)) {
+			fs.readFile(testDataPath, (err, data) => {
+				if (err || data === undefined) { 
+					console.log('Error reading data file.'); 
+				} else {
+					let results = JSON.parse(data.toString('ascii'));
+					console.log(`Read contents of ${testDataPath} OK, which, after parse is ${typeof(results)}, which we should now try to fit.`);
+				}
+			});
+		} else {
+			console.log(`Couldn't find: ${testDataPath} on disk.`);
+		}
 		vscode.window.showInformationMessage("Should be reading results");
-		console.log("This should show up in the debug panel");
 	});
 
     context.subscriptions.push(startDocker);
