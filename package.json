@@ -54,15 +54,15 @@
             "explorer/context": [
                 {
                     "command": "extension.Convert",
-					"when": "resourceFilename =~ /.pb|.pt|.h5/"
+                    "when": "resourceFilename =~ /.pb|.pt|.h5/"
                 },
                 {
                     "command": "extension.Quantize",
-					"when": "resourceExtname == .onnx"
+                    "when": "resourceExtname == .onnx"
                 },
                 {
                     "command": "extension.Validate",
-					"when": "resourceExtname == .onnx"
+                    "when": "resourceExtname == .onnx"
                 }
             ]
         }
