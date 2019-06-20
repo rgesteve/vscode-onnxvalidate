@@ -6,58 +6,70 @@ import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
-declare var acquireVsCodeApi : any;
+declare var acquireVsCodeApi: any;
 const vscode = acquireVsCodeApi();
 
-const App : React.SFC = () => {
+const App: React.SFC = () => {
 
     const tokens = {
-        fiveGapStack : {
-            childrenGap : 5
+        fiveGapStack: {
+            childrenGap: 5
         }
     };
 
     const state = {
-        columnDefs : [
-            {headerName : 'Make',  field : 'make'},
-            {headerName : 'Model', field : 'model'},
-            {headerName : 'Price', field : 'price'},
+        columnDefs: [
+            { headerName: 'Inputs', field: 'make' },
+            { headerName: 'Actual', field: 'model' },
+            { headerName: 'Predicted', field: 'price' },
         ],
-        rowData : [{"make":"Toyota","model":"Celica","price":35000},
-                    {"make":"Ford","model":"Mondeo","price":32000},
-                    {"make":"Porsche","model":"Boxter","price":72000},
-                    {"make":"Toyota","model":"Celica","price":35000},
-                    {"make":"Ford","model":"Mondeo","price":32000},
-                    {"make":"Porsche","model":"Boxter","price":72000},
-                    {"make":"Toyota","model":"Celica","price":35000},
-                    {"make":"Ford","model":"Mondeo","price":32000},
-                    {"make":"Porsche","model":"Boxter","price":72000},
-                    {"make":"Toyota","model":"Celica","price":35000},
-                ]
+        rowData: [{ "make": "Toyota", "model": "Celica", "price": 35000 },
+        { "make": "Ford", "model": "Mondeo", "price": 32000 },
+        { "make": "Porsche", "model": "Boxter", "price": 72000 },
+        { "make": "Toyota", "model": "Celica", "price": 35000 },
+        { "make": "Ford", "model": "Mondeo", "price": 32000 },
+        { "make": "Porsche", "model": "Boxter", "price": 72000 },
+        { "make": "Toyota", "model": "Celica", "price": 35000 },
+        { "make": "Ford", "model": "Mondeo", "price": 32000 },
+        { "make": "Porsche", "model": "Boxter", "price": 72000 },
+        { "make": "Toyota", "model": "Celica", "price": 35000 },
+        ]
     };
 
     const [count, setCount] = React.useState(0);
-
-    let objectsInVSCode = Object.keys(vscode).join(',');
+    const [inputFile, setInputFile] = React.useState("");
+    const [outputFile, setOutputFile] = React.useState("");
+    const [result, setResult] = React.useState("");
 
     React.useEffect(() => {
         window.addEventListener('message', (ev) => {
-            console.log(`Somehow inside useeffect, with ${ev.data}.`);
-            setCount(count + 1);
+            //ev.data
+            switch (ev.data.command) {
+                case "inputFile": {
+                    console.log(`Got a message from the host ${ev.data}`);
+                    setInputFile(ev.data.payload);
+                    break;
+                }
+                case "outputFile": {
+                    console.log(`Got a message from the host ${ev.data}`);
+                    setOutputFile(ev.data.payload);
+                    break;
+                }
+                case "result": {
+                    console.log(`Got a message from the host ${ev.data}`);
+                    setResult(ev.data.payload);
+                    break;
+                }
+            }
         });
-    });
+    }, []);
+
+    let objectsInVSCode = Object.keys(vscode).join(',');
 
     let clickHandler = () => {
-        /*
-        // apparently cannot use hooks outside of render loops
-        React.useEffect(() => {
-            setCount(count + 1);
-        });
-        */
-
         window.console.log(`Curious to see where ${count} value is.`);
         vscode.postMessage({
-            command : 'startVerification',
+            command: 'startVerification',
             text: 'check out from host'
         });
         window.console.log(`Sent message to host.`);
@@ -66,7 +78,7 @@ const App : React.SFC = () => {
     let inputHandler = () => {
         window.console.log("Select test input");
         vscode.postMessage({
-            command : 'setInputFile',
+            command: 'setInputFile',
             text: 'Select test input'
         });
         window.console.log(`Sent message to host.`);
@@ -75,7 +87,7 @@ const App : React.SFC = () => {
     let outputHandler = () => {
         window.console.log("Select reference output");
         vscode.postMessage({
-            command : 'setOutputFile',
+            command: 'setOutputFile',
             text: 'Select reference output'
         });
         window.console.log(`Sent message to host.`);
@@ -85,7 +97,7 @@ const App : React.SFC = () => {
     let cancelHandler = () => {
         window.console.log("Select reference output");
         vscode.postMessage({
-            command : 'cancel',
+            command: 'cancel',
             text: 'Cancel'
         });
         window.console.log(`Sent message to host.`);
@@ -97,9 +109,9 @@ const App : React.SFC = () => {
             <Stack tokens={tokens.fiveGapStack}>
                 <Stack.Item align="stretch">
                     <span>Enter directory containing inputs</span>
-                    <TextField value= { `The count should be ${count} here...`} placeholder="Inputs..." />
+                    <TextField value={`${inputFile}`} placeholder="Inputs..." />
                     <span>Enter file containing validation</span>
-                    <TextField value={`Properties of vscode API are ${Object.keys(vscode).join(',')} .`} placeholder="Reference outputs..." />
+                    <TextField value={`${outputFile}`} placeholder="Reference outputs..." />
                 </Stack.Item>
                 <Stack.Item align="center">
                     <PrimaryButton onClick={inputHandler}>Select test input</PrimaryButton>
@@ -109,8 +121,8 @@ const App : React.SFC = () => {
                     <PrimaryButton onClick={() => { setCount(count + 1); }}>Up the counter</PrimaryButton>
                 </Stack.Item>
                 <Stack.Item>
-                    <div className="ag-theme-balham"
-                         style={{height: '200px', width:'600px'}}>
+                    <div hidden={`${result}` == ""} className="ag-theme-balham"
+                        style={{ height: '200px', width: '600px' }}>
                         <AgGridReact columnDefs={state.columnDefs} rowData={state.rowData}></AgGridReact>
                     </div>
                 </Stack.Item>
