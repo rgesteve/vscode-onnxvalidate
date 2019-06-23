@@ -1,5 +1,6 @@
 {
 	"name": "first-extension",
+	"publisher" : "rgesteve",
 	"displayName": "first-extension",
 	"description": "",
 	"version": "0.0.1",
