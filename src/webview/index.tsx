@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { Stack, TextField, PrimaryButton } from "office-ui-fabric-react";
+import { Stack, TextField, PrimaryButton, } from "office-ui-fabric-react";
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
@@ -11,10 +11,22 @@ const vscode = acquireVsCodeApi();
 
 const App: React.SFC = () => {
 
+     
+    
+    
     const tokens = {
         fiveGapStack: {
             childrenGap: 5
-        }
+        },
+        numericalSpacing: {
+            childrenGap: 10
+          },
+        customSpacing: {
+            childrenGap: '10'
+          },
+
+     
+
     };
 
     const state = {
@@ -106,27 +118,47 @@ const App: React.SFC = () => {
 
     return (
         <div>
-            <Stack tokens={tokens.fiveGapStack}>
-                <Stack.Item align="stretch">
+           <Stack tokens={tokens.numericalSpacing}>
+               <Stack horizontal gap={3} >
+                  <Stack.Item grow >
                     <span>Enter directory containing inputs</span>
                     <TextField value={`${inputFile}`} placeholder="Inputs..." />
+                  </Stack.Item>
+               
+                <Stack.Item align="end" >
+                   <PrimaryButton style={{width:'200px'}} onClick={inputHandler}>Select Test Input</PrimaryButton>
+                 </Stack.Item>
+               
+                </Stack>
+
+               <Stack horizontal gap={3}>
+                  <Stack.Item grow >
                     <span>Enter file containing validation</span>
                     <TextField value={`${outputFile}`} placeholder="Reference outputs..." />
+                  </Stack.Item>
+               
+                 <Stack.Item align="end" >
+                    <PrimaryButton style={{width:'200px'}} onClick={outputHandler}>Select Reference Output</PrimaryButton>
                 </Stack.Item>
+               </Stack>
+
+               <Stack horizontal tokens={tokens.customSpacing} padding="s1 35%">
                 <Stack.Item align="center">
-                    <PrimaryButton onClick={inputHandler}>Select test input</PrimaryButton>
-                    <PrimaryButton onClick={outputHandler}>Select reference output</PrimaryButton>
-                    <PrimaryButton onClick={clickHandler}>Start verification</PrimaryButton>
-                    <PrimaryButton onClick={cancelHandler}>Cancel</PrimaryButton>
-                    <PrimaryButton onClick={() => { setCount(count + 1); }}>Up the counter</PrimaryButton>
+                       <PrimaryButton style={{width:'200px'}} onClick={clickHandler}>Start Verification</PrimaryButton>
+                      
                 </Stack.Item>
-                <Stack.Item>
-                    <div hidden={`${result}` == ""} className="ag-theme-balham"
-                        style={{ height: '200px', width: '600px' }}>
-                        <AgGridReact columnDefs={state.columnDefs} rowData={state.rowData}></AgGridReact>
-                    </div>
+                <Stack.Item >
+                      
+                       <PrimaryButton style={{width:'200px'}} onClick={cancelHandler}>Cancel</PrimaryButton>
                 </Stack.Item>
-            </Stack>
+                </Stack> 
+               
+
+             </Stack>
+          
+ 
+           
+           
         </div>
     );
 };
