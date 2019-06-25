@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { Stack, TextField, PrimaryButton, } from "office-ui-fabric-react";
+import { Stack, TextField, PrimaryButton } from "office-ui-fabric-react";
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
@@ -15,9 +15,7 @@ const App: React.SFC = () => {
     
     
     const tokens = {
-        fiveGapStack: {
-            childrenGap: 5
-        },
+
         numericalSpacing: {
             childrenGap: 10
           },
@@ -143,7 +141,7 @@ const App: React.SFC = () => {
                </Stack>
 
                <Stack horizontal tokens={tokens.customSpacing} padding="s1 35%">
-                <Stack.Item align="center">
+                <Stack.Item>
                        <PrimaryButton style={{width:'200px'}} onClick={clickHandler}>Start Verification</PrimaryButton>
                       
                 </Stack.Item>
@@ -154,7 +152,7 @@ const App: React.SFC = () => {
                 </Stack> 
                
 
-             </Stack>
+            </Stack>
           
  
            
