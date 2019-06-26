@@ -12,7 +12,8 @@
 	],
 	"activationEvents": [
 		"onCommand:extension.startOnnxEcosystem",
-		"onCommand:firstextension.addCountToPanel"
+        "onCommand:firstextension.addCountToPanel",
+        "onCommand:firstextension.tryResults"
 	],
 	"main": "./out/extension/extension.js",
 	"contributes": {

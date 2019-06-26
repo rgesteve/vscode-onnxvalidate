@@ -141,19 +141,33 @@ export function activate(context: vscode.ExtensionContext) {
 
     let testResults = vscode.commands.registerCommand('firstextension.tryResults', () => {
         //const unBundleDiskPath = Uri.file(join(context.extensionPath, "out", "webview", "webview.bundle.js"));
+
         const testDataPath: string = join(context.extensionPath, 'src', 'test', 'data', 'verification_data.json');
         if (fs.existsSync(testDataPath)) {
             fs.readFile(testDataPath, (err, data) => {
                 if (err || data === undefined) {
                     console.log('Error reading data file.');
                 } else {
-                    let results = JSON.parse(data.toString('ascii'));
-                    console.log(`Read contents of ${testDataPath} OK, which, after parse is ${typeof (results)}, which we should now try to fit.`);
+                    let results = JSON.parse(data.toString());
+                    try {
+                        // Be mindful that the new object created in the lambda *has* to be enclosed in brackets
+                        let forGrid : any = Object.entries(results).map(kv => ({ "input" : kv[0], 
+                                                                                "actual" : (<any>kv[1])["actual"],
+                                                                                "expected" : (<any>kv[1])["expected"]
+                                                                            }));
+                        console.log("Results parsing worked");
+                        if (currentPanel !== undefined) {
+                            currentPanel.webview.postMessage({ command: 'testCommand', payload: forGrid });
+                        }
+                    } catch {
+                        console.log("Likely pulling from array didn't work.");
+                    }
                 }
             });
         } else {
             console.log(`Couldn't find: ${testDataPath} on disk.`);
         }
+
         vscode.window.showInformationMessage("Should be reading results");
     });
 
