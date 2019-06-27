@@ -66,15 +66,13 @@ const App: React.SFC = () => {
                     break;
                 }
                 case "result": {
-                    console.log(`Got a message from the host ${ev.data}`);
-                    setResult(ev.data.payload);
+                    console.log(`Got a message from the host ${ev.data}, of type: ${typeof(ev.data)}.`);
+                    //setResult(ev.data.payload);
                     break;
                 }
             }
         });
     }, []);
-
-    let objectsInVSCode = Object.keys(vscode).join(',');
 
     let clickHandler = () => {
         window.console.log(`Curious to see where ${count} value is.`);
@@ -162,10 +160,3 @@ const App: React.SFC = () => {
 };
 
 ReactDOM.render(<App />, document.getElementById('root'));
-
-/*
-window.addEventListener('message', (ev) => {
-    //ev.data
-    console.log(`Got a message from the host ${ev.data}`);
-});
-*/

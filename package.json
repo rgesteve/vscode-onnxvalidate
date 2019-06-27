@@ -13,15 +13,12 @@
 	"activationEvents": [
 		"onCommand:extension.startOnnxEcosystem",
         "onCommand:firstextension.addCountToPanel",
-        "onCommand:firstextension.tryResults"
+        "onCommand:firstextension.tryResults",
+        "onCommand:extension.Validate"
 	],
 	"main": "./out/extension/extension.js",
 	"contributes": {
 	     "commands": [
-	     	{
-	     		"command": "firstextension.showPanel",
-                "title": "ONNX: Run validation"
-            },
             {
                 "command": "extension.startOnnxEcosystem",
                 "title": "ONNX: Start ONNX ecosystem"
