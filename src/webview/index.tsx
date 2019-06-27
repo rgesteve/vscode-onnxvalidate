@@ -11,9 +11,6 @@ const vscode = acquireVsCodeApi();
 
 const App: React.SFC = () => {
 
-     
-    
-    
     const tokens = {
 
         numericalSpacing: {
@@ -22,9 +19,6 @@ const App: React.SFC = () => {
         customSpacing: {
             childrenGap: '10'
           },
-
-     
-
     };
 
     const state = {
@@ -49,11 +43,10 @@ const App: React.SFC = () => {
     const [count, setCount] = React.useState(0);
     const [inputFile, setInputFile] = React.useState("");
     const [outputFile, setOutputFile] = React.useState("");
-    const [result, setResult] = React.useState("");
+    const [result, setResult] = React.useState([]);
 
     React.useEffect(() => {
         window.addEventListener('message', (ev) => {
-            //ev.data
             switch (ev.data.command) {
                 case "inputFile": {
                     console.log(`Got a message from the host ${ev.data}`);
@@ -67,7 +60,14 @@ const App: React.SFC = () => {
                 }
                 case "result": {
                     console.log(`Got a message from the host ${ev.data}, of type: ${typeof(ev.data)}.`);
-                    //setResult(ev.data.payload);
+                    try {
+                        //console.log(`Got object that looks like: ${ev.data}.`);
+                        //let table : Array<any> = Array.from(ev.data.payload);
+                        //console.log(`Found ${table.length} records in data.`);
+                        setResult(ev.data.payload);
+                    } catch {
+                        console.log("Couldn't display keys to the element");
+                    }
                     break;
                 }
             }
@@ -147,6 +147,13 @@ const App: React.SFC = () => {
                       
                        <PrimaryButton style={{width:'200px'}} onClick={cancelHandler}>Cancel</PrimaryButton>
                 </Stack.Item>
+
+                <Stack.Item>
+                <div className="ag-theme-balham"  hidden={result === []}
+                    style={{ height: '200px', width: '600px' }}>
+                    <AgGridReact columnDefs={state.columnDefs} rowData={result}></AgGridReact>
+                </div>
+            </Stack.Item>
                 </Stack> 
                
 
