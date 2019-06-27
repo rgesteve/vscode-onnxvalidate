@@ -34,7 +34,7 @@ export class DockerManager {
             console.log(`Testing... ${allImages}`);
             this._imageIds.push(allImages.trim().split(/\s+ \s+/)[4].split('\n')[1]);
 
-            if (vscode.window.activeTextEditor) {
+            if (!vscode.window.activeTextEditor) {
                 if (this._workspace && vscode.workspace.workspaceFolders) {
                     let userWorkspaceMount: string = `source=${this._workspace.uri.fsPath},target=C:\\${path.basename(this._workspace.uri.fsPath)},type=bind`;
                     let extensionMount: string = `source=${os.tmpdir()},target=C:\\output,type=bind`;
@@ -104,16 +104,18 @@ export class DockerManager {
     dockerValidate() {
 
     }
-    dockerRunValidation(inputPath: string, referenceOutputPath: string, currentPanel: vscode.WebviewPanel | undefined) {
+    dockerRunValidation(modelpath: string, inputPath: string, referenceOutputPath: string, currentPanel: vscode.WebviewPanel | undefined) {
 
         if (this._workspace) {
             let temp = this._workspace.uri.fsPath + "\\";
             let containerInputPath = `C:\\${path.basename(this._workspace.uri.fsPath)}\\${inputPath.replace(temp, "")}`;
             let containerRefPath = `C:\\${path.basename(this._workspace.uri.fsPath)}\\${referenceOutputPath.replace(temp, "")}`;
-            let exec = cp.spawn('docker', ['exec', '-w', "C:\\scratch\\mnist\\test", this._containerIds[0], 'python', `C:\\scratch\\mnist\\test\\mnist_validate.py`, containerInputPath, containerRefPath]);
+            let model = `C:\\${path.basename(this._workspace.uri.fsPath)}\\${modelpath.replace(temp, "")}`;
+            //let exec = cp.spawn('docker', ['exec', '-w', "C:\\scratch\\mnist\\test", this._containerIds[0], 'python', `C:\\scratch\\mnist\\test\\mnist_validate.py`, containerInputPath, containerRefPath]);
+            let exec = cp.spawn('docker', ['exec', '1555f6640ca8', 'python', `C:\\scripts\\mnist_validate.py`, model,  containerInputPath, containerRefPath]);
             console.log(containerInputPath);
             console.log(containerRefPath);
-
+            console.log(model);
             exec.on('error', (err) => {
                 console.log('Running validation failed.');
             });
