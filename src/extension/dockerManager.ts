@@ -12,6 +12,7 @@ export class DockerManager {
     private _workspace: vscode.WorkspaceFolder | undefined;
     private _extensionPath: string;
     private _context: vscode.ExtensionContext | undefined;
+    private _usermountlocation: string = "";
     // the constructor might need to get the required images from the docker hub too.
     constructor(extensionPath: string, context: vscode.ExtensionContext) {
         this._imageIds = [];
@@ -39,8 +40,9 @@ export class DockerManager {
                     let extensionMount: string = `source=${os.tmpdir()},target=C:\\output,type=bind`;
                     console.log(`mount location:${userWorkspaceMount}`);
                     console.log(`${this._imageIds[0]}`);
+                    this._usermountlocation = `C:\\${path.basename(this._workspace.uri.fsPath)}`;
 
-                    let runningContainer = cp.spawn('docker', ['run', '-t', '-d', '--mount', userWorkspaceMount, '--mount', extensionMount, this._imageIds[0]]);
+                    let runningContainer = cp.spawn('docker', ['run', '-m', '8g', '-t', '-d', '--mount', userWorkspaceMount, '--mount', extensionMount, this._imageIds[0]]);
 
                     console.log(this._workspace.uri.fsPath);
                     runningContainer.on('error', (err) => {
@@ -72,11 +74,9 @@ export class DockerManager {
 
     // Docker exec needs a running container, 
     dockerExec(fileuri: any) {
-        console.log("here");
-        if (this._workspace && vscode.workspace.workspaceFolders) {
-            console.log(`Location: C:\\${path.basename(this._workspace.uri.fsPath)}\\tf_onnx.py C:\\${path.basename(this._workspace.uri.fsPath)}\\${path.basename(fileuri.fsPath)}`);
-            let exec = cp.spawn('docker', ['exec', this._containerIds[0], 'python', `C:\\${path.basename(this._workspace.uri.fsPath)}\\tf_onnx.py`, `C:\\${path.basename(this._workspace.uri.fsPath)}\\${path.basename(fileuri.fsPath)}`]);
 
+        if (this._workspace && vscode.workspace.workspaceFolders) {
+            let exec = cp.spawn('docker', ['exec', '-w', `${path.dirname(fileuri.fsPath).replace(this._workspace.uri.fsPath, this._usermountlocation)}`, this._containerIds[0], 'python', '-m', 'tf2onnx.convert', '--saved-model', '.', '--output', 'model.onnx', '--target', 'rs6', '--fold_const', '--verbose']);
             console.log("Converting...");
             exec.on('error', (err) => {
                 console.log('Failed to start the container.');
