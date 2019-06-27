@@ -149,7 +149,7 @@ const App: React.SFC = () => {
                 </Stack.Item>
 
                 <Stack.Item>
-                <div className="ag-theme-balham"  hidden={result === []}
+                <div className="ag-theme-balham"  hidden={result.length === 0}
                     style={{ height: '200px', width: '600px' }}>
                     <AgGridReact columnDefs={state.columnDefs} rowData={result}></AgGridReact>
                 </div>
