@@ -28,7 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
     let convert = vscode.commands.registerCommand('extension.Convert', (fileuri: any) => {
         // get the file name with which the right click command was executed
         dockerManager.dockerExec(fileuri);
-        vscode.window.showInformationMessage(`Converting ${basename(fileuri.fsPath)} to ONNX...`)
+        vscode.window.showInformationMessage(`Converting ${basename(fileuri.fsPath)} to ONNX...`);
         console.log(`Converting....${basename(fileuri.fsPath)}`);
     });
 
@@ -39,7 +39,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 
     let runValidation = vscode.commands.registerCommand('extension.RunValidation', () => {
-        dockerManager.dockerExec("dockerRun_command")
+        dockerManager.dockerExec("dockerRun_command");
         console.log("Running validation....");
     });
 
@@ -87,8 +87,9 @@ export function activate(context: vscode.ExtensionContext) {
                                     inputFolders = value.fsPath;
                                 });
                             }
-                            if (currentPanel)
-                                currentPanel.webview.postMessage({ command: "inputFile", payload: inputFolders })
+                            if (currentPanel) {
+                                currentPanel.webview.postMessage({ command: "inputFile", payload: inputFolders });
+                            }
                             vscode.window.showInformationMessage(`Seems like I should be opening ${folderUris}!`);
                         });
                         break;
@@ -106,26 +107,27 @@ export function activate(context: vscode.ExtensionContext) {
                                     refFolders = value.fsPath;
                                 });
                             }
-                            if (currentPanel)
-                                currentPanel.webview.postMessage({ command: "outputFile", payload: refFolders })
+                            if (currentPanel) {
+                                currentPanel.webview.postMessage({ command: "outputFile", payload: refFolders });
+                            }
                             vscode.window.showInformationMessage(`Seems like I should be opening ${folderUris}!`);
                         });
                         break;
                     }
                     case "startVerification": {
-                        if (inputFolders != "" && refFolders != "") {
+                        if (inputFolders !== "" && refFolders !== "") {
                             dockerManager.dockerRunValidation(inputFolders, refFolders, currentPanel);
                         }
                         else {
                             console.log("Something went wrong! Input or/and ref output folder are empty");
                             inputFolders = "";
-                            refFolders = ""
+                            refFolders = "";
                         }
                         break;
                     }
                     case "cancel": {
                         inputFolders = "";
-                        refFolders = ""
+                        refFolders = "";
                         console.log("Canceling verification");
                     }
                 }
