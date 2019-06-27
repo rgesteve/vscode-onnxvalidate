@@ -11,9 +11,6 @@ const vscode = acquireVsCodeApi();
 
 const App: React.SFC = () => {
 
-     
-    
-    
     const tokens = {
 
         numericalSpacing: {
@@ -22,38 +19,34 @@ const App: React.SFC = () => {
         customSpacing: {
             childrenGap: '10'
           },
-
-     
-
     };
 
     const state = {
         columnDefs: [
-            { headerName: 'Inputs', field: 'make' },
-            { headerName: 'Actual', field: 'model' },
-            { headerName: 'Predicted', field: 'price' },
+            { headerName: 'Inputs', field: 'input' }, 
+            { headerName: 'Actual', field: 'actual' }, 
+            { headerName: 'Predicted', field: 'expected' }, 
         ],
-        rowData: [{ "make": "Toyota", "model": "Celica", "price": 35000 },
-        { "make": "Ford", "model": "Mondeo", "price": 32000 },
-        { "make": "Porsche", "model": "Boxter", "price": 72000 },
-        { "make": "Toyota", "model": "Celica", "price": 35000 },
-        { "make": "Ford", "model": "Mondeo", "price": 32000 },
-        { "make": "Porsche", "model": "Boxter", "price": 72000 },
-        { "make": "Toyota", "model": "Celica", "price": 35000 },
-        { "make": "Ford", "model": "Mondeo", "price": 32000 },
-        { "make": "Porsche", "model": "Boxter", "price": 72000 },
-        { "make": "Toyota", "model": "Celica", "price": 35000 },
+        rowData: [{ "input": "Toyota", "actual": "Celica", "expected": 35000 },
+        { "input": "Ford", "actual": "Mondeo", "expected": 32000 },
+        { "input": "Porsche", "actual": "Boxter", "expected": 72000 },
+        { "input": "Toyota", "actual": "Celica", "expected": 35000 },
+        { "input": "Ford", "actual": "Mondeo", "expected": 32000 },
+        { "input": "Porsche", "actual": "Boxter", "expected": 72000 },
+        { "input": "Toyota", "actual": "Celica", "expected": 35000 },
+        { "input": "Ford", "actual": "Mondeo", "expected": 32000 },
+        { "input": "Porsche", "actual": "Boxter", "expected": 72000 },
+        { "input": "Toyota", "actual": "Celica", "expected": 35000 },
         ]
     };
 
     const [count, setCount] = React.useState(0);
     const [inputFile, setInputFile] = React.useState("");
     const [outputFile, setOutputFile] = React.useState("");
-    const [result, setResult] = React.useState("");
+    const [result, setResult] = React.useState([]);
 
     React.useEffect(() => {
         window.addEventListener('message', (ev) => {
-            //ev.data
             switch (ev.data.command) {
                 case "inputFile": {
                     console.log(`Got a message from the host ${ev.data}`);
@@ -66,15 +59,20 @@ const App: React.SFC = () => {
                     break;
                 }
                 case "result": {
-                    console.log(`Got a message from the host ${ev.data}`);
-                    setResult(ev.data.payload);
+                    console.log(`Got a message from the host ${ev.data}, of type: ${typeof(ev.data)}.`);
+                    try {
+                        //console.log(`Got object that looks like: ${ev.data}.`);
+                        //let table : Array<any> = Array.from(ev.data.payload);
+                        //console.log(`Found ${table.length} records in data.`);
+                        setResult(ev.data.payload);
+                    } catch {
+                        console.log("Couldn't display keys to the element");
+                    }
                     break;
                 }
             }
         });
     }, []);
-
-    let objectsInVSCode = Object.keys(vscode).join(',');
 
     let clickHandler = () => {
         window.console.log(`Curious to see where ${count} value is.`);
@@ -149,6 +147,13 @@ const App: React.SFC = () => {
                       
                        <PrimaryButton style={{width:'200px'}} onClick={cancelHandler}>Cancel</PrimaryButton>
                 </Stack.Item>
+
+                <Stack.Item>
+                <div className="ag-theme-balham"  hidden={result === []}
+                    style={{ height: '200px', width: '600px' }}>
+                    <AgGridReact columnDefs={state.columnDefs} rowData={result}></AgGridReact>
+                </div>
+            </Stack.Item>
                 </Stack> 
                
 
@@ -162,10 +167,3 @@ const App: React.SFC = () => {
 };
 
 ReactDOM.render(<App />, document.getElementById('root'));
-
-/*
-window.addEventListener('message', (ev) => {
-    //ev.data
-    console.log(`Got a message from the host ${ev.data}`);
-});
-*/

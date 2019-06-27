@@ -116,7 +116,10 @@ export function activate(context: vscode.ExtensionContext) {
                     }
                     case "startVerification": {
                         if (inputFolders !== "" && refFolders !== "") {
-                            dockerManager.dockerRunValidation(inputFolders, refFolders, currentPanel);
+                            // TODO -- uncomment this 
+                            //dockerManager.dockerRunValidation(inputFolders, refFolders, currentPanel);
+                            testResultsHandler();
+                            vscode.window.showInformationMessage("Should be showing the results of validation");
                         }
                         else {
                             console.log("Something went wrong! Input or/and ref output folder are empty");
@@ -141,7 +144,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     });
 
-    let testResults = vscode.commands.registerCommand('firstextension.tryResults', () => {
+    let testResultsHandler = () => {
         //const unBundleDiskPath = Uri.file(join(context.extensionPath, "out", "webview", "webview.bundle.js"));
 
         const testDataPath: string = join(context.extensionPath, 'src', 'test', 'data', 'verification_data.json');
@@ -159,7 +162,7 @@ export function activate(context: vscode.ExtensionContext) {
                                                                             }));
                         console.log("Results parsing worked");
                         if (currentPanel !== undefined) {
-                            currentPanel.webview.postMessage({ command: 'testCommand', payload: forGrid });
+                            currentPanel.webview.postMessage({ command: 'result', payload: forGrid });
                         }
                     } catch {
                         console.log("Likely pulling from array didn't work.");
@@ -171,7 +174,9 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         vscode.window.showInformationMessage("Should be reading results");
-    });
+    };
+
+    let testResults = vscode.commands.registerCommand('firstextension.tryResults', testResultsHandler);
 
     context.subscriptions.push(startDocker);
     context.subscriptions.push(convert);
