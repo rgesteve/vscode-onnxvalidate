@@ -43,9 +43,10 @@ export function activate(context: vscode.ExtensionContext) {
         console.log("Running validation....");
     });
 
-    let validate = vscode.commands.registerCommand('extension.Validate', () => {
+    let validate = vscode.commands.registerCommand('extension.Validate', (modeluri: vscode.Uri) => {
 
         let userMountLocation: string = "";
+        let model: string = modeluri.fsPath;
         if (vscode.workspace.workspaceFolders && vscode.window.activeTextEditor) {
             let folder = vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri);
             if (folder) {
@@ -117,7 +118,7 @@ export function activate(context: vscode.ExtensionContext) {
                     case "startVerification": {
                         if (inputFolders !== "" && refFolders !== "") {
                             // TODO -- uncomment this 
-                            //dockerManager.dockerRunValidation(inputFolders, refFolders, currentPanel);
+                            //dockerManager.dockerRunValidation(model, inputFolders, refFolders, currentPanel);
                             testResultsHandler();
                             vscode.window.showInformationMessage("Should be showing the results of validation");
                         }
