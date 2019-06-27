@@ -29,20 +29,20 @@ const App: React.SFC = () => {
 
     const state = {
         columnDefs: [
-            { headerName: 'Inputs', field: 'make' },
-            { headerName: 'Actual', field: 'model' },
-            { headerName: 'Predicted', field: 'price' },
+            { headerName: 'Inputs', field: 'input' }, 
+            { headerName: 'Actual', field: 'actual' }, 
+            { headerName: 'Predicted', field: 'expected' }, 
         ],
-        rowData: [{ "make": "Toyota", "model": "Celica", "price": 35000 },
-        { "make": "Ford", "model": "Mondeo", "price": 32000 },
-        { "make": "Porsche", "model": "Boxter", "price": 72000 },
-        { "make": "Toyota", "model": "Celica", "price": 35000 },
-        { "make": "Ford", "model": "Mondeo", "price": 32000 },
-        { "make": "Porsche", "model": "Boxter", "price": 72000 },
-        { "make": "Toyota", "model": "Celica", "price": 35000 },
-        { "make": "Ford", "model": "Mondeo", "price": 32000 },
-        { "make": "Porsche", "model": "Boxter", "price": 72000 },
-        { "make": "Toyota", "model": "Celica", "price": 35000 },
+        rowData: [{ "input": "Toyota", "actual": "Celica", "expected": 35000 },
+        { "input": "Ford", "actual": "Mondeo", "expected": 32000 },
+        { "input": "Porsche", "actual": "Boxter", "expected": 72000 },
+        { "input": "Toyota", "actual": "Celica", "expected": 35000 },
+        { "input": "Ford", "actual": "Mondeo", "expected": 32000 },
+        { "input": "Porsche", "actual": "Boxter", "expected": 72000 },
+        { "input": "Toyota", "actual": "Celica", "expected": 35000 },
+        { "input": "Ford", "actual": "Mondeo", "expected": 32000 },
+        { "input": "Porsche", "actual": "Boxter", "expected": 72000 },
+        { "input": "Toyota", "actual": "Celica", "expected": 35000 },
         ]
     };
 

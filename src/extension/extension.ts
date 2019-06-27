@@ -159,7 +159,7 @@ export function activate(context: vscode.ExtensionContext) {
                                                                             }));
                         console.log("Results parsing worked");
                         if (currentPanel !== undefined) {
-                            currentPanel.webview.postMessage({ command: 'testCommand', payload: forGrid });
+                            currentPanel.webview.postMessage({ command: 'result', payload: forGrid });
                         }
                     } catch {
                         console.log("Likely pulling from array didn't work.");
