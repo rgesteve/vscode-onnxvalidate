@@ -46,13 +46,14 @@ export function activate(context: vscode.ExtensionContext) {
     let validate = vscode.commands.registerCommand('extension.Validate', (modeluri: vscode.Uri) => {
 
         let userMountLocation: string = "";
-
+        /*
         if (modeluri === undefined) {
             vscode.window.showErrorMessage("Validate requires a file argument!!");
             return;
         }
 
         let model: string = modeluri.fsPath;
+        */
         if (vscode.workspace.workspaceFolders && vscode.window.activeTextEditor) {
             let folder = vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri);
             if (folder) {
@@ -124,8 +125,9 @@ export function activate(context: vscode.ExtensionContext) {
                     case "startVerification": {
                         if (inputFolders !== "" && refFolders !== "") {
                             // TODO -- uncomment this 
-                            dockerManager.dockerRunValidation(model, inputFolders, refFolders, currentPanel);
+                            //dockerManager.dockerRunValidation(model, inputFolders, refFolders, currentPanel);
                             //testResultsHandler();
+                            testPerformanceHandler();
                             vscode.window.showInformationMessage("Should be showing the results of validation");
                         }
                         else {
@@ -183,7 +185,38 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.showInformationMessage("Should be reading results");
     };
 
-    let testResults = vscode.commands.registerCommand('firstextension.tryResults', testResultsHandler);
+    let testPerformanceHandler = () => {
+        const perfDataPath: string = join(context.extensionPath, 'src', 'test', 'data', 'onnxruntime_profile__2019-06-28_04-56-43.json');
+        if (fs.existsSync(perfDataPath)) {
+            fs.readFile(perfDataPath, (err, data) => {
+                if (err || data === undefined) {
+                    console.log('Error reading data file.');
+                } else {
+                    let results = JSON.parse(data.toString());
+                    try {
+                        /*
+                        let forGrid : any = Object.entries(results).map(kv => ({ "input" : kv[0], 
+                                                                                "actual" : (<any>kv[1])["actual"],
+                                                                                "expected" : (<any>kv[1])["expected"]
+                                                                            }));
+                                                                            */
+                        if (currentPanel !== undefined) {
+                            // currentPanel.webview.postMessage({ command: 'result', payload: forGrid });
+                        }
+                        vscode.window.showInformationMessage("Apparently parsed the data!");
+                    } catch {
+                        console.log("Likely couldn't pull the result.");
+                    }
+                }
+            });
+        } else {
+            console.log(`Couldn't find: ${perfDataPath} on disk.`);
+        }
+
+        vscode.window.showInformationMessage("Should be sending perf data for graph");
+    };
+
+    let testResults = vscode.commands.registerCommand('firstextension.tryResults', testPerformanceHandler);
 
     context.subscriptions.push(startDocker);
     context.subscriptions.push(convert);
