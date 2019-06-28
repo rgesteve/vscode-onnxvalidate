@@ -45,13 +45,42 @@ const App: React.SFC = () => {
         { "input": "Toyota", "actual": "Celica", "expected": 35000 },
         ],
         barData : [
-            { name: 'Page A', uv: 4000, pv: 2400, amt: 2400, },
-            { name: 'Page B', uv: 3000, pv: 1398, amt: 2210, },
-            { name: 'Page C', uv: 2000, pv: 9800, amt: 2290, },
-            { name: 'Page D', uv: 2780, pv: 3908, amt: 2000, },
-            { name: 'Page E', uv: 1890, pv: 4800, amt: 2181, },
-            { name: 'Page F', uv: 2390, pv: 3800, amt: 2500, },
-            { name: 'Page G', uv: 3490, pv: 4300, amt: 2100, },
+            {'name': 'Convolution28_fence_before/Conv', 'dur': 6},
+            {'name': 'Convolution28_kernel_time/Conv', 'dur': 1702},
+            {'name': 'Convolution28_fence_after/Conv', 'dur': 3},
+            {'name': 'Plus30_fence_before/Add', 'dur': 3},
+            {'name': 'Plus30_kernel_time/Add', 'dur': 24},
+            {'name': 'Plus30_fence_after/Add', 'dur': 2},
+            {'name': 'ReLU32_fence_before/Relu', 'dur': 3},
+            {'name': 'ReLU32_kernel_time/Relu', 'dur': 9},
+            {'name': 'ReLU32_fence_after/Relu', 'dur': 2},
+            {'name': 'Pooling66_fence_before/MaxPool', 'dur': 2},
+            {'name': 'Pooling66_kernel_time/MaxPool', 'dur': 31},
+            {'name': 'Pooling66_fence_after/MaxPool', 'dur': 2},
+            {'name': 'Convolution110_fence_before/Conv', 'dur': 3},
+            {'name': 'Convolution110_kernel_time/Conv', 'dur': 123},
+            {'name': 'Convolution110_fence_after/Conv', 'dur': 2},
+            {'name': 'Plus112_fence_before/Add', 'dur': 2},
+            {'name': 'Plus112_kernel_time/Add', 'dur': 13},
+            {'name': 'Plus112_fence_after/Add', 'dur': 2},
+            {'name': 'ReLU114_fence_before/Relu', 'dur': 2},
+            {'name': 'ReLU114_kernel_time/Relu', 'dur': 6},
+            {'name': 'ReLU114_fence_after/Relu', 'dur': 2},
+            {'name': 'Pooling160_fence_before/MaxPool', 'dur': 2},
+            {'name': 'Pooling160_kernel_time/MaxPool', 'dur': 16},
+            {'name': 'Pooling160_fence_after/MaxPool', 'dur': 2},
+            {'name': 'Times212_reshape0_fence_before/Reshape', 'dur': 3},
+            {'name': 'Times212_reshape0_kernel_time/Reshape', 'dur': 4},
+            {'name': 'Times212_reshape0_fence_after/Reshape', 'dur': 2},
+            {'name': 'Times212_reshape1_fence_before/Reshape', 'dur': 2},
+            {'name': 'Times212_reshape1_kernel_time/Reshape', 'dur': 3},
+            {'name': 'Times212_reshape1_fence_after/Reshape', 'dur': 2},
+            {'name': 'Times212_fence_before/MatMul', 'dur': 2},
+            {'name': 'Times212_kernel_time/MatMul', 'dur': 13},
+            {'name': 'Times212_fence_after/MatMul', 'dur': 2},
+            {'name': 'Plus214_fence_before/Add', 'dur': 2},
+            {'name': 'Plus214_kernel_time/Add', 'dur': 19},
+            {'name': 'Plus214_fence_after/Add', 'dur': 2}
         ]
     };
 
@@ -175,25 +204,16 @@ const App: React.SFC = () => {
                     <Stack.Item>
                         <BarChart data={state.barData} width={500} height={500} >
                             <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" tick={{fill: "#000"}} />
-                            <YAxis tick={{fill: "#000"}} />
+                            <XAxis dataKey="name" tick={{fill: "#fff"}} />
+                            <YAxis tick={{fill: "#fff"}} />
                             <Tooltip />
                             <Legend />
-                            <Bar dataKey="pv" fill="#8884d8" />
-                            <Bar dataKey="uv" fill="#84a9af" />
+                            <Bar dataKey="dur" fill="#8884d8" />
                         </BarChart>
                     </Stack.Item>
                 </Stack>
-
             </Stack>
-
-
-
-
         </div>
-
-
-
     );
 };
 
