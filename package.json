@@ -1,24 +1,24 @@
 {
-	"name": "first-extension",
-	"publisher" : "rgesteve",
-	"displayName": "first-extension",
-	"description": "",
-	"version": "0.0.1",
-	"engines": {
-		"vscode": "^1.35.0"
-	},
-	"categories": [
-		"Other"
-	],
-	"activationEvents": [
-		"onCommand:extension.startOnnxEcosystem",
+    "name": "first-extension",
+    "publisher": "rgesteve",
+    "displayName": "first-extension",
+    "description": "",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.35.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onCommand:extension.startOnnxEcosystem",
         "onCommand:firstextension.addCountToPanel",
         "onCommand:firstextension.tryResults",
         "onCommand:extension.Validate"
-	],
-	"main": "./out/extension/extension.js",
-	"contributes": {
-	     "commands": [
+    ],
+    "main": "./out/extension/extension.js",
+    "contributes": {
+        "commands": [
             {
                 "command": "extension.startOnnxEcosystem",
                 "title": "ONNX: Start ONNX ecosystem"
@@ -81,6 +81,7 @@
         "@types/node": "^10.12.21",
         "@types/react": "^16.8.19",
         "@types/react-dom": "^16.8.4",
+        "@types/recharts": "^1.1.17",
         "ag-grid-community": "^21.0.1",
         "ag-grid-react": "^21.0.1",
         "css-loader": "^3.0.0",
@@ -98,6 +99,7 @@
     },
     "dependencies": {
         "react": "^16.8.6",
-        "react-dom": "^16.8.6"
+        "react-dom": "^16.8.6",
+        "recharts": "^1.6.2"
     }
 }
