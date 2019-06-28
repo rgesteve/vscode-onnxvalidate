@@ -11,21 +11,25 @@ const vscode = acquireVsCodeApi();
 
 const App: React.SFC = () => {
 
+    const divStyle = {
+        height: '600px', width: '800px'
+    };
+
     const tokens = {
 
         numericalSpacing: {
             childrenGap: 10
-          },
+        },
         customSpacing: {
             childrenGap: '10'
-          },
+        },
     };
 
     const state = {
         columnDefs: [
-            { headerName: 'Inputs', field: 'input' }, 
-            { headerName: 'Actual', field: 'actual' }, 
-            { headerName: 'Predicted', field: 'expected' }, 
+            { headerName: 'Inputs', field: 'input' },
+            { headerName: 'Actual', field: 'actual' },
+            { headerName: 'Predicted', field: 'expected' },
         ],
         rowData: [{ "input": "Toyota", "actual": "Celica", "expected": 35000 },
         { "input": "Ford", "actual": "Mondeo", "expected": 32000 },
@@ -59,7 +63,7 @@ const App: React.SFC = () => {
                     break;
                 }
                 case "result": {
-                    console.log(`Got a message from the host ${ev.data}, of type: ${typeof(ev.data)}.`);
+                    console.log(`Got a message from the host ${ev.data}, of type: ${typeof (ev.data)}.`);
                     try {
                         //console.log(`Got object that looks like: ${ev.data}.`);
                         //let table : Array<any> = Array.from(ev.data.payload);
@@ -113,56 +117,58 @@ const App: React.SFC = () => {
     };
 
     return (
+
         <div>
-           <Stack tokens={tokens.numericalSpacing}>
-               <Stack horizontal gap={3} >
-                  <Stack.Item grow >
-                    <span>Enter directory containing inputs</span>
-                    <TextField value={`${inputFile}`} placeholder="Inputs..." />
-                  </Stack.Item>
-               
-                <Stack.Item align="end" >
-                   <PrimaryButton style={{width:'200px'}} onClick={inputHandler}>Select Test Input</PrimaryButton>
-                 </Stack.Item>
-               
+            <Stack tokens={tokens.numericalSpacing}>
+                <Stack horizontal gap={3} >
+                    <Stack.Item grow >
+                        <span>Enter directory containing inputs</span>
+                        <TextField value={`${inputFile}`} placeholder="Inputs..." />
+                    </Stack.Item>
+                    <Stack.Item align="end" >
+                        <PrimaryButton style={{ width: '200px' }} onClick={inputHandler}>Select Test Input</PrimaryButton>
+                    </Stack.Item>
+
                 </Stack>
 
-               <Stack horizontal gap={3}>
-                  <Stack.Item grow >
-                    <span>Enter file containing validation</span>
-                    <TextField value={`${outputFile}`} placeholder="Reference outputs..." />
-                  </Stack.Item>
-               
-                 <Stack.Item align="end" >
-                    <PrimaryButton style={{width:'200px'}} onClick={outputHandler}>Select Reference Output</PrimaryButton>
-                </Stack.Item>
-               </Stack>
+                <Stack horizontal gap={3}>
+                    <Stack.Item grow >
+                        <span>Enter file containing validation</span>
+                        <TextField value={`${outputFile}`} placeholder="Reference outputs..." />
+                    </Stack.Item>
 
-               <Stack horizontal tokens={tokens.customSpacing} padding="s1 35%">
-                <Stack.Item>
-                       <PrimaryButton style={{width:'200px'}} onClick={clickHandler}>Start Verification</PrimaryButton>
-                      
-                </Stack.Item>
-                <Stack.Item >
-                      
-                       <PrimaryButton style={{width:'200px'}} onClick={cancelHandler}>Cancel</PrimaryButton>
-                </Stack.Item>
+                    <Stack.Item align="end" >
+                        <PrimaryButton style={{ width: '200px' }} onClick={outputHandler}>Select Reference Output</PrimaryButton>
+                    </Stack.Item>
+                </Stack>
 
-                <Stack.Item>
-                <div className="ag-theme-balham"  hidden={result === []}
-                    style={{ height: '200px', width: '600px' }}>
-                    <AgGridReact columnDefs={state.columnDefs} rowData={result}></AgGridReact>
-                </div>
-            </Stack.Item>
-                </Stack> 
-               
+                <Stack horizontal tokens={tokens.customSpacing} padding="s1 35%">
+                    <Stack.Item>
+                        <PrimaryButton style={{ width: '200px' }} onClick={clickHandler}>Start Verification</PrimaryButton>
+                    </Stack.Item>
+                    <Stack.Item >
+                        <PrimaryButton style={{ width: '200px' }} onClick={cancelHandler}>Cancel</PrimaryButton>
+                    </Stack.Item>
+                </Stack>
+
+                <Stack>
+                    <Stack.Item>
+                        <span hidden={result.length === 0}>Validation Result</span>
+                        <div className="ag-theme-balham" style={{ height: '600px', width: '1200px' }} hidden={result.length === 0}>
+                            <AgGridReact columnDefs={state.columnDefs} rowData={result}></AgGridReact>
+                        </div>
+                    </Stack.Item>
+                </Stack>
 
             </Stack>
-          
- 
-           
-           
+
+
+
+
         </div>
+
+
+
     );
 };
 

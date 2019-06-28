@@ -34,7 +34,7 @@ export class DockerManager {
             console.log(`Testing... ${allImages}`);
             this._imageIds.push(allImages.trim().split(/\s+ \s+/)[4].split('\n')[1]);
 
-            if (!vscode.window.activeTextEditor) {
+            if (vscode.window.activeTextEditor) {
                 if (this._workspace && vscode.workspace.workspaceFolders) {
                     let userWorkspaceMount: string = `source=${this._workspace.uri.fsPath},target=C:\\${path.basename(this._workspace.uri.fsPath)},type=bind`;
                     let extensionMount: string = `source=${os.tmpdir()},target=C:\\output,type=bind`;
@@ -111,8 +111,7 @@ export class DockerManager {
             let containerInputPath = `C:\\${path.basename(this._workspace.uri.fsPath)}\\${inputPath.replace(temp, "")}`;
             let containerRefPath = `C:\\${path.basename(this._workspace.uri.fsPath)}\\${referenceOutputPath.replace(temp, "")}`;
             let model = `C:\\${path.basename(this._workspace.uri.fsPath)}\\${modelpath.replace(temp, "")}`;
-            //let exec = cp.spawn('docker', ['exec', '-w', "C:\\scratch\\mnist\\test", this._containerIds[0], 'python', `C:\\scratch\\mnist\\test\\mnist_validate.py`, containerInputPath, containerRefPath]);
-            let exec = cp.spawn('docker', ['exec', '1555f6640ca8', 'python', `C:\\scripts\\mnist_validate.py`, model,  containerInputPath, containerRefPath]);
+            let exec = cp.spawn('docker', ['exec', this._containerIds[0], 'python', `C:\\scripts\\mnist_validate.py`, model,  containerInputPath, containerRefPath]);
             console.log(containerInputPath);
             console.log(containerRefPath);
             console.log(model);
@@ -131,12 +130,33 @@ export class DockerManager {
                 else {
                     vscode.window.showInformationMessage("Validation done!");
                     console.log("Validation done!");
-                    let datajson = fs.readFileSync(path.join(os.tmpdir(), "result.json"), "utf8");
+                    let result_file = path.join(os.tmpdir(), "result.json");
 
-                    if (currentPanel) {
-                        currentPanel.webview.postMessage({ command: "result", payload: datajson });
+                    if (fs.existsSync(result_file)) {
+                        fs.readFile(result_file, (err, data) => {
+                            if (err || data === undefined) {
+                                console.log('Error reading data file.');
+                            } else {
+                                let results = JSON.parse(data.toString());
+                                try {
+                                    // Be mindful that the new object created in the lambda *has* to be enclosed in brackets
+                                    let forGrid : any = Object.entries(results).map(kv => ({ "input" : kv[0], 
+                                                                                            "actual" : (<any>kv[1])["actual"],
+                                                                                            "expected" : (<any>kv[1])["expected"]
+                                                                                        }));
+                                    console.log("Results parsing worked");
+                                    if (currentPanel !== undefined) {
+                                        currentPanel.webview.postMessage({ command: 'result', payload: forGrid });
+                                    }
+                                } catch {
+                                    console.log("Likely pulling from array didn't work.");
+                                }
+                            }
+                        });
+                    } else {
+                        console.log(`Couldn't find: ${result_file} on disk.`);
                     }
-                    console.log(`Result: \n ${datajson}`)
+                    
                 }
             });
         }

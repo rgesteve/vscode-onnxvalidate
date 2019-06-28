@@ -118,8 +118,8 @@ export function activate(context: vscode.ExtensionContext) {
                     case "startVerification": {
                         if (inputFolders !== "" && refFolders !== "") {
                             // TODO -- uncomment this 
-                            //dockerManager.dockerRunValidation(model, inputFolders, refFolders, currentPanel);
-                            testResultsHandler();
+                            dockerManager.dockerRunValidation(model, inputFolders, refFolders, currentPanel);
+                            //testResultsHandler();
                             vscode.window.showInformationMessage("Should be showing the results of validation");
                         }
                         else {
