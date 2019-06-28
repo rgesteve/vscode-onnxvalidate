@@ -46,6 +46,12 @@ export function activate(context: vscode.ExtensionContext) {
     let validate = vscode.commands.registerCommand('extension.Validate', (modeluri: vscode.Uri) => {
 
         let userMountLocation: string = "";
+
+        if (modeluri === undefined) {
+            vscode.window.showErrorMessage("Validate requires a file argument!!");
+            return;
+        }
+
         let model: string = modeluri.fsPath;
         if (vscode.workspace.workspaceFolders && vscode.window.activeTextEditor) {
             let folder = vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri);
