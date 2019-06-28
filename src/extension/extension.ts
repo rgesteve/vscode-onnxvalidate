@@ -186,22 +186,22 @@ export function activate(context: vscode.ExtensionContext) {
     };
 
     let testPerformanceHandler = () => {
+        console.log('In testperformanceHandler');
         const perfDataPath: string = join(context.extensionPath, 'src', 'test', 'data', 'onnxruntime_profile__2019-06-28_04-56-43.json');
         if (fs.existsSync(perfDataPath)) {
             fs.readFile(perfDataPath, (err, data) => {
                 if (err || data === undefined) {
                     console.log('Error reading data file.');
                 } else {
-                    let results = JSON.parse(data.toString());
+                    let perfData = JSON.parse(data.toString());
                     try {
-                        /*
-                        let forGrid : any = Object.entries(results).map(kv => ({ "input" : kv[0], 
-                                                                                "actual" : (<any>kv[1])["actual"],
-                                                                                "expected" : (<any>kv[1])["expected"]
+                        let forChart : any = Array.from(perfData).filter(rec => { return ((<any>rec)["cat"] === "Node"); })
+                                                                 .map(rec => ({ "name" : `${(<any>rec)["name"]/(<any>rec)["args"]["op_name"]}`, 
+                                                                                "dur" : (<any>rec)["dur"]
                                                                             }));
-                                                                            */
+                        console.log('Should be sending perfdata');
                         if (currentPanel !== undefined) {
-                            // currentPanel.webview.postMessage({ command: 'result', payload: forGrid });
+                            currentPanel.webview.postMessage({ command: 'perfData', payload: forChart });
                         }
                         vscode.window.showInformationMessage("Apparently parsed the data!");
                     } catch {

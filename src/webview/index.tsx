@@ -88,6 +88,7 @@ const App: React.SFC = () => {
     const [inputFile, setInputFile] = React.useState("");
     const [outputFile, setOutputFile] = React.useState("");
     const [result, setResult] = React.useState([]);
+    const [perfData, setPerfData] = React.useState(false);
 
     React.useEffect(() => {
         window.addEventListener('message', (ev) => {
@@ -113,6 +114,10 @@ const App: React.SFC = () => {
                         console.log("Couldn't display keys to the element");
                     }
                     break;
+                }
+                case "perfData" : {
+                    console.log("Got data on performance");
+                    setPerfData(true);
                 }
             }
         });
@@ -201,7 +206,8 @@ const App: React.SFC = () => {
                 </Stack>
 
                 <Stack>
-                    <Stack.Item>
+                    <Stack.Item align="center">
+                        <span hidden={!perfData}>
                         <BarChart data={state.barData} width={500} height={500} >
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="name" tick={{fill: "#fff"}} />
@@ -210,6 +216,7 @@ const App: React.SFC = () => {
                             <Legend />
                             <Bar dataKey="dur" fill="#8884d8" />
                         </BarChart>
+                        </span>
                     </Stack.Item>
                 </Stack>
             </Stack>
