@@ -32,6 +32,12 @@ export function activate(context: vscode.ExtensionContext) {
         console.log(`Converting....${basename(fileuri.fsPath)}`);
     });
 
+    let display = vscode.commands.registerCommand('extension.Display', (modeluri: vscode.Uri) => {
+        // get the file name with which the right click command was executed
+        dockerManager.dockerDisplay(modeluri);
+        //vscode.window.showInformationMessage(`Display ${basename(fileuri.fsPath)} to ONNX...`);
+        console.log(`Displaying....${basename(modeluri.fsPath)} in Netron`);
+    });
 
     let quantize = vscode.commands.registerCommand('extension.Quantize', () => {
         console.log("Quantize....");
@@ -46,14 +52,14 @@ export function activate(context: vscode.ExtensionContext) {
     let validate = vscode.commands.registerCommand('extension.Validate', (modeluri: vscode.Uri) => {
 
         let userMountLocation: string = "";
-        /*
+        
         if (modeluri === undefined) {
             vscode.window.showErrorMessage("Validate requires a file argument!!");
             return;
         }
 
         let model: string = modeluri.fsPath;
-        */
+        
         if (vscode.workspace.workspaceFolders && vscode.window.activeTextEditor) {
             let folder = vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri);
             if (folder) {
@@ -125,9 +131,9 @@ export function activate(context: vscode.ExtensionContext) {
                     case "startVerification": {
                         if (inputFolders !== "" && refFolders !== "") {
                             // TODO -- uncomment this 
-                            //dockerManager.dockerRunValidation(model, inputFolders, refFolders, currentPanel);
+                            dockerManager.dockerRunValidation(model, inputFolders, refFolders, currentPanel);
                             //testResultsHandler();
-                            testPerformanceHandler();
+                            //testPerformanceHandler();
                             vscode.window.showInformationMessage("Should be showing the results of validation");
                         }
                         else {

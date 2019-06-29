@@ -199,7 +199,7 @@ const App: React.SFC = () => {
                 <Stack>
                     <Stack.Item>
                         <span hidden={result.length === 0}>Validation Result</span>
-                        <div className="ag-theme-balham" style={{ height: '600px', width: '1200px' }} hidden={result.length === 0}>
+                        <div className="ag-theme-balham" style={{ height: '600px', width: '600px' }} hidden={result.length === 0}>
                             <AgGridReact columnDefs={state.columnDefs} rowData={result}></AgGridReact>
                         </div>
                     </Stack.Item>
@@ -208,7 +208,7 @@ const App: React.SFC = () => {
                 <Stack>
                     <Stack.Item align="center">
                         <span hidden={!perfData}>
-                        <BarChart data={state.barData} width={500} height={500} >
+                        <BarChart data={state.barData} width={1200} height={500} >
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="name" tick={{fill: "#fff"}} />
                             <YAxis tick={{fill: "#fff"}} />

@@ -14,7 +14,8 @@
         "onCommand:extension.startOnnxEcosystem",
         "onCommand:firstextension.addCountToPanel",
         "onCommand:firstextension.tryResults",
-        "onCommand:extension.Validate"
+        "onCommand:extension.Validate",
+        "onCommand:extension.Display"
     ],
     "main": "./out/extension/extension.js",
     "contributes": {
@@ -46,6 +47,10 @@
             {
                 "command": "firstextension.tryResults",
                 "title": "ONNX: Test results"
+            },
+            {
+                "command": "extension.Display",
+                "title": "ONNX: Display Model in Netron"
             }
         ],
         "menus": {
@@ -62,6 +67,7 @@
                     "command": "extension.Validate",
                     "when": "resourceExtname == .onnx"
                 }
+
             ]
         }
     },
