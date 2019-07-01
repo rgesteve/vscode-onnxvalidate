@@ -3,6 +3,7 @@ import ContentProvider from './ContentProvider';
 import { DockerManager } from './dockerManager';
 import { basename, join } from 'path';
 import * as fs from 'fs';
+import { spawn } from 'child_process';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -33,9 +34,12 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     let display = vscode.commands.registerCommand('extension.Display', (modeluri: vscode.Uri) => {
+        const pathToChrome : string = join ("c:", "Program Files (x86)", "Google", "Chrome", "Application", "chrome.exe");
+        const vizModelPath: string = join(context.extensionPath, 'src', 'test', 'data', 'model.svg');
         // get the file name with which the right click command was executed
-        dockerManager.dockerDisplay(modeluri);
-        //vscode.window.showInformationMessage(`Display ${basename(fileuri.fsPath)} to ONNX...`);
+        //dockerManager.dockerDisplay(modeluri);
+        vscode.window.showInformationMessage(`Display ${basename(modeluri.fsPath)} using ${pathToChrome}...`);
+        spawn(pathToChrome, [vizModelPath]); // TODO -- replace this with an in-vscode viewer
         console.log(`Displaying....${basename(modeluri.fsPath)} in Netron`);
     });
 
