@@ -67,7 +67,6 @@
                     "command": "extension.Validate",
                     "when": "resourceExtname == .onnx"
                 }
-
             ]
         }
     },
