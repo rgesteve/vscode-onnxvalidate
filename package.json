@@ -50,7 +50,7 @@
             },
             {
                 "command": "extension.Display",
-                "title": "ONNX: Display Model in Netron"
+                "title": "ONNX: Visualize model"
             }
         ],
         "menus": {
@@ -66,8 +66,11 @@
                 {
                     "command": "extension.Validate",
                     "when": "resourceExtname == .onnx"
+                },
+                {
+                    "command": "extension.Display",
+                    "when": "resourceExtname == .onnx"
                 }
-
             ]
         }
     },
