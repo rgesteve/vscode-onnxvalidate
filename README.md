@@ -1,31 +1,26 @@
-This is the README for your extension "first-extension". After writing up a brief description, we recommend including the following sections.
+This vscode extension attempts to provide a unified view of many of the tools available to manipulate, adapt, verify and improve Deep Learning (DL) models, especially pre-trained models, in the process of preparing them to use within an application.
 
 ## Features
 
-TODO
+* Model conversion: TF->onnx supported right now, other formats in the works
+* Model validation: Given a labeled dataset, this extension will run the model over it and verify that the results correspon with the label (or to what extent the results correspond with the label)
+* Performance: We report running time per inference broken down per operator
+* Model quantization (WIP)
 
 ## Requirements
 
-TODO
+* Docker: for the moment, we only include Windows containers, but the design is OS-agnostic
+* A (software) project with a ML/DL model, either in TensorFlow "saved_model.pb" format or [onnx](https://onnx.ai)
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
+None for the moment
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+* No help handling errors in conversion/quantization ... we need to at the very least present them in a way that is obvious to the user.
 
 ## Release Notes
 
-### 0.0.1
-
-Initial import
+(No releases yet)
 
