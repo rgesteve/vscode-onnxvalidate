@@ -7,7 +7,11 @@
     "license": "MIT",
 	"displayName": "first-extension",
 	"description": "Prepare ML/DL models for inclusion/deployment in applications",
-	"version": "0.0.1",
+    "version": "0.0.1",
+    "repository": {
+        "type" : "git",
+        "url": "https://github.com/rgesteve/vscode-onnxvalidate"
+    },
 	"engines": {
 		"vscode": "^1.35.0"
 	},
