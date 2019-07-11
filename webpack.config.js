@@ -13,12 +13,15 @@ module.exports = env => ({
     },
     devServer : {
         contentBase : path.resolve(__dirname, 'src/webview/test'),
-        hot : true,
+        // hot : true,
+        host: '0.0.0.0',
         port : 9000,
+        /*
         disableHostCheck : true,
         headers : {
             "Access-Control-Allow-Origin" : "*"
         }
+        */
     },
     module : {
         rules : [
