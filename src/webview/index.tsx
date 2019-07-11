@@ -43,7 +43,7 @@ const App: React.SFC = () => {
         ]
     };
 
-    const [count, setCount] = React.useState(0);
+    //const [count, setCount] = React.useState(0);
     const [inputFile, setInputFile] = React.useState("");
     const [outputFile, setOutputFile] = React.useState("");
     const [result, setResult] = React.useState([]);
@@ -79,7 +79,6 @@ const App: React.SFC = () => {
 
 
     let clickHandler = () => {
-        window.console.log(`Curious to see where ${count} value is.`);
         if (process.env.NODE_ENV && process.env.NODE_ENV === 'production') {
             vscode.postMessage({
                 command: 'startVerification',
