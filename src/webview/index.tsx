@@ -7,7 +7,10 @@ import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
 declare var acquireVsCodeApi: any;
-const vscode = acquireVsCodeApi();
+let vscode : any = null; // this is poking a hole in the type system, better try something like https://github.com/microsoft/WebTemplateStudio/blob/28759f22376ae8b25401fb8591d13dcb7148d168/src/client/src/reducers/vscodeApiReducer.ts#L19
+if (process.env.NODE_ENV && process.env.NODE_ENV === 'production') {
+    const vscode = acquireVsCodeApi();
+}
 
 const App: React.SFC = () => {
 
@@ -40,7 +43,7 @@ const App: React.SFC = () => {
         ]
     };
 
-    const [count, setCount] = React.useState(0);
+    //const [count, setCount] = React.useState(0);
     const [inputFile, setInputFile] = React.useState("");
     const [outputFile, setOutputFile] = React.useState("");
     const [result, setResult] = React.useState([]);
@@ -74,40 +77,48 @@ const App: React.SFC = () => {
         });
     }, []);
 
+
     let clickHandler = () => {
-        window.console.log(`Curious to see where ${count} value is.`);
-        vscode.postMessage({
-            command: 'startVerification',
-            text: 'check out from host'
-        });
+        if (process.env.NODE_ENV && process.env.NODE_ENV === 'production') {
+            vscode.postMessage({
+                command: 'startVerification',
+                text: 'check out from host'
+            });
+        }
         window.console.log(`Sent message to host.`);
 
     };
     let inputHandler = () => {
         window.console.log("Select test input");
-        vscode.postMessage({
-            command: 'setInputFile',
-            text: 'Select test input'
-        });
+        if (process.env.NODE_ENV && process.env.NODE_ENV === 'production') {
+            vscode.postMessage({
+                command: 'setInputFile',
+                text: 'Select test input'
+            });
+        }
         window.console.log(`Sent message to host.`);
 
     };
     let outputHandler = () => {
         window.console.log("Select reference output");
-        vscode.postMessage({
-            command: 'setOutputFile',
-            text: 'Select reference output'
-        });
+        if (process.env.NODE_ENV && process.env.NODE_ENV === 'production') {
+            vscode.postMessage({
+                command: 'setOutputFile',
+                text: 'Select reference output'
+            });
+        }
         window.console.log(`Sent message to host.`);
 
     };
 
     let cancelHandler = () => {
         window.console.log("Select reference output");
-        vscode.postMessage({
-            command: 'cancel',
-            text: 'Cancel'
-        });
+        if (process.env.NODE_ENV && process.env.NODE_ENV === 'production') {
+            vscode.postMessage({
+                command: 'cancel',
+                text: 'Cancel'
+            });
+        }
         window.console.log(`Sent message to host.`);
 
     };
