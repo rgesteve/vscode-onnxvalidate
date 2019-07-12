@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { Stack, TextField, PrimaryButton } from "office-ui-fabric-react";
+import { Stack, TextField, PrimaryButton, Pivot, PivotLinkFormat, PivotItem } from "office-ui-fabric-react";
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
@@ -132,9 +132,9 @@ const App: React.SFC = () => {
                     <TextField value={`${inputFile}`} placeholder="Inputs..." />
                   </Stack.Item>
                
-                <Stack.Item align="end" >
-                   <PrimaryButton style={{width:'200px'}} onClick={inputHandler}>Select Test Input</PrimaryButton>
-                 </Stack.Item>
+                  <Stack.Item align="end" >
+                    <PrimaryButton style={{width:'200px'}} onClick={inputHandler}>Select Test Input</PrimaryButton>
+                  </Stack.Item>
                
                 </Stack>
 
@@ -144,35 +144,37 @@ const App: React.SFC = () => {
                     <TextField value={`${outputFile}`} placeholder="Reference outputs..." />
                   </Stack.Item>
                
-                 <Stack.Item align="end" >
+                  <Stack.Item align="end" >
                     <PrimaryButton style={{width:'200px'}} onClick={outputHandler}>Select Reference Output</PrimaryButton>
-                </Stack.Item>
+                  </Stack.Item>
                </Stack>
 
                <Stack horizontal tokens={tokens.customSpacing} padding="s1 35%">
-                <Stack.Item>
-                       <PrimaryButton style={{width:'200px'}} onClick={clickHandler}>Start Verification</PrimaryButton>
-                      
-                </Stack.Item>
-                <Stack.Item >
+                 <Stack.Item>
+                   <PrimaryButton style={{width:'200px'}} onClick={clickHandler}>Start Verification</PrimaryButton>
+                 </Stack.Item>
+               <Stack.Item >
                       
                        <PrimaryButton style={{width:'200px'}} onClick={cancelHandler}>Cancel</PrimaryButton>
                 </Stack.Item>
+                </Stack>
 
-                <Stack.Item>
-                <div className="ag-theme-balham"  hidden={result === []}
-                    style={{ height: '200px', width: '600px' }}>
-                    <AgGridReact columnDefs={state.columnDefs} rowData={result}></AgGridReact>
-                </div>
-            </Stack.Item>
+               <Stack>
+                 <Stack.Item align="center">
+                   <Pivot linkFormat={PivotLinkFormat.links}>
+                     <PivotItem headerText="One">
+                       <div className="ag-theme-balham"  hidden={result === []}
+                            style={{ height: '200px', width: '600px' }}>
+                         <AgGridReact columnDefs={state.columnDefs} rowData={result}></AgGridReact>
+                       </div>
+                    </PivotItem>
+                    <PivotItem headerText="Two">
+                       <p>{"One two three four five"}</p>
+                    </PivotItem>
+                   </Pivot>
+                 </Stack.Item>
                 </Stack> 
-               
-
             </Stack>
-          
- 
-           
-           
         </div>
     );
 };
