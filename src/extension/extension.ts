@@ -3,6 +3,7 @@ import ContentProvider from './ContentProvider';
 import { DockerManager } from './dockerManager';
 import { basename, join } from 'path';
 import * as fs from 'fs';
+import { spawn } from 'child_process';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -32,6 +33,15 @@ export function activate(context: vscode.ExtensionContext) {
         console.log(`Converting....${basename(fileuri.fsPath)}`);
     });
 
+    let display = vscode.commands.registerCommand('extension.Display', (modeluri: vscode.Uri) => {
+        const pathToChrome : string = join ("c:", "Program Files (x86)", "Google", "Chrome", "Application", "chrome.exe");
+        const vizModelPath: string = join(context.extensionPath, 'src', 'test', 'data', 'model.svg');
+        // get the file name with which the right click command was executed
+        //dockerManager.dockerDisplay(modeluri);
+        vscode.window.showInformationMessage(`Display ${basename(modeluri.fsPath)} using ${pathToChrome}...`);
+        spawn(pathToChrome, [vizModelPath]); // TODO -- replace this with an in-vscode viewer
+        console.log(`Displaying....${basename(modeluri.fsPath)} in Netron`);
+    });
 
     let quantize = vscode.commands.registerCommand('extension.Quantize', () => {
         console.log("Quantize....");
@@ -43,9 +53,17 @@ export function activate(context: vscode.ExtensionContext) {
         console.log("Running validation....");
     });
 
-    let validate = vscode.commands.registerCommand('extension.Validate', () => {
+    let validate = vscode.commands.registerCommand('extension.Validate', (modeluri: vscode.Uri) => {
 
         let userMountLocation: string = "";
+        
+        if (modeluri === undefined) {
+            vscode.window.showErrorMessage("Validate requires a file argument!!");
+            return;
+        }
+
+        let model: string = modeluri.fsPath;
+        
         if (vscode.workspace.workspaceFolders && vscode.window.activeTextEditor) {
             let folder = vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri);
             if (folder) {
@@ -117,8 +135,9 @@ export function activate(context: vscode.ExtensionContext) {
                     case "startVerification": {
                         if (inputFolders !== "" && refFolders !== "") {
                             // TODO -- uncomment this 
-                            //dockerManager.dockerRunValidation(inputFolders, refFolders, currentPanel);
-                            testResultsHandler();
+                            dockerManager.dockerRunValidation(model, inputFolders, refFolders, currentPanel);
+                            //testResultsHandler();
+                            //testPerformanceHandler();
                             vscode.window.showInformationMessage("Should be showing the results of validation");
                         }
                         else {
@@ -176,7 +195,38 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.showInformationMessage("Should be reading results");
     };
 
-    let testResults = vscode.commands.registerCommand('firstextension.tryResults', testResultsHandler);
+    let testPerformanceHandler = () => {
+        console.log('In testperformanceHandler');
+        const perfDataPath: string = join(context.extensionPath, 'src', 'test', 'data', 'onnxruntime_profile__2019-06-28_04-56-43.json');
+        if (fs.existsSync(perfDataPath)) {
+            fs.readFile(perfDataPath, (err, data) => {
+                if (err || data === undefined) {
+                    console.log('Error reading data file.');
+                } else {
+                    let perfData = JSON.parse(data.toString());
+                    try {
+                        let forChart : any = Array.from(perfData).filter(rec => { return ((<any>rec)["cat"] === "Node"); })
+                                                                 .map(rec => ({ "name" : `${(<any>rec)["name"]/(<any>rec)["args"]["op_name"]}`, 
+                                                                                "dur" : (<any>rec)["dur"]
+                                                                            }));
+                        console.log('Should be sending perfdata');
+                        if (currentPanel !== undefined) {
+                            currentPanel.webview.postMessage({ command: 'perfData', payload: forChart });
+                        }
+                        vscode.window.showInformationMessage("Apparently parsed the data!");
+                    } catch {
+                        console.log("Likely couldn't pull the result.");
+                    }
+                }
+            });
+        } else {
+            console.log(`Couldn't find: ${perfDataPath} on disk.`);
+        }
+
+        vscode.window.showInformationMessage("Should be sending perf data for graph");
+    };
+
+    let testResults = vscode.commands.registerCommand('firstextension.tryResults', testPerformanceHandler);
 
     context.subscriptions.push(startDocker);
     context.subscriptions.push(convert);
