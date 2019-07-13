@@ -22,11 +22,12 @@
 		"onCommand:extension.startOnnxEcosystem",
         "onCommand:firstextension.addCountToPanel",
         "onCommand:firstextension.tryResults",
-        "onCommand:extension.Validate"
-	],
-	"main": "./out/extension/extension.js",
-	"contributes": {
-	     "commands": [
+        "onCommand:extension.Validate",
+        "onCommand:extension.Display"
+    ],
+    "main": "./out/extension/extension.js",
+    "contributes": {
+        "commands": [
             {
                 "command": "extension.startOnnxEcosystem",
                 "title": "ONNX: Start ONNX ecosystem"
@@ -54,6 +55,10 @@
             {
                 "command": "firstextension.tryResults",
                 "title": "ONNX: Test results"
+            },
+            {
+                "command": "extension.Display",
+                "title": "ONNX: Visualize model"
             }
         ],
         "menus": {
@@ -68,6 +73,10 @@
                 },
                 {
                     "command": "extension.Validate",
+                    "when": "resourceExtname == .onnx"
+                },
+                {
+                    "command": "extension.Display",
                     "when": "resourceExtname == .onnx"
                 }
             ]
@@ -89,6 +98,7 @@
         "@types/node": "^10.12.21",
         "@types/react": "^16.8.19",
         "@types/react-dom": "^16.8.4",
+        "@types/recharts": "^1.1.17",
         "ag-grid-community": "^21.0.1",
         "ag-grid-react": "^21.0.1",
         "css-loader": "^3.0.0",
@@ -106,6 +116,7 @@
     },
     "dependencies": {
         "react": "^16.8.6",
-        "react-dom": "^16.8.6"
+        "react-dom": "^16.8.6",
+        "recharts": "^1.6.2"
     }
 }
