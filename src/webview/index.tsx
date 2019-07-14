@@ -8,13 +8,15 @@ import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
+import { SvgComponent } from './SvgComponent';
+
 declare var acquireVsCodeApi: any;
 let vscode : any = null; // this is poking a hole in the type system, better try something like https://github.com/microsoft/WebTemplateStudio/blob/28759f22376ae8b25401fb8591d13dcb7148d168/src/client/src/reducers/vscodeApiReducer.ts#L19
 if (process.env.NODE_ENV && process.env.NODE_ENV === 'production') {
     const vscode = acquireVsCodeApi();
 }
 
-const App: React.SFC = () => {
+const App: React.FunctionComponent = () => {
 
     const divStyle = {
         height: '600px', width: '800px'
@@ -175,6 +177,7 @@ const App: React.SFC = () => {
     return (
 
         <div>
+            <SvgComponent />
             <Stack tokens={tokens.numericalSpacing}>
                 <Stack horizontal gap={3} >
                     <Stack.Item grow >
