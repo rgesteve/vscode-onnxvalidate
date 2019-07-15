@@ -1,25 +1,25 @@
 {
-	"name": "first-extension",
-    "publisher" : "rgesteve",
-    "author" : {
-        "name" : "Intel Corporation"
+    "name": "first-extension",
+    "publisher": "rgesteve",
+    "author": {
+        "name": "Intel Corporation"
     },
     "license": "MIT",
-	"displayName": "first-extension",
-	"description": "Prepare ML/DL models for inclusion/deployment in applications",
+    "displayName": "first-extension",
+    "description": "Prepare ML/DL models for inclusion/deployment in applications",
     "version": "0.0.1",
     "repository": {
-        "type" : "git",
+        "type": "git",
         "url": "https://github.com/rgesteve/vscode-onnxvalidate"
     },
-	"engines": {
-		"vscode": "^1.35.0"
-	},
-	"categories": [
-		"Other"
-	],
-	"activationEvents": [
-		"onCommand:extension.startOnnxEcosystem",
+    "engines": {
+        "vscode": "^1.35.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onCommand:extension.startOnnxEcosystem",
         "onCommand:firstextension.addCountToPanel",
         "onCommand:firstextension.tryResults",
         "onCommand:extension.Validate",
@@ -99,6 +99,7 @@
         "@types/react": "^16.8.19",
         "@types/react-dom": "^16.8.4",
         "@types/recharts": "^1.1.17",
+        "@types/snapsvg": "^0.5.0",
         "ag-grid-community": "^21.0.1",
         "ag-grid-react": "^21.0.1",
         "css-loader": "^3.0.0",
@@ -117,6 +118,7 @@
     "dependencies": {
         "react": "^16.8.6",
         "react-dom": "^16.8.6",
-        "recharts": "^1.6.2"
+        "recharts": "^1.6.2",
+        "snapsvg": "^0.5.1"
     }
 }

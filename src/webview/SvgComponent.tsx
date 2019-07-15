@@ -1,4 +1,5 @@
 import React from 'react';
+import * as Snap from 'snapsvg';
 //import * from 'fs';
 //import * from 'path';
 
