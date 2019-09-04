@@ -40,7 +40,7 @@ export function activate(context: vscode.ExtensionContext) {
         //dockerManager.dockerDisplay(modeluri);
         vscode.window.showInformationMessage(`Display ${basename(modeluri.fsPath)} using ${pathToChrome}...`);
         spawn(pathToChrome, [vizModelPath]); // TODO -- replace this with an in-vscode viewer
-        console.log(`Displaying....${basename(modeluri.fsPath)} in Netron`);
+        console.log(`Displaying....${basename(modeluri.fsPath)} in Chrome`);
     });
 
     let quantize = vscode.commands.registerCommand('extension.Quantize', () => {
@@ -133,6 +133,12 @@ export function activate(context: vscode.ExtensionContext) {
                         break;
                     }
                     case "startVerification": {
+                        //model: string,  result: string, profile: string, dataFormat: string, count: number, dataset:string, currentPanel: vscode.WebviewPanel | undefined
+                        dockerManager.dockerRunMLPerfValidation("C:\\mount\\final_models\\mobilenetv1\\mobilenet_v1_1.0_224_frozen.pb",
+                                                  "output.json", "mobilenet-tf","NHWC", 10,
+                                                  "C:\\mount\\resnet50v2\\onnx\\ImageNet", currentPanel);
+
+                                                  
                         if (inputFolders !== "" && refFolders !== "") {
                             // TODO -- uncomment this 
                             dockerManager.dockerRunValidation(model, inputFolders, refFolders, currentPanel);
