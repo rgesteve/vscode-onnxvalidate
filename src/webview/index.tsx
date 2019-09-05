@@ -304,7 +304,7 @@ React.useEffect(() =>{
                 <Stack horizontal gap={5} >
                     <Stack.Item grow>
                         <Label style={{ color: 'white' }}>Enter path to model </Label>
-                        <TextField placeholder="Enter path to model" />
+                        <TextField value={`${modelPath}`} placeholder="Enter path to model" />
                     </Stack.Item>
                     <Stack.Item align="end" >
                         <PrimaryButton style={{ width: '200px' }} onClick={PathToModelHandler}>Select Path to model</PrimaryButton>
@@ -313,7 +313,7 @@ React.useEffect(() =>{
                 <Stack horizontal gap={5} >
                     <Stack.Item grow>
                         <Label style={{ color: 'white' }}>Enter path to data set </Label>
-                        <TextField placeholder="Enter path to data set" />
+                        <TextField value={`${dataSet}`} placeholder="Enter path to data set" />
                     </Stack.Item>
                     <Stack.Item align="end" >
                         <PrimaryButton style={{ width: '200px' }} onClick={PathToDatasetHandler}>Select Path to dataset</PrimaryButton>

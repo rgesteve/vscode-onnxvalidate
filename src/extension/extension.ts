@@ -123,7 +123,7 @@ export function activate(context: vscode.ExtensionContext) {
                     }
                     case "setDataset": {
                         vscode.window.showOpenDialog({
-                            canSelectFolders: false, canSelectFiles: true, canSelectMany: false,
+                            canSelectFolders: true, canSelectFiles: true, canSelectMany: false,
                             openLabel: 'Select dataset'
                         }).then((folderUris) => {
                             if (folderUris) {
