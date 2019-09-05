@@ -52,43 +52,43 @@ const App: React.FunctionComponent = () => {
         { "input": "Porsche", "actual": "Boxter", "expected": 72000 },
         { "input": "Toyota", "actual": "Celica", "expected": 35000 },
         ],
-        barData : [
-            {'name': 'Convolution28_fence_before/Conv', 'dur': 6},
-            {'name': 'Convolution28_kernel_time/Conv', 'dur': 1702},
-            {'name': 'Convolution28_fence_after/Conv', 'dur': 3},
-            {'name': 'Plus30_fence_before/Add', 'dur': 3},
-            {'name': 'Plus30_kernel_time/Add', 'dur': 24},
-            {'name': 'Plus30_fence_after/Add', 'dur': 2},
-            {'name': 'ReLU32_fence_before/Relu', 'dur': 3},
-            {'name': 'ReLU32_kernel_time/Relu', 'dur': 9},
-            {'name': 'ReLU32_fence_after/Relu', 'dur': 2},
-            {'name': 'Pooling66_fence_before/MaxPool', 'dur': 2},
-            {'name': 'Pooling66_kernel_time/MaxPool', 'dur': 31},
-            {'name': 'Pooling66_fence_after/MaxPool', 'dur': 2},
-            {'name': 'Convolution110_fence_before/Conv', 'dur': 3},
-            {'name': 'Convolution110_kernel_time/Conv', 'dur': 123},
-            {'name': 'Convolution110_fence_after/Conv', 'dur': 2},
-            {'name': 'Plus112_fence_before/Add', 'dur': 2},
-            {'name': 'Plus112_kernel_time/Add', 'dur': 13},
-            {'name': 'Plus112_fence_after/Add', 'dur': 2},
-            {'name': 'ReLU114_fence_before/Relu', 'dur': 2},
-            {'name': 'ReLU114_kernel_time/Relu', 'dur': 6},
-            {'name': 'ReLU114_fence_after/Relu', 'dur': 2},
-            {'name': 'Pooling160_fence_before/MaxPool', 'dur': 2},
-            {'name': 'Pooling160_kernel_time/MaxPool', 'dur': 16},
-            {'name': 'Pooling160_fence_after/MaxPool', 'dur': 2},
-            {'name': 'Times212_reshape0_fence_before/Reshape', 'dur': 3},
-            {'name': 'Times212_reshape0_kernel_time/Reshape', 'dur': 4},
-            {'name': 'Times212_reshape0_fence_after/Reshape', 'dur': 2},
-            {'name': 'Times212_reshape1_fence_before/Reshape', 'dur': 2},
-            {'name': 'Times212_reshape1_kernel_time/Reshape', 'dur': 3},
-            {'name': 'Times212_reshape1_fence_after/Reshape', 'dur': 2},
-            {'name': 'Times212_fence_before/MatMul', 'dur': 2},
-            {'name': 'Times212_kernel_time/MatMul', 'dur': 13},
-            {'name': 'Times212_fence_after/MatMul', 'dur': 2},
-            {'name': 'Plus214_fence_before/Add', 'dur': 2},
-            {'name': 'Plus214_kernel_time/Add', 'dur': 19},
-            {'name': 'Plus214_fence_after/Add', 'dur': 2}
+        barData: [
+            { 'name': 'Convolution28_fence_before/Conv', 'dur': 6 },
+            { 'name': 'Convolution28_kernel_time/Conv', 'dur': 1702 },
+            { 'name': 'Convolution28_fence_after/Conv', 'dur': 3 },
+            { 'name': 'Plus30_fence_before/Add', 'dur': 3 },
+            { 'name': 'Plus30_kernel_time/Add', 'dur': 24 },
+            { 'name': 'Plus30_fence_after/Add', 'dur': 2 },
+            { 'name': 'ReLU32_fence_before/Relu', 'dur': 3 },
+            { 'name': 'ReLU32_kernel_time/Relu', 'dur': 9 },
+            { 'name': 'ReLU32_fence_after/Relu', 'dur': 2 },
+            { 'name': 'Pooling66_fence_before/MaxPool', 'dur': 2 },
+            { 'name': 'Pooling66_kernel_time/MaxPool', 'dur': 31 },
+            { 'name': 'Pooling66_fence_after/MaxPool', 'dur': 2 },
+            { 'name': 'Convolution110_fence_before/Conv', 'dur': 3 },
+            { 'name': 'Convolution110_kernel_time/Conv', 'dur': 123 },
+            { 'name': 'Convolution110_fence_after/Conv', 'dur': 2 },
+            { 'name': 'Plus112_fence_before/Add', 'dur': 2 },
+            { 'name': 'Plus112_kernel_time/Add', 'dur': 13 },
+            { 'name': 'Plus112_fence_after/Add', 'dur': 2 },
+            { 'name': 'ReLU114_fence_before/Relu', 'dur': 2 },
+            { 'name': 'ReLU114_kernel_time/Relu', 'dur': 6 },
+            { 'name': 'ReLU114_fence_after/Relu', 'dur': 2 },
+            { 'name': 'Pooling160_fence_before/MaxPool', 'dur': 2 },
+            { 'name': 'Pooling160_kernel_time/MaxPool', 'dur': 16 },
+            { 'name': 'Pooling160_fence_after/MaxPool', 'dur': 2 },
+            { 'name': 'Times212_reshape0_fence_before/Reshape', 'dur': 3 },
+            { 'name': 'Times212_reshape0_kernel_time/Reshape', 'dur': 4 },
+            { 'name': 'Times212_reshape0_fence_after/Reshape', 'dur': 2 },
+            { 'name': 'Times212_reshape1_fence_before/Reshape', 'dur': 2 },
+            { 'name': 'Times212_reshape1_kernel_time/Reshape', 'dur': 3 },
+            { 'name': 'Times212_reshape1_fence_after/Reshape', 'dur': 2 },
+            { 'name': 'Times212_fence_before/MatMul', 'dur': 2 },
+            { 'name': 'Times212_kernel_time/MatMul', 'dur': 13 },
+            { 'name': 'Times212_fence_after/MatMul', 'dur': 2 },
+            { 'name': 'Plus214_fence_before/Add', 'dur': 2 },
+            { 'name': 'Plus214_kernel_time/Add', 'dur': 19 },
+            { 'name': 'Plus214_fence_after/Add', 'dur': 2 }
         ]
     };
 
@@ -162,8 +162,9 @@ const App: React.FunctionComponent = () => {
     const [dataSet, setDataset] = React.useState("");
     const [result, setResult] = React.useState([]);
     const [selectedItem, setProfileOption] = React.useState("");
-    const[message, setMessage] = React.useState("");
-
+    const [message, setMessage] = React.useState("");
+    const [selectedBackend, setBackend] = React.useState("");
+    const [selectDataFormat, setDataFormat] = React.useState("");
     React.useEffect(() => {
 
         window.addEventListener('message', (ev) => {
@@ -179,16 +180,16 @@ const App: React.FunctionComponent = () => {
                     break;
                 }
                 case "count": {
-                     console.log(`Got a message from the host ${ev.data}`);
-                     setCount(ev.data.payload);
-                     break;
-                 } 
-                 case "selectedItem": {
+                    console.log(`Got a message from the host ${ev.data}`);
+                    setCount(ev.data.payload);
+                    break;
+                }
+                case "selectedItem": {
                     console.log(`Got a message from the host ${ev.data}`);
                     setProfileOption(ev.data.payload);
                     break;
-                } 
-               
+                }
+
                 case "result": {
                     console.log(`Got a message from the host ${ev.data}, of type: ${typeof (ev.data)}.`);
                     try {
@@ -243,8 +244,8 @@ const App: React.FunctionComponent = () => {
 
     };
 
-React.useEffect(() =>{
-       console.log("inside test");
+    React.useEffect(() => {
+        console.log("inside test");
         window.console.log("Testing......");
         vscode.postMessage(
             {
@@ -252,28 +253,49 @@ React.useEffect(() =>{
                 text: selectedItem
             }
         );
-        window.console.log(`Sent message to host.`);  
-},[selectedItem])
+        window.console.log(`Sent message to host.`);
 
-  let test1=()=>
-  {
+        console.log("For backend option");
+        window.console.log("Testing......");
+        vscode.postMessage(
+            {
+                command: 'setBackend',
+                text: selectedBackend
+            }
+        );
+        window.console.log(`Sent message to host.`);
 
-    window.console.log("testing...");
-    window.console.log(message);
-    vscode.postMessage(
-        {
-            command: 'setCount',
-            text: 'select count'
-        }
-    );
-    window.console.log(`Sent message to host.`); 
+        console.log("For data format option");
+        window.console.log("Testing......");
+        vscode.postMessage(
+            {
+                command: 'setDataFormat',
+                text: selectDataFormat
+            }
+        );
+        window.console.log(`Sent message to host.`);
+    }, [selectedItem, selectedBackend, selectDataFormat])
 
-  }
+    let test1 = () => {
 
-  const onItemChanged = React.useCallback(e => setProfileOption(e.text), [setProfileOption]);
-  
+        window.console.log("testing...");
+        window.console.log(message);
+        vscode.postMessage(
+            {
+                command: 'setCount',
+                text: 'select count'
+            }
+        );
+        window.console.log(`Sent message to host.`);
+
+    }
+
+    const onItemChanged = React.useCallback(e => setProfileOption(e.text), [setProfileOption]);
+    const onBackendSelected = React.useCallback(e => setBackend(e.text), [setBackend]);
+    const onDataFormatSelected = React.useCallback(e => setDataFormat(e.text), [setDataFormat]);
+
     return (
-        
+
         <div>
             {/* TODO: Add different modes accurancy modes. perf mode etc
                       Add different streams: single stream, multi stream etc */}
@@ -282,22 +304,22 @@ React.useEffect(() =>{
                     <Stack.Item grow>
                         <Label style={{ color: 'white' }}>Select a Profile</Label>
                         {/*  <Dropdown placeholder="Select a profile" options={Profileoptions} styles={dropdownStyles} selectedKey={selectedItem} onChanged={selectedOption =>{
-                        setProfileOption(selectedOption.text); console.log(selectedOption.text);test()}}  />  */} 
-                          <Dropdown placeholder="Select a profile" options={Profileoptions} styles={dropdownStyles} selectedKey={selectedItem} onChanged={onItemChanged}  />    
-                   
+                        setProfileOption(selectedOption.text); console.log(selectedOption.text);test()}}  />  */}
+                        <Dropdown placeholder="Select a profile" options={Profileoptions} styles={dropdownStyles} selectedKey={selectedItem} onChanged={onItemChanged} />
                     </Stack.Item>
                     <Stack.Item grow>
                         <Label style={{ color: 'white' }}>Select Backend</Label>
-                        <Dropdown placeholder="Select backend" options={Backendoptions} styles={dropdownStyles} />
+                        <Dropdown placeholder="Select backend" options={Backendoptions} styles={dropdownStyles} selectedKey={selectedBackend} onChanged={onBackendSelected} />
                     </Stack.Item>
                     <Stack.Item grow>
                         <Label style={{ color: 'white' }}>Select data format</Label>
-                        <Dropdown placeholder="Select data format" options={DataFormatoptions} styles={dropdownStyles} />
+                        <Dropdown placeholder="Select data format" options={DataFormatoptions} styles={dropdownStyles} selectedKey={selectDataFormat} onChanged={onDataFormatSelected} />
                     </Stack.Item>
                     <Stack.Item grow>
                         <Label style={{ color: 'white' }}>Enter count </Label>
-                        <TextField placeholder="Enter number of images you need to test from the selected dataset" value={message} onChange={event=>{setMessage((event.target as HTMLInputElement).value); test1(); console.log(message)}}  />
-                   
+                         <TextField placeholder="Enter number of images you need to test from the selected dataset" value={message} onChange={event => { setMessage((event.target as HTMLInputElement).value); test1(); console.log(message) }} /> 
+                     {/* <TextField placeholder="Enter number of images you need to test from the selected dataset" value={message} onChange={selectedOption =>{
+                        setProfileOption(selectedOption.text); console.log(selectedOption.text);test() } /> */}
                     </Stack.Item>
                 </Stack>
 
