@@ -87,77 +87,92 @@ export function activate(context: vscode.ExtensionContext) {
                     retainContextWhenHidden: true
                 }
             );
-            let inputFolders: string = "";
-            let refFolders: string = "";
+            let pathToModel: string = "";
+            let pathToDataset: string = "";
+            let count:number=0;
+            let Profile:string="";
             currentPanel.webview.onDidReceiveMessage(msg => {
                 let txtMessage = "generic command";
                 switch (msg.command) {
-                    case "setInputFile": {
+                    case "setModelPath": {
                         vscode.window.showOpenDialog({
-                            canSelectFolders: true, canSelectFiles: true, canSelectMany: true,
-                            openLabel: 'Select folder(s) containing input files'
+                            //modified this as you can select either file or folder not both, set selecting only files as folders wont be helpful here
+                            canSelectFolders: false, canSelectFiles: true, canSelectMany: false,
+                            openLabel: 'Select model',
+                            //added this for an example - searches for .tf, .pb,.onnx format - can change this back to default
+                            filters:{
+                               'TensorFlow models .pb' : ['pb'],
+                               'Onnxruntime models .onnx': ['onnx']
+                            }
+
                         }).then((folderUris) => {
                             if (folderUris) {
                                 folderUris.forEach(function (value) {
                                     console.log(value.fsPath);
                                     // TODO: fix this for the case when multiple folders are selected
                                     //inputFolders = value.path.toString() + ',' + inputFolders;
-                                    inputFolders = value.fsPath;
+                                    pathToModel = value.fsPath;
                                 });
                             }
                             if (currentPanel) {
-                                currentPanel.webview.postMessage({ command: "inputFile", payload: inputFolders });
+                                currentPanel.webview.postMessage({ command: "modelPath", payload: pathToModel });
                             }
                             vscode.window.showInformationMessage(`Seems like I should be opening ${folderUris}!`);
                         });
                         break;
                     }
-                    case "setOutputFile": {
+                    case "setDataset": {
                         vscode.window.showOpenDialog({
-                            canSelectFolders: true, canSelectFiles: true, canSelectMany: true,
-                            openLabel: 'Select folder(s) containing reference output files'
+                            canSelectFolders: false, canSelectFiles: true, canSelectMany: false,
+                            openLabel: 'Select dataset'
                         }).then((folderUris) => {
                             if (folderUris) {
                                 folderUris.forEach(function (value) {
                                     console.log(value.fsPath);
                                     // TODO: fix this for the case when multiple folders are selected
                                     //refFolders = value.path.toString() + ',' + refFolders;
-                                    refFolders = value.fsPath;
+                                    pathToDataset = value.fsPath;
                                 });
                             }
                             if (currentPanel) {
-                                currentPanel.webview.postMessage({ command: "outputFile", payload: refFolders });
+                                currentPanel.webview.postMessage({ command: "dataSet", payload: pathToDataset });
                             }
                             vscode.window.showInformationMessage(`Seems like I should be opening ${folderUris}!`);
                         });
                         break;
                     }
-                    case "startVerification": {
-                        //model: string,  result: string, profile: string, dataFormat: string, count: number, dataset:string, currentPanel: vscode.WebviewPanel | undefined
-                        dockerManager.dockerRunMLPerfValidation("C:\\mount\\final_models\\mobilenetv1\\mobilenet_v1_1.0_224_frozen.pb",
-                                                  "output.json", "mobilenet-tf","NHWC", 10,
-                                                  "C:\\mount\\resnet50v2\\onnx\\ImageNet", currentPanel);
+                    case "setProfileOption": {
+                        Profile=msg.text;
 
-                                                  
-                        if (inputFolders !== "" && refFolders !== "") {
-                            // TODO -- uncomment this 
-                            dockerManager.dockerRunValidation(model, inputFolders, refFolders, currentPanel);
-                            //testResultsHandler();
-                            //testPerformanceHandler();
-                            vscode.window.showInformationMessage("Should be showing the results of validation");
-                        }
-                        else {
-                            console.log("Something went wrong! Input or/and ref output folder are empty");
-                            inputFolders = "";
-                            refFolders = "";
-                        }
-                        break;
+                        if (currentPanel) {
+                         currentPanel.webview.postMessage({ command: "selectedItem", payload: Profile });
+                     }
+                     
+                        vscode.window.showInformationMessage(`inside extension.ts`);
+                        vscode.window.showInformationMessage(Profile);
+                   
+                     break;
+                 }
+                 case "startVerification": {
+                    if (pathToModel !== "" && pathToDataset !== "") {
+                        // TODO -- uncomment this 
+                        dockerManager.dockerRunValidation(model, pathToModel, pathToDataset, currentPanel);
+                        //testResultsHandler();
+                        //testPerformanceHandler();
+                        vscode.window.showInformationMessage("Should be showing the results of validation");
                     }
-                    case "cancel": {
-                        inputFolders = "";
-                        refFolders = "";
-                        console.log("Canceling verification");
+                    else {
+                        console.log("Something went wrong! Input or/and ref output folder are empty");
+                        pathToModel = "";
+                        pathToDataset = "";
                     }
+                    break;
+                }
+                case "cancel": {
+                    pathToModel = "";
+                    pathToDataset = "";
+                    console.log("Canceling verification");
+                }
                 }
 
             }, undefined, context.subscriptions);
