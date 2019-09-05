@@ -1,17 +1,26 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { initializeIcons } from '@uifabric/icons'
 
-import { Stack, TextField, PrimaryButton } from "office-ui-fabric-react";
+
+//code added for Dropdown first option
+
+import { IStackTokens } from 'office-ui-fabric-react/lib/Stack';
+import { Dropdown, DropdownMenuItemType, IDropdownStyles, IDropdownOption } from 'office-ui-fabric-react/lib/Dropdown';
+
+import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Stack, TextField, PrimaryButton, labelProperties, Label, textAreaProperties, BasePeopleSelectedItemsList, } from "office-ui-fabric-react";
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
-import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-
 declare var acquireVsCodeApi: any;
 const vscode = acquireVsCodeApi();
 
-const App: React.SFC = () => {
+initializeIcons();
+
+
+const App: React.FunctionComponent = () => {
 
     const divStyle = {
         height: '600px', width: '800px'
@@ -26,7 +35,6 @@ const App: React.SFC = () => {
             childrenGap: '10'
         },
     };
-
     const state = {
         columnDefs: [
             { headerName: 'Inputs', field: 'input' },
@@ -84,25 +92,103 @@ const App: React.SFC = () => {
         ]
     };
 
+
+
+
+    /* const state = {
+   
+      
+          
+        columnDefs: [
+            { headerName: 'Inputs', field: 'input' },
+            { headerName: 'Actual', field: 'actual' },
+            { headerName: 'Predicted', field: 'expected' },
+        ],
+        rowData: [{ "input": "Toyota", "actual": "Celica", "expected": 35000 },
+        { "input": "Ford", "actual": "Mondeo", "expected": 32000 },
+        { "input": "Porsche", "actual": "Boxter", "expected": 72000 },
+        { "input": "Toyota", "actual": "Celica", "expected": 35000 },
+        { "input": "Ford", "actual": "Mondeo", "expected": 32000 },
+        { "input": "Porsche", "actual": "Boxter", "expected": 72000 },
+        { "input": "Toyota", "actual": "Celica", "expected": 35000 },
+        { "input": "Ford", "actual": "Mondeo", "expected": 32000 },
+        { "input": "Porsche", "actual": "Boxter", "expected": 72000 },
+        { "input": "Toyota", "actual": "Celica", "expected": 35000 },
+        ]
+    };*/
+
+
+    //code added for dropdown
+    const dropdownStyles: Partial<IDropdownStyles> = {
+        //dropdown: { width: 300}
+        caretDown: { width: 300 }
+
+    };
+
+
+
+    //TODO: Add other models as needed (takes care of resnet 50 and mobilenet)
+    const Profileoptions: IDropdownOption[] = [
+        { key: 'Resnet50Header', text: 'Resnet50', itemType: DropdownMenuItemType.Header },
+        { key: 'resnet50-tf', text: 'resnet50-tf' },
+        { key: 'resnet50-onnxruntime', text: 'resnet50-onnxruntime' },
+        { key: 'divider_2', text: '-', itemType: DropdownMenuItemType.Divider },
+        { key: 'MobilenetHeader', text: 'MobileNet', itemType: DropdownMenuItemType.Header },
+        { key: 'mobilenet-tf', text: 'mobilenet-tf' },
+        { key: 'mobilenet-onnxruntime', text: 'mobilenet-onnxruntime' }
+
+    ];
+
+    //TODO: Add other backends as needed
+    const Backendoptions: IDropdownOption[] = [
+        { key: 'tensorflow', text: 'tensorflow' },
+        { key: 'onnxruntime', text: 'onnxruntime' },
+
+
+    ];
+
+    //TODO: Add other formats as needed
+    const DataFormatoptions: IDropdownOption[] = [
+        { key: 'NHWC', text: 'NHWC' },
+        { key: 'NCHW', text: 'NCHW' },
+
+
+    ];
+
+
+
     const [count, setCount] = React.useState(0);
-    const [inputFile, setInputFile] = React.useState("");
-    const [outputFile, setOutputFile] = React.useState("");
+    const [modelPath, setModelPath] = React.useState("");
+    const [dataSet, setDataset] = React.useState("");
     const [result, setResult] = React.useState([]);
-    const [perfData, setPerfData] = React.useState(false);
+    const [selectedItem, setProfileOption] = React.useState("");
+    const[message, setMessage] = React.useState("");
 
     React.useEffect(() => {
+
         window.addEventListener('message', (ev) => {
             switch (ev.data.command) {
-                case "inputFile": {
+                case "modelPath": {
                     console.log(`Got a message from the host ${ev.data}`);
-                    setInputFile(ev.data.payload);
+                    setModelPath(ev.data.payload);
                     break;
                 }
-                case "outputFile": {
+                case "dataSet": {
                     console.log(`Got a message from the host ${ev.data}`);
-                    setOutputFile(ev.data.payload);
+                    setDataset(ev.data.payload);
                     break;
                 }
+                case "count": {
+                     console.log(`Got a message from the host ${ev.data}`);
+                     setCount(ev.data.payload);
+                     break;
+                 } 
+                 case "selectedItem": {
+                    console.log(`Got a message from the host ${ev.data}`);
+                    setProfileOption(ev.data.payload);
+                    break;
+                } 
+               
                 case "result": {
                     console.log(`Got a message from the host ${ev.data}, of type: ${typeof (ev.data)}.`);
                     try {
@@ -114,10 +200,6 @@ const App: React.SFC = () => {
                         console.log("Couldn't display keys to the element");
                     }
                     break;
-                }
-                case "perfData" : {
-                    console.log("Got data on performance");
-                    setPerfData(true);
                 }
             }
         });
@@ -132,20 +214,20 @@ const App: React.SFC = () => {
         window.console.log(`Sent message to host.`);
 
     };
-    let inputHandler = () => {
-        window.console.log("Select test input");
+    let PathToModelHandler = () => {
+        window.console.log("Select path to model");
         vscode.postMessage({
-            command: 'setInputFile',
-            text: 'Select test input'
+            command: 'setModelPath',
+            text: 'Select path to model'
         });
         window.console.log(`Sent message to host.`);
 
     };
-    let outputHandler = () => {
-        window.console.log("Select reference output");
+    let PathToDatasetHandler = () => {
+        window.console.log("Select path to data set");
         vscode.postMessage({
-            command: 'setOutputFile',
-            text: 'Select reference output'
+            command: 'setDataset',
+            text: 'Select path to dataset'
         });
         window.console.log(`Sent message to host.`);
 
@@ -161,67 +243,97 @@ const App: React.SFC = () => {
 
     };
 
+React.useEffect(() =>{
+       console.log("inside test");
+        window.console.log("Testing......");
+        vscode.postMessage(
+            {
+                command: 'setProfileOption',
+                text: selectedItem
+            }
+        );
+        window.console.log(`Sent message to host.`);  
+},[selectedItem])
+
+  let test1=()=>
+  {
+
+    window.console.log("testing...");
+    window.console.log(message);
+    vscode.postMessage(
+        {
+            command: 'setCount',
+            text: 'select count'
+        }
+    );
+    window.console.log(`Sent message to host.`); 
+
+  }
+
+  const onItemChanged = React.useCallback(e => setProfileOption(e.text), [setProfileOption]);
+  
     return (
-
+        
         <div>
+            {/* TODO: Add different modes accurancy modes. perf mode etc
+                      Add different streams: single stream, multi stream etc */}
             <Stack tokens={tokens.numericalSpacing}>
-                <Stack horizontal gap={3} >
-                    <Stack.Item grow >
-                        <span>Enter directory containing inputs</span>
-                        <TextField value={`${inputFile}`} placeholder="Inputs..." />
+                <Stack horizontal gap={7} >
+                    <Stack.Item grow>
+                        <Label style={{ color: 'white' }}>Select a Profile</Label>
+                        {/*  <Dropdown placeholder="Select a profile" options={Profileoptions} styles={dropdownStyles} selectedKey={selectedItem} onChanged={selectedOption =>{
+                        setProfileOption(selectedOption.text); console.log(selectedOption.text);test()}}  />  */} 
+                          <Dropdown placeholder="Select a profile" options={Profileoptions} styles={dropdownStyles} selectedKey={selectedItem} onChanged={onItemChanged}  />    
+                   
                     </Stack.Item>
-                    <Stack.Item align="end" >
-                        <PrimaryButton style={{ width: '200px' }} onClick={inputHandler}>Select Test Input</PrimaryButton>
+                    <Stack.Item grow>
+                        <Label style={{ color: 'white' }}>Select Backend</Label>
+                        <Dropdown placeholder="Select backend" options={Backendoptions} styles={dropdownStyles} />
                     </Stack.Item>
-
+                    <Stack.Item grow>
+                        <Label style={{ color: 'white' }}>Select data format</Label>
+                        <Dropdown placeholder="Select data format" options={DataFormatoptions} styles={dropdownStyles} />
+                    </Stack.Item>
+                    <Stack.Item grow>
+                        <Label style={{ color: 'white' }}>Enter count </Label>
+                        <TextField placeholder="Enter number of images you need to test from the selected dataset" value={message} onChange={event=>{setMessage((event.target as HTMLInputElement).value); test1(); console.log(message)}}  />
+                   
+                    </Stack.Item>
                 </Stack>
 
-                <Stack horizontal gap={3}>
-                    <Stack.Item grow >
-                        <span>Enter file containing validation</span>
-                        <TextField value={`${outputFile}`} placeholder="Reference outputs..." />
+                <Stack horizontal gap={5} >
+                    <Stack.Item grow>
+                        <Label style={{ color: 'white' }}>Enter path to model </Label>
+                        <TextField placeholder="Enter path to model" />
                     </Stack.Item>
-
                     <Stack.Item align="end" >
-                        <PrimaryButton style={{ width: '200px' }} onClick={outputHandler}>Select Reference Output</PrimaryButton>
+                        <PrimaryButton style={{ width: '200px' }} onClick={PathToModelHandler}>Select Path to model</PrimaryButton>
                     </Stack.Item>
                 </Stack>
-
+                <Stack horizontal gap={5} >
+                    <Stack.Item grow>
+                        <Label style={{ color: 'white' }}>Enter path to data set </Label>
+                        <TextField placeholder="Enter path to data set" />
+                    </Stack.Item>
+                    <Stack.Item align="end" >
+                        <PrimaryButton style={{ width: '200px' }} onClick={PathToDatasetHandler}>Select Path to dataset</PrimaryButton>
+                    </Stack.Item>
+                </Stack>
                 <Stack horizontal tokens={tokens.customSpacing} padding="s1 35%">
                     <Stack.Item>
                         <PrimaryButton style={{ width: '200px' }} onClick={clickHandler}>Start Verification</PrimaryButton>
+
                     </Stack.Item>
                     <Stack.Item >
+
                         <PrimaryButton style={{ width: '200px' }} onClick={cancelHandler}>Cancel</PrimaryButton>
                     </Stack.Item>
                 </Stack>
-
-                <Stack>
-                    <Stack.Item>
-                        <span hidden={result.length === 0}>Validation Result</span>
-                        <div className="ag-theme-balham" style={{ height: '600px', width: '600px' }} hidden={result.length === 0}>
-                            <AgGridReact columnDefs={state.columnDefs} rowData={result}></AgGridReact>
-                        </div>
-                    </Stack.Item>
-                </Stack>
-
-                <Stack>
-                    <Stack.Item align="center">
-                        <span hidden={!perfData}>
-                        <BarChart data={state.barData} width={1200} height={500} >
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" tick={{fill: "#fff"}} />
-                            <YAxis tick={{fill: "#fff"}} />
-                            <Tooltip />
-                            <Legend />
-                            <Bar dataKey="dur" fill="#8884d8" />
-                        </BarChart>
-                        </span>
-                    </Stack.Item>
-                </Stack>
             </Stack>
+
         </div>
     );
 };
 
 ReactDOM.render(<App />, document.getElementById('root'));
+
