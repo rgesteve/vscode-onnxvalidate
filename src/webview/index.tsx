@@ -162,7 +162,7 @@ const App: React.FunctionComponent = () => {
     const [dataSet, setDataset] = React.useState("");
     const [result, setResult] = React.useState([]);
     const [selectedItem, setProfileOption] = React.useState("");
-    const [message, setMessage] = React.useState("");
+    const [numberOfImages, setnumberOfImages] = React.useState("");
     const [selectedBackend, setBackend] = React.useState("");
     const [selectDataFormat, setDataFormat] = React.useState("");
     React.useEffect(() => {
@@ -273,23 +273,23 @@ const App: React.FunctionComponent = () => {
                 text: selectDataFormat
             }
         );
+
         window.console.log(`Sent message to host.`);
-    }, [selectedItem, selectedBackend, selectDataFormat])
 
-    let test1 = () => {
-
-        window.console.log("testing...");
-        window.console.log(message);
+        window.console.log("Count entered");
+        window.console.log(numberOfImages);
+        window.console.log("Testing");
         vscode.postMessage(
             {
-                command: 'setCount',
-                text: 'select count'
+                command: 'setnumberOfImages',
+                text:numberOfImages
             }
         );
-        window.console.log(`Sent message to host.`);
 
-    }
 
+    }, [selectedItem, selectedBackend, selectDataFormat,numberOfImages])
+
+    
     const onItemChanged = React.useCallback(e => setProfileOption(e.text), [setProfileOption]);
     const onBackendSelected = React.useCallback(e => setBackend(e.text), [setBackend]);
     const onDataFormatSelected = React.useCallback(e => setDataFormat(e.text), [setDataFormat]);
@@ -303,9 +303,9 @@ const App: React.FunctionComponent = () => {
                 <Stack horizontal gap={7} >
                     <Stack.Item grow>
                         <Label style={{ color: 'white' }}>Select a Profile</Label>
-                        {/*  <Dropdown placeholder="Select a profile" options={Profileoptions} styles={dropdownStyles} selectedKey={selectedItem} onChanged={selectedOption =>{
-                        setProfileOption(selectedOption.text); console.log(selectedOption.text);test()}}  />  */}
-                        <Dropdown placeholder="Select a profile" options={Profileoptions} styles={dropdownStyles} selectedKey={selectedItem} onChanged={onItemChanged} />
+                         {/* <Dropdown placeholder="Select a profile" options={Profileoptions} styles={dropdownStyles} selectedKey={selectedItem} onChanged={selectedOption =>{
+                        setProfileOption(selectedOption.text); console.log(selectedOption.text);}}  />  */}
+                         <Dropdown placeholder="Select a profile" options={Profileoptions} styles={dropdownStyles} selectedKey={selectedItem} onChanged={onItemChanged} /> 
                     </Stack.Item>
                     <Stack.Item grow>
                         <Label style={{ color: 'white' }}>Select Backend</Label>
@@ -317,9 +317,7 @@ const App: React.FunctionComponent = () => {
                     </Stack.Item>
                     <Stack.Item grow>
                         <Label style={{ color: 'white' }}>Enter count </Label>
-                         <TextField placeholder="Enter number of images you need to test from the selected dataset" value={message} onChange={event => { setMessage((event.target as HTMLInputElement).value); test1(); console.log(message) }} /> 
-                     {/* <TextField placeholder="Enter number of images you need to test from the selected dataset" value={message} onChange={selectedOption =>{
-                        setProfileOption(selectedOption.text); console.log(selectedOption.text);test() } /> */}
+                         <TextField placeholder="Enter number of images you need to test from the selected dataset" value={numberOfImages} onChange={event => { setnumberOfImages((event.target as HTMLInputElement).value)}} /> 
                     </Stack.Item>
                 </Stack>
 

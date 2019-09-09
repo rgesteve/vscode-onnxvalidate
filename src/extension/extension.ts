@@ -89,10 +89,13 @@ export function activate(context: vscode.ExtensionContext) {
             );
             let pathToModel: string = "";
             let pathToDataset: string = "";
-            let count: number = 0;
             let profile: string = "";
             let backend: string = "";
             let dataFormat: string = "";
+            let stringNumberOfImages: string = "";
+            let count: number = 0;
+            let result:string ="result";
+
             currentPanel.webview.onDidReceiveMessage(msg => {
                 let txtMessage = "generic command";
                 switch (msg.command) {
@@ -174,16 +177,22 @@ export function activate(context: vscode.ExtensionContext) {
                         if (currentPanel) {
                             currentPanel.webview.postMessage({ command: "setDataFormat", payload: dataFormat });
                         }
-
-                        vscode.window.showInformationMessage(`inside extension.ts`);
                         vscode.window.showInformationMessage(dataFormat);
 
+                        break;
+                    }
+                    case "setnumberOfImages": {
+                        stringNumberOfImages = msg.text;
+
+                        //converting to number from string
+                        count = parseInt(stringNumberOfImages);
+                        vscode.window.showInformationMessage(`number of images ${count}`);
                         break;
                     }
                     case "startVerification": {
                         if (pathToModel !== "" && pathToDataset !== "") {
                             // TODO -change this to call dockerRunMLPerfValidation
-                            dockerManager.dockerRunValidation(model, pathToModel, pathToDataset, currentPanel);
+                            dockerManager.dockerRunMLPerfValidation(pathToModel, result ,backend,dataFormat,count, pathToDataset, currentPanel);
                             //testResultsHandler();
                             //testPerformanceHandler();
                             vscode.window.showInformationMessage("Should be showing the results of validation");
