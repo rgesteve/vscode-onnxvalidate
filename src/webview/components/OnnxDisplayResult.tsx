@@ -2,6 +2,8 @@ import React from 'react';
 import { Stack, IStackStyles, IStackTokens, PrimaryButton, mergeStyles, mergeStyleSets, DefaultPalette, ScrollablePane } from 'office-ui-fabric-react';
 import { TooltipHost } from 'office-ui-fabric-react/lib/Tooltip';
 import { getId } from 'office-ui-fabric-react/lib/Utilities';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 import { Result } from './Result'
 import { MLPERF_TERMS } from '../constants/Constants'
 import Header from './Header';
@@ -21,7 +23,7 @@ const OnnxDisplayResult: React.FunctionComponent = () => {
 
     return (
         <div>
-            <Stack verticalFill gap='10'>
+            <Stack verticalFill gap='15'>
                 <Stack.Item>
                     <Header name={"ONNX Validation Results"} />
                 </Stack.Item>
@@ -29,55 +31,55 @@ const OnnxDisplayResult: React.FunctionComponent = () => {
                 <Stack.Item>
                     <Stack styles={stackStyles} tokens={customSpacingStackTokens} >
 
-                        <Stack horizontal gap='5'>
+                        <Stack styles = {stackItems} horizontal gap='5'>
                             <Stack.Item grow className={stackItemLabelStyles}>Accuracy
                                 <TooltipHost content={MLPERF_TERMS.accuracy} styles={{ root: { display: 'inline-block' } }} id={getToolTipID(1)} calloutProps={{ gapSpace: 0 }}>
-                                    <span style={{ cursor: 'pointer' }}>&#128712;</span>
+                                    <span style={{ cursor: 'pointer' }}><FontAwesomeIcon icon={faInfoCircle} size="xs" /></span>
                                 </TooltipHost>
                             </Stack.Item>
                             <Stack.Item className={stackItemValueStyles}>{result_instance["TestScenario.SingleStream"].accuracy}</Stack.Item>
                         </Stack>
 
-                        <Stack horizontal gap='5'>
+                        <Stack styles = {stackItems} horizontal gap='5'>
                             <Stack.Item grow className={stackItemLabelStyles}>Good Items
                                 <TooltipHost content={MLPERF_TERMS.good_items} styles={{ root: { display: 'inline-block' } }} id={getToolTipID(2)} calloutProps={{ gapSpace: 0 }}>
-                                    <span style={{ cursor: 'pointer' }}>&#128712;</span>
+                                    <span style={{ cursor: 'pointer' }}><FontAwesomeIcon icon={faInfoCircle} size="xs" /></span>
                                 </TooltipHost>
                             </Stack.Item>
                             <Stack.Item className={stackItemValueStyles}>{result_instance["TestScenario.SingleStream"].good_items}</Stack.Item>
                         </Stack>
 
-                        <Stack horizontal gap='5'>
+                        <Stack styles = {stackItems} horizontal gap='5'>
                             <Stack.Item grow className={stackItemLabelStyles}>Count
                                 <TooltipHost content={MLPERF_TERMS.count} styles={{ root: { display: 'inline-block' } }} id={getToolTipID(3)} calloutProps={{ gapSpace: 0 }}>
-                                    <span style={{ cursor: 'pointer' }}>&#128712;</span>
+                                    <span style={{ cursor: 'pointer' }}><FontAwesomeIcon icon={faInfoCircle} size="xs" /></span>
                                 </TooltipHost>
                             </Stack.Item>
                             <Stack.Item className={stackItemValueStyles}>{result_instance["TestScenario.SingleStream"].count}</Stack.Item>
                         </Stack>
 
-                        <Stack horizontal gap='5'>
+                        <Stack styles = {stackItems} horizontal gap='5'>
                             <Stack.Item grow className={stackItemLabelStyles}>QPS
                                 <TooltipHost content={MLPERF_TERMS.qps} styles={{ root: { display: 'inline-block' } }} id={getToolTipID(4)} calloutProps={{ gapSpace: 0 }}>
-                                    <span style={{ cursor: 'pointer' }}>&#128712;</span>
+                                    <span style={{ cursor: 'pointer' }}><FontAwesomeIcon icon={faInfoCircle} size="xs" /></span>
                                 </TooltipHost>
                             </Stack.Item>
                             <Stack.Item className={stackItemValueStyles}>{roundFloatValue(result_instance["TestScenario.SingleStream"].qps)}</Stack.Item>
                         </Stack>
 
-                        <Stack horizontal gap='5'>
+                        <Stack styles = {stackItems} horizontal gap='5'>
                             <Stack.Item grow className={stackItemLabelStyles}>Execution Time
                                 <TooltipHost content={MLPERF_TERMS.took} styles={{ root: { display: 'inline-block' } }} id={getToolTipID(5)} calloutProps={{ gapSpace: 0 }}>
-                                    <span style={{ cursor: 'pointer' }}>&#128712;</span>
+                                    <span style={{ cursor: 'pointer' }}><FontAwesomeIcon icon={faInfoCircle} size="xs" /></span>
                                 </TooltipHost>
-                            </Stack.Item>>
-                            <Stack.Item className={stackItemValueStyles}>{roundFloatValue(result_instance["TestScenario.SingleStream"].took)}</Stack.Item>
+                            </Stack.Item>
+                            <Stack.Item className={stackItemValueStyles}>{roundFloatValue(result_instance["TestScenario.SingleStream"].took) + 's'}</Stack.Item>
                         </Stack>
 
-                        <Stack horizontal gap='5'>
+                        <Stack styles = {customScrollStack} horizontal gap='5'>
                             <Stack.Item grow className={stackItemLabelStyles}>Command Executed
                                 <TooltipHost content={MLPERF_TERMS.command} styles={{ root: { display: 'inline-block' } }} id={getToolTipID(6)} calloutProps={{ gapSpace: 0 }}>
-                                    <span style={{ cursor: 'pointer' }}>&#128712;</span>
+                                    <span style={{ cursor: 'pointer' }}><FontAwesomeIcon icon={faInfoCircle} size="xs" /></span>
                                 </TooltipHost>
                             </Stack.Item>
                             <Stack.Item className={stackItemValueStyles}>
@@ -100,6 +102,18 @@ const OnnxDisplayResult: React.FunctionComponent = () => {
     );
 }
 
+const stackItems: IStackStyles = {
+    root: {
+        height: '50px'
+    }
+}
+
+const customScrollStack: IStackStyles = {
+    root: {
+        height: '100px'
+    }
+}
+
 const stackStyles: IStackStyles = {
     root: {
         background: DefaultPalette.neutralLight,
@@ -112,7 +126,7 @@ const stackItemLabelStyles = mergeStyles({
     background: DefaultPalette.themeDarker,
     color: DefaultPalette.white,
     display: 'flex',
-    height: 50,
+    height: 'inherit',
     justifyContent: 'center',
     width: '20%'
 });
@@ -122,7 +136,7 @@ const stackItemValueStyles = mergeStyles({
     background: DefaultPalette.themeDark,
     color: DefaultPalette.white,
     display: 'flex',
-    height: 50,
+    height: 'inherit',
     justifyContent: 'center',
     width: '80%'
 });
