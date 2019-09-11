@@ -5,23 +5,26 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
 import ContentProvider from './ContentProvider';
+import { isWindows, getMLPerfLocation, getMLPerfDriver } from './osUtils';
+import { supported_models } from './config';
+
 // this class manages the docker commands like build, run, exec, 
 
-let supported_models : { [key: string]: {inputs: string, outputs: string}} = {
-    // resnet
-    "resnet50": {
-        "inputs": "input_tensor:0",
-        "outputs" : "ArgMax:0",
-    },
-    // mobilenet
-    "mobilenet": {
-        "inputs": "input:0",
-        "outputs": "MobilenetV1/Predictions/Reshape_1:0",
-    },
-}
+// let supported_models : { [key: string]: {inputs: string, outputs: string}} = {
+//     // resnet
+//     "resnet50": {
+//         "inputs": "input_tensor:0",
+//         "outputs" : "ArgMax:0",
+//     },
+//     // mobilenet
+//     "mobilenet": {
+//         "inputs": "input:0",
+//         "outputs": "MobilenetV1/Predictions/Reshape_1:0",
+//     },
+// }
 
-let mlperfLocation: string = "C:\\inference\\v0.5\\classification_and_detection"
-let mlperfDriver: string = "python\\main.py";
+//let mlperfLocation: string = "C:\\inference\\v0.5\\classification_and_detection"
+//let mlperfDriver: string = "python\\main.py";
 
 export class DockerManager {
     private _imageIds: string[]; // declare an array of image ids, that exists on the system, conversionContainerImage, QuantizationImage
@@ -39,6 +42,10 @@ export class DockerManager {
         let currentContainerId: string = "";
         //TODO: Make sure that the host system has docker and this image.
         // if not, get it from docker hub? that part needs to be decided.
+        const workspaceFolders: vscode.WorkspaceFolder[] = vscode.workspace.workspaceFolders || [];
+        if (workspaceFolders.length !=0 ) {
+            
+        }
         if (vscode.window.activeTextEditor)
             this._workspace = vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri);
         let images = cp.spawn('docker', ['images', 'onnx-ecosystem-mlperf:latest']);
@@ -269,7 +276,7 @@ export class DockerManager {
             let containerModelPath = `C:\\${path.basename(this._workspace.uri.fsPath)}\\${model.replace(temp, "")}`;
             let containerDatasetPath = `C:\\${path.basename(this._workspace.uri.fsPath)}\\${dataset.replace(temp, "")}`;
 
-            let exec = cp.spawn('docker', ['exec', '-w', `${mlperfLocation}`, 'b3586d48d085', 'python', `${mlperfDriver}`,
+            let exec = cp.spawn('docker', ['exec', '-w', `${getMLPerfLocation()}`, 'b3586d48d085', 'python', `${getMLPerfDriver()}`,
                                 '--profile', `${profile}`, '--model', `${model}`, '--dataset-path', `${dataset}`,
                                 '--output', 'C:\\mount\\'+ result, '--data-format', `${dataFormat}`, '--accuracy',
                                 '--count', `${count}`]);
