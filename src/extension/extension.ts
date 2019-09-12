@@ -128,7 +128,7 @@ export function activate(context: vscode.ExtensionContext) {
                     }
                     case "setDataset": {
                         vscode.window.showOpenDialog({
-                            canSelectFolders: false, canSelectFiles: true, canSelectMany: false,
+                            canSelectFolders: true, canSelectFiles: true, canSelectMany: false,
                             openLabel: 'Select dataset'
                         }).then((folderUris) => {
                             if (folderUris) {
@@ -150,14 +150,14 @@ export function activate(context: vscode.ExtensionContext) {
                         profile = msg.text;
 
                         //For debug
-                        //vscode.window.showInformationMessage(profile);
+                        vscode.window.showInformationMessage(profile);
 
                         break;
                     }
                     case "setBackend": {
                         backend = msg.text;
                         //For debug
-                        //vscode.window.showInformationMessage(backend);
+                        vscode.window.showInformationMessage(backend);
 
                         break;
                     }
@@ -166,7 +166,7 @@ export function activate(context: vscode.ExtensionContext) {
                         dataFormat = msg.text;
 
                         //For debug
-                        //vscode.window.showInformationMessage(dataFormat);
+                        vscode.window.showInformationMessage(dataFormat);
 
                         break;
                     }
@@ -177,7 +177,7 @@ export function activate(context: vscode.ExtensionContext) {
                         count = parseInt(stringNumberOfImages);
 
                         //For debug
-                        //vscode.window.showInformationMessage(`number of images ${count}`);
+                        vscode.window.showInformationMessage(`number of images ${count}`);
                         break;
                     }
                     case "startVerification": {
@@ -190,6 +190,9 @@ export function activate(context: vscode.ExtensionContext) {
                                     //testResultsHandler();
                                     //testPerformanceHandler();
                                     vscode.window.showInformationMessage("Should be showing the results of validation");
+                                    if (currentPanel) {
+                                        currentPanel.webview.postMessage({ command: "result", payload: "Verification complete" });
+                                    }
                                 }
                                 else {
                                     console.log("Something went wrong! Incorrect combination of input parameters selected");
