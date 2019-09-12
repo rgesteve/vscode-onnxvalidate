@@ -14,10 +14,11 @@ import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
+//initializeIcons();
 declare var acquireVsCodeApi: any;
 const vscode = acquireVsCodeApi();
 
-initializeIcons();
+
 
 
 const App: React.FunctionComponent = () => {
@@ -245,7 +246,7 @@ const App: React.FunctionComponent = () => {
     };
 
     React.useEffect(() => {
-        console.log("inside test");
+        console.log("Selecting profile");
         window.console.log("Testing......");
         vscode.postMessage(
             {
@@ -255,7 +256,7 @@ const App: React.FunctionComponent = () => {
         );
         window.console.log(`Sent message to host.`);
 
-        console.log("For backend option");
+        console.log("Selecting backend");
         window.console.log("Testing......");
         vscode.postMessage(
             {
@@ -265,7 +266,7 @@ const App: React.FunctionComponent = () => {
         );
         window.console.log(`Sent message to host.`);
 
-        console.log("For data format option");
+        console.log("Selecting data format");
         window.console.log("Testing......");
         vscode.postMessage(
             {
@@ -276,20 +277,19 @@ const App: React.FunctionComponent = () => {
 
         window.console.log(`Sent message to host.`);
 
-        window.console.log("Count entered");
-        window.console.log(numberOfImages);
+        console.log("Entering number of images from the data set")
         window.console.log("Testing");
         vscode.postMessage(
             {
                 command: 'setnumberOfImages',
-                text:numberOfImages
+                text: numberOfImages
             }
         );
 
 
-    }, [selectedItem, selectedBackend, selectDataFormat,numberOfImages])
+    }, [selectedItem, selectedBackend, selectDataFormat, numberOfImages])
 
-    
+
     const onItemChanged = React.useCallback(e => setProfileOption(e.text), [setProfileOption]);
     const onBackendSelected = React.useCallback(e => setBackend(e.text), [setBackend]);
     const onDataFormatSelected = React.useCallback(e => setDataFormat(e.text), [setDataFormat]);
@@ -303,9 +303,7 @@ const App: React.FunctionComponent = () => {
                 <Stack horizontal gap={7} >
                     <Stack.Item grow>
                         <Label style={{ color: 'white' }}>Select a Profile</Label>
-                         {/* <Dropdown placeholder="Select a profile" options={Profileoptions} styles={dropdownStyles} selectedKey={selectedItem} onChanged={selectedOption =>{
-                        setProfileOption(selectedOption.text); console.log(selectedOption.text);}}  />  */}
-                         <Dropdown placeholder="Select a profile" options={Profileoptions} styles={dropdownStyles} selectedKey={selectedItem} onChanged={onItemChanged} /> 
+                        <Dropdown placeholder="Select a profile" options={Profileoptions} styles={dropdownStyles} selectedKey={selectedItem} onChanged={onItemChanged} />
                     </Stack.Item>
                     <Stack.Item grow>
                         <Label style={{ color: 'white' }}>Select Backend</Label>
@@ -317,7 +315,7 @@ const App: React.FunctionComponent = () => {
                     </Stack.Item>
                     <Stack.Item grow>
                         <Label style={{ color: 'white' }}>Enter count </Label>
-                         <TextField placeholder="Enter number of images you need to test from the selected dataset" value={numberOfImages} onChange={event => { setnumberOfImages((event.target as HTMLInputElement).value)}} /> 
+                        <TextField placeholder="Enter number of images you need to test from the selected dataset" value={numberOfImages} onChange={event => { setnumberOfImages((event.target as HTMLInputElement).value) }} />
                     </Stack.Item>
                 </Stack>
 

@@ -94,7 +94,7 @@ export function activate(context: vscode.ExtensionContext) {
             let dataFormat: string = "";
             let stringNumberOfImages: string = "";
             let count: number = 0;
-            let result:string ="result";
+            let result: string = "result";
 
             currentPanel.webview.onDidReceiveMessage(msg => {
                 let txtMessage = "generic command";
@@ -149,24 +149,15 @@ export function activate(context: vscode.ExtensionContext) {
                     case "setProfileOption": {
                         profile = msg.text;
 
-                        if (currentPanel) {
-                            currentPanel.webview.postMessage({ command: "selectedItem", payload: profile });
-                        }
-
-                        vscode.window.showInformationMessage(`inside extension.ts`);
-                        vscode.window.showInformationMessage(profile);
+                        //For debug
+                        //vscode.window.showInformationMessage(profile);
 
                         break;
                     }
                     case "setBackend": {
                         backend = msg.text;
-
-                        if (currentPanel) {
-                            currentPanel.webview.postMessage({ command: "selectedBackend", payload: backend });
-                        }
-
-                        vscode.window.showInformationMessage(`inside extension.ts`);
-                        vscode.window.showInformationMessage(backend);
+                        //For debug
+                        //vscode.window.showInformationMessage(backend);
 
                         break;
                     }
@@ -174,10 +165,8 @@ export function activate(context: vscode.ExtensionContext) {
                     case "setDataFormat": {
                         dataFormat = msg.text;
 
-                        if (currentPanel) {
-                            currentPanel.webview.postMessage({ command: "setDataFormat", payload: dataFormat });
-                        }
-                        vscode.window.showInformationMessage(dataFormat);
+                        //For debug
+                        //vscode.window.showInformationMessage(dataFormat);
 
                         break;
                     }
@@ -186,19 +175,44 @@ export function activate(context: vscode.ExtensionContext) {
 
                         //converting to number from string
                         count = parseInt(stringNumberOfImages);
-                        vscode.window.showInformationMessage(`number of images ${count}`);
+
+                        //For debug
+                        //vscode.window.showInformationMessage(`number of images ${count}`);
                         break;
                     }
                     case "startVerification": {
                         if (pathToModel !== "" && pathToDataset !== "") {
-                            // TODO -change this to call dockerRunMLPerfValidation
-                            dockerManager.dockerRunMLPerfValidation(pathToModel, result ,backend,dataFormat,count, pathToDataset, currentPanel);
-                            //testResultsHandler();
-                            //testPerformanceHandler();
-                            vscode.window.showInformationMessage("Should be showing the results of validation");
+                            //checks
+                            if (profile === "resnet50-tf" || profile === "mobilenet-tf") {
+                                if (backend === "tensorflow" && dataFormat === "NHWC") {
+                                    // TODO -change this to call dockerRunMLPerfValidation
+                                    dockerManager.dockerRunMLPerfValidation(pathToModel, result, backend, dataFormat, count, pathToDataset, currentPanel);
+                                    //testResultsHandler();
+                                    //testPerformanceHandler();
+                                    vscode.window.showInformationMessage("Should be showing the results of validation");
+                                }
+                                else {
+                                    console.log("Something went wrong! Incorrect combination of input parameters selected");
+                                }
+
+                            }
+                            if (profile == "resnet50-onnxruntime" || profile == "mobilenet-onnxruntime") {
+                                if (backend == "onnxruntime" && dataFormat == "NCHW") {
+                                    // TODO -change this to call dockerRunMLPerfValidation
+                                    dockerManager.dockerRunMLPerfValidation(pathToModel, result, backend, dataFormat, count, pathToDataset, currentPanel);
+                                    //testResultsHandler();
+                                    //testPerformanceHandler();
+                                    vscode.window.showInformationMessage("Should be showing the results of validation");
+                                }
+                                else {
+                                    console.log("Something went wrong! Incorrect combination of input parameters selected");
+                                }
+
+                            }
+
                         }
                         else {
-                            console.log("Something went wrong! Input or/and ref output folder are empty");
+                            console.log("Something went wrong! Path to model and dataset is empty");
                             pathToModel = "";
                             pathToDataset = "";
                         }
