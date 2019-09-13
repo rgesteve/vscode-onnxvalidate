@@ -7,8 +7,8 @@ import { spawn } from 'child_process';
 
 export function activate(context: vscode.ExtensionContext) {
 
-    // Use the console to output diagnostic information (console.log) and errors (console.error)
     console.log(`Extension "first-extension" is now active from path ${context.extensionPath}!!`);
+    
     let currentPanel: vscode.WebviewPanel | undefined = undefined;
 
 
@@ -20,6 +20,7 @@ export function activate(context: vscode.ExtensionContext) {
     let startDocker = vscode.commands.registerCommand('extension.startOnnxEcosystem', () => {
         // tell the user that the development/deployment env is getting ready
         // using a pop up.
+        console.log("After the startOnnxEcosystem");
         vscode.window.showInformationMessage("Starting the target development environment...\n \
 											  This might take a minute.\n ");
 

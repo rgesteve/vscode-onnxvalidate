@@ -5,26 +5,8 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
 import ContentProvider from './ContentProvider';
-import { isWindows, getMLPerfLocation, getMLPerfDriver } from './osUtils';
-import { supported_models } from './config';
-
-// this class manages the docker commands like build, run, exec, 
-
-// let supported_models : { [key: string]: {inputs: string, outputs: string}} = {
-//     // resnet
-//     "resnet50": {
-//         "inputs": "input_tensor:0",
-//         "outputs" : "ArgMax:0",
-//     },
-//     // mobilenet
-//     "mobilenet": {
-//         "inputs": "input:0",
-//         "outputs": "MobilenetV1/Predictions/Reshape_1:0",
-//     },
-// }
-
-//let mlperfLocation: string = "C:\\inference\\v0.5\\classification_and_detection"
-//let mlperfDriver: string = "python\\main.py";
+import * as utils from './osUtils';
+import { supported_models, docker_images } from './config';
 
 export class DockerManager {
     private _imageIds: string[]; // declare an array of image ids, that exists on the system, conversionContainerImage, QuantizationImage
@@ -42,62 +24,80 @@ export class DockerManager {
         let currentContainerId: string = "";
         //TODO: Make sure that the host system has docker and this image.
         // if not, get it from docker hub? that part needs to be decided.
+        console.log("Coming here");
         const workspaceFolders: vscode.WorkspaceFolder[] = vscode.workspace.workspaceFolders || [];
-        if (workspaceFolders.length !=0 ) {
-            
-        }
-        if (vscode.window.activeTextEditor)
-            this._workspace = vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri);
-        let images = cp.spawn('docker', ['images', 'onnx-ecosystem-mlperf:latest']);
+        if (workspaceFolders.length != 0 ) {
+            // Check if docker is installed and has the image that we require
+            this._workspace = workspaceFolders[0];
 
-        let allImages: string = "";
-        images.stdout.on("data", (data: string): void => {
-            allImages = allImages + data.toString();
-        });
-        images.on("exit", (data: string | Buffer): void => {
+            let containerTypeCP = cp.spawn('docker', ['info', '-f', `"{{.OSType}}"`]);
+            let containerType = "";
+            containerTypeCP.stdout.on("data", (data: string): void => {
+                containerType = data.toString();
+            });
 
-            console.log(`Testing... ${allImages}`);
-            this._imageIds.push(allImages.trim().split(/\s+ \s+/)[4].split('\n')[1]);
+            containerTypeCP.on('error', (err) => {
+                console.log('Docker client is either not installed or not running!');
+            });
 
-            if (vscode.window.activeTextEditor) {
-                 if (this._workspace && vscode.workspace.workspaceFolders) {
-                     let userWorkspaceMount: string = `source=${this._workspace.uri.fsPath},target=C:\\${path.basename(this._workspace.uri.fsPath)},type=bind`;
-                     let extensionMount: string = `source=${os.tmpdir()},target=C:\\output,type=bind`;
-                     console.log(`mount location:${userWorkspaceMount}`);
-                     console.log(`${this._imageIds[0]}`);
-                     this._usermountlocation = `C:\\${path.basename(this._workspace.uri.fsPath)}`;
+            containerTypeCP.on("exit", (data: string | Buffer): void => {
+                if (this._workspace) {
+                    utils.setMountLocations(this._workspace.uri.fsPath, os.tmpdir(), containerType);
+                }
+            });
 
-                    }
-                    // let runningContainer = cp.spawn('docker', ['run', '-m', '8g','-t', '-d', '--mount', userWorkspaceMount, '--mount', extensionMount, this._imageIds[0]]);
+            let images: cp.ChildProcess;
 
-                    // console.log(this._workspace.uri.fsPath);
-                    // runningContainer.on('error', (err) => {
-                    //     console.log('Failed to start the container.');
-                    // });
-
-                    // runningContainer.stdout.on('data', (data: string) => {
-                    //     console.log(`Creating container id ${data.toString()}`);
-                    //     currentContainerId = data.toString();
-                    // });
-
-                    // runningContainer.on('exit', (err) => {
-                    //     if (err != 0) {
-                    //         vscode.window.showInformationMessage("Something wrong happening while starting the development environment is ready");
-                    //         console.log(`Exit with error code:  ${err}`);
-                    //     }
-                    //     else {
-                    //         this._containerIds.push(currentContainerId.substr(0, 12));
-                    //         vscode.window.showInformationMessage("Development environment is ready!");
-                    //         console.log("Development environment successfully running!");
-                    //     }
-
-                    // });
-                //}
+            if (utils.g_containerType === 'windows'){
+                images = cp.spawn('docker', ['images', `${docker_images["windows-mlperf"]["name"]}`]);
+            }
+            else {
+                images = cp.spawn('docker', ['images', `${docker_images["linux-mlperf"]["name"]}`]);
             }
 
-        });
-    }
+            let allImages: string = "";
+            images.stdout.on("data", (data: string): void => {
+                allImages = allImages + data.toString();
+            });
+            images.on("exit", (data: string | Buffer): void => {
+                console.log(`Testing... ${allImages}`);
+                this._imageIds.push(allImages.trim().split(/\s+ \s+/)[4].split('\n')[1]);
+                if (this._workspace) {
+                    let userWorkspaceMount: string = `source=${this._workspace.uri.fsPath},target=${utils.getLocationOnContainer(this._workspace.uri.fsPath)},type=bind`;
+                    let extensionMount: string = `source=${utils.g_hostOutputLocation},target=${utils.g_mountOutputLocation},type=bind`;
+                    console.log(`mount location:${userWorkspaceMount}`);
+                    console.log(`${this._imageIds[0]}`);
+                    console.log(`extension:${extensionMount}`);
+                    //this._usermountlocation = `${utils.getLocationOnContainer(this._workspace.uri.fsPath)}`; //TOFO: fix the params for both OSs
+                    //let runningContainer = cp.spawn('docker', ['run', '-m', '8g','-t', '-d', '--mount', userWorkspaceMount, '--mount', extensionMount, this._imageIds[0]]);
+                    let runningContainer =  cp.spawn('docker', ['images']);//cp.spawn('docker', ['run', '-t', '-d', '--mount', userWorkspaceMount, '--mount', extensionMount, this._imageIds[0]]);
 
+                    console.log(this._workspace.uri.fsPath);
+                    runningContainer.on('error', (err) => {
+                        console.log('Failed to start the container.');
+                    });
+
+                    runningContainer.stdout.on('data', (data: string) => {
+                        console.log(`Creating container id ${data.toString()}`);
+                        currentContainerId = data.toString();
+                    });
+
+                    runningContainer.on('exit', (err) => {
+                        if (err != 0) {
+                            vscode.window.showInformationMessage("Something wrong happening while starting the development environment is ready");
+                            console.log(`Exit with error code:  ${err}`);
+                        }
+                        else {
+                            this._containerIds.push(currentContainerId.substr(0, 12));
+                            vscode.window.showInformationMessage("Development environment is ready!");
+                            console.log("Development environment successfully running!");
+                        }
+
+                    });
+                }
+            });
+        }
+    }
     // Docker exec needs a running container, 
     // TODO:
     // I am using the CLI tf2onnx.convert for converting, right now, right now
@@ -276,7 +276,7 @@ export class DockerManager {
             let containerModelPath = `C:\\${path.basename(this._workspace.uri.fsPath)}\\${model.replace(temp, "")}`;
             let containerDatasetPath = `C:\\${path.basename(this._workspace.uri.fsPath)}\\${dataset.replace(temp, "")}`;
 
-            let exec = cp.spawn('docker', ['exec', '-w', `${getMLPerfLocation()}`, 'b3586d48d085', 'python', `${getMLPerfDriver()}`,
+            let exec = cp.spawn('docker', ['exec', '-w', `${utils.getMLPerfLocation()}`, 'b3586d48d085', 'python', `${utils.getMLPerfDriver()}`,
                                 '--profile', `${profile}`, '--model', `${model}`, '--dataset-path', `${dataset}`,
                                 '--output', 'C:\\mount\\'+ result, '--data-format', `${dataFormat}`, '--accuracy',
                                 '--count', `${count}`]);

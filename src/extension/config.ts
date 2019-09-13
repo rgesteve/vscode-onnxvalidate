@@ -13,24 +13,24 @@ export const supported_models : { [key: string]: {inputs: string, outputs: strin
 }
 
 // Configs for the docker container run
-export const docker_images : { [key: string]: {}} = {
+export const docker_images : { [key: string]: {name: string, memory: string, cpu: string}} = {
     "windows-onnxruntime": {
-        "name": "onnxruntime:latest",
+        "name": "onnxruntime_win:latest",
         "memory" : "",
         "cpu": ""
     },
     "linux-onnxruntime": {
-        "name": "onnxruntime:latest",
+        "name": "onnxruntime_linux:latest",
         "memory" : "",
         "cpu": ""
     },
     "windows-mlperf": {
-        "name": "mlperf:latest",
+        "name": "mlperf_win:latest",
         "memory" : "",
         "cpu": ""
     },
     "linux-mlperf": {
-        "name": "mlperf:latest",
+        "name": "mlperf_linux:latest",
         "memory" : "",
         "cpu": ""
     },

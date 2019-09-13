@@ -1,18 +1,29 @@
 import * as path from 'path';
 
-export let g_mountLocation: string = ""
-export let g_hostLocation: string = ""
+export let g_mountLocation: string = "";
+export let g_hostLocation: string = "";
 
-export function setMountLocation(hostLocation: string) : void {
-    if (isWindows()) {
-       g_hostLocation = hostLocation; 
-        g_mountLocation = `C:\\${path.basename(hostLocation)}`;
+export let g_mountOutputLocation: string = "";
+export let g_hostOutputLocation: string = "";
+export let g_containerType: string = "";
+
+export async function setMountLocations(userMount: string, extMount: string, containerType: string) : Promise<void> { 
+    g_containerType = containerType;
+
+    if ((isWindows() && containerType === 'linux') || !isWindows()) {
+        g_hostLocation = userMount; 
+        g_mountLocation = `/${path.basename(userMount)}`;
+        g_hostOutputLocation = extMount; 
+        g_mountOutputLocation = `/${path.basename(extMount)}`;
     }
     else {
-        g_hostLocation = hostLocation; 
-        g_mountLocation = `/${path.basename(hostLocation)}`;
+        g_hostLocation = userMount; 
+        g_mountLocation = `C:\\${path.basename(userMount)}`;
+        g_hostOutputLocation = extMount; 
+        g_mountOutputLocation = `/${path.basename(extMount)}`;
     }
 }
+
 
 export function isWindows(): boolean {
     return process.platform === "win32";
@@ -36,8 +47,8 @@ export function getLocationOnContainer (pathOnHost: string ): string {
     let retString = "";
     if (isWindows())
         retString = `${g_mountLocation}\\${pathOnHost.replace(g_hostLocation, "")}`;
-    else
-        retString = `${g_hostLocation}/${pathOnHost.replace(g_hostLocation, "")}`;
+    else {
+        retString = `${g_mountLocation}${pathOnHost.replace(g_hostLocation, "")}`;
+    }
     return retString;
 }  
-
