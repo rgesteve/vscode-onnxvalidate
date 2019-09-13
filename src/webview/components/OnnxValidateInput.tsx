@@ -1,18 +1,14 @@
 import React from 'react';
 import Header from './Header';
-
+import OnnxDisplayResult from './OnnxDisplayResult';
 
 
 //code added for Dropdown first option
 
 import { IStackTokens } from 'office-ui-fabric-react/lib/Stack';
 import { Dropdown, DropdownMenuItemType, IDropdownStyles, IDropdownOption } from 'office-ui-fabric-react/lib/Dropdown';
-
-import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Stack, TextField, PrimaryButton, labelProperties, Label, textAreaProperties, BasePeopleSelectedItemsList, } from "office-ui-fabric-react";
-import { AgGridReact } from 'ag-grid-react';
-import 'ag-grid-community/dist/styles/ag-grid.css';
-import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+
 
 //initializeIcons();
 declare var acquireVsCodeApi: any;
@@ -33,88 +29,6 @@ const OnnxValidateInput: React.FunctionComponent = () => {
             childrenGap: '10'
         },
     };
-    const state = {
-        columnDefs: [
-            { headerName: 'Inputs', field: 'input' },
-            { headerName: 'Actual', field: 'actual' },
-            { headerName: 'Predicted', field: 'expected' },
-        ],
-        rowData: [{ "input": "Toyota", "actual": "Celica", "expected": 35000 },
-        { "input": "Ford", "actual": "Mondeo", "expected": 32000 },
-        { "input": "Porsche", "actual": "Boxter", "expected": 72000 },
-        { "input": "Toyota", "actual": "Celica", "expected": 35000 },
-        { "input": "Ford", "actual": "Mondeo", "expected": 32000 },
-        { "input": "Porsche", "actual": "Boxter", "expected": 72000 },
-        { "input": "Toyota", "actual": "Celica", "expected": 35000 },
-        { "input": "Ford", "actual": "Mondeo", "expected": 32000 },
-        { "input": "Porsche", "actual": "Boxter", "expected": 72000 },
-        { "input": "Toyota", "actual": "Celica", "expected": 35000 },
-        ],
-        barData: [
-            { 'name': 'Convolution28_fence_before/Conv', 'dur': 6 },
-            { 'name': 'Convolution28_kernel_time/Conv', 'dur': 1702 },
-            { 'name': 'Convolution28_fence_after/Conv', 'dur': 3 },
-            { 'name': 'Plus30_fence_before/Add', 'dur': 3 },
-            { 'name': 'Plus30_kernel_time/Add', 'dur': 24 },
-            { 'name': 'Plus30_fence_after/Add', 'dur': 2 },
-            { 'name': 'ReLU32_fence_before/Relu', 'dur': 3 },
-            { 'name': 'ReLU32_kernel_time/Relu', 'dur': 9 },
-            { 'name': 'ReLU32_fence_after/Relu', 'dur': 2 },
-            { 'name': 'Pooling66_fence_before/MaxPool', 'dur': 2 },
-            { 'name': 'Pooling66_kernel_time/MaxPool', 'dur': 31 },
-            { 'name': 'Pooling66_fence_after/MaxPool', 'dur': 2 },
-            { 'name': 'Convolution110_fence_before/Conv', 'dur': 3 },
-            { 'name': 'Convolution110_kernel_time/Conv', 'dur': 123 },
-            { 'name': 'Convolution110_fence_after/Conv', 'dur': 2 },
-            { 'name': 'Plus112_fence_before/Add', 'dur': 2 },
-            { 'name': 'Plus112_kernel_time/Add', 'dur': 13 },
-            { 'name': 'Plus112_fence_after/Add', 'dur': 2 },
-            { 'name': 'ReLU114_fence_before/Relu', 'dur': 2 },
-            { 'name': 'ReLU114_kernel_time/Relu', 'dur': 6 },
-            { 'name': 'ReLU114_fence_after/Relu', 'dur': 2 },
-            { 'name': 'Pooling160_fence_before/MaxPool', 'dur': 2 },
-            { 'name': 'Pooling160_kernel_time/MaxPool', 'dur': 16 },
-            { 'name': 'Pooling160_fence_after/MaxPool', 'dur': 2 },
-            { 'name': 'Times212_reshape0_fence_before/Reshape', 'dur': 3 },
-            { 'name': 'Times212_reshape0_kernel_time/Reshape', 'dur': 4 },
-            { 'name': 'Times212_reshape0_fence_after/Reshape', 'dur': 2 },
-            { 'name': 'Times212_reshape1_fence_before/Reshape', 'dur': 2 },
-            { 'name': 'Times212_reshape1_kernel_time/Reshape', 'dur': 3 },
-            { 'name': 'Times212_reshape1_fence_after/Reshape', 'dur': 2 },
-            { 'name': 'Times212_fence_before/MatMul', 'dur': 2 },
-            { 'name': 'Times212_kernel_time/MatMul', 'dur': 13 },
-            { 'name': 'Times212_fence_after/MatMul', 'dur': 2 },
-            { 'name': 'Plus214_fence_before/Add', 'dur': 2 },
-            { 'name': 'Plus214_kernel_time/Add', 'dur': 19 },
-            { 'name': 'Plus214_fence_after/Add', 'dur': 2 }
-        ]
-    };
-
-
-
-
-    /* const state = {
-   
-      
-          
-        columnDefs: [
-            { headerName: 'Inputs', field: 'input' },
-            { headerName: 'Actual', field: 'actual' },
-            { headerName: 'Predicted', field: 'expected' },
-        ],
-        rowData: [{ "input": "Toyota", "actual": "Celica", "expected": 35000 },
-        { "input": "Ford", "actual": "Mondeo", "expected": 32000 },
-        { "input": "Porsche", "actual": "Boxter", "expected": 72000 },
-        { "input": "Toyota", "actual": "Celica", "expected": 35000 },
-        { "input": "Ford", "actual": "Mondeo", "expected": 32000 },
-        { "input": "Porsche", "actual": "Boxter", "expected": 72000 },
-        { "input": "Toyota", "actual": "Celica", "expected": 35000 },
-        { "input": "Ford", "actual": "Mondeo", "expected": 32000 },
-        { "input": "Porsche", "actual": "Boxter", "expected": 72000 },
-        { "input": "Toyota", "actual": "Celica", "expected": 35000 },
-        ]
-    };*/
-
 
     //code added for dropdown
     const dropdownStyles: Partial<IDropdownStyles> = {
@@ -190,6 +104,7 @@ const OnnxValidateInput: React.FunctionComponent = () => {
 
                 case "result": {
                     console.log(`Verification done `);
+                    OnnxDisplayResult;
                     try {
                         //console.log(`Got object that looks like: ${ev.data}.`);
                         //let table : Array<any> = Array.from(ev.data.payload);
@@ -325,19 +240,19 @@ const OnnxValidateInput: React.FunctionComponent = () => {
                 <Stack horizontal gap={5} >
                     <Stack.Item grow>
                         <Label style={{ color: 'white' }}>Enter path to model </Label>
-                        <TextField placeholder="Enter path to model" />
+                        <TextField placeholder="Enter path to model" value={`${modelPath}`} />
                     </Stack.Item>
                     <Stack.Item align="end" >
-                        <PrimaryButton style={{ width: '200px' }} value={`${modelPath}`} onClick={PathToModelHandler}>Select Path to model</PrimaryButton>
+                        <PrimaryButton style={{ width: '200px' }} onClick={PathToModelHandler}>Select Path to model</PrimaryButton>
                     </Stack.Item>
                 </Stack>
                 <Stack horizontal gap={5} >
                     <Stack.Item grow>
                         <Label style={{ color: 'white' }}>Enter path to data set </Label>
-                        <TextField placeholder="Enter path to data set" />
+                        <TextField placeholder="Enter path to data set" value={`${dataSet}`} />
                     </Stack.Item>
                     <Stack.Item align="end" >
-                        <PrimaryButton style={{ width: '200px' }} value={`${dataSet}`} onClick={PathToDatasetHandler}>Select Path to dataset</PrimaryButton>
+                        <PrimaryButton style={{ width: '200px' }} onClick={PathToDatasetHandler}>Select Path to dataset</PrimaryButton>
                     </Stack.Item>
                 </Stack>
                 <Stack horizontal tokens={tokens.customSpacing} padding="s1 35%">

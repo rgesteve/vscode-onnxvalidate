@@ -8,7 +8,7 @@ const App: React.FunctionComponent = () => {
     return (
         <div className="container">
               <OnnxValidateInput /> 
-            {/* <OnnxDisplayResult /> */}
+              {/* <OnnxDisplayResult />  */}
         </div>
     );
 };

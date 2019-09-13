@@ -20,8 +20,8 @@ let supported_models : { [key: string]: {inputs: string, outputs: string}} = {
     },
 }
 
-let mlperfLocation: string = "C:\\inference\\v0.5\\classification_and_detection"
-let mlperfDriver: string = "python\\main.py";
+let mlperfLocation: string = "/inference/v0.5/classification_and_detection" ;//"C:\\inference\\v0.5\\classification_and_detection"
+let mlperfDriver: string = "python/main.py";
 
 export class DockerManager {
     private _imageIds: string[]; // declare an array of image ids, that exists on the system, conversionContainerImage, QuantizationImage
@@ -263,19 +263,22 @@ export class DockerManager {
     }
 
 
-    dockerRunMLPerfValidation(model: string, result: string, profile: string, dataFormat: string, count: number, dataset:string, currentPanel: vscode.WebviewPanel | undefined) {
+    dockerRunMLPerfValidation(model: string, result: string, backend: string ,profile: string, dataFormat: string, count: number, dataset:string, currentPanel: vscode.WebviewPanel | undefined) {
         if (this._workspace) {
             let temp = this._workspace.uri.fsPath + "\\";
-            let containerModelPath = `C:\\${path.basename(this._workspace.uri.fsPath)}\\${model.replace(temp, "")}`;
-            let containerDatasetPath = `C:\\${path.basename(this._workspace.uri.fsPath)}\\${dataset.replace(temp, "")}`;
-
-            let exec = cp.spawn('docker', ['exec', '-w', `${mlperfLocation}`, 'b3586d48d085', 'python', `${mlperfDriver}`,
-                                '--profile', `${profile}`, '--model', `${model}`, '--dataset-path', `${dataset}`,
-                                '--output', 'C:\\mount\\'+ result, '--data-format', `${dataFormat}`, '--accuracy',
+         //   let containerModelPath = `C:\\${path.basename(this._workspace.uri.fsPath)}\\${model.replace(temp, "")}`;
+           // let containerDatasetPath = `C:\\${path.basename(this._workspace.uri.fsPath)}\\${dataset.replace(temp, "")}`;
+            //TODO need to handle windows to linux path conversion for model and dataset
+            model = '/Vscode/resnet50_v15.pb';
+            dataset = '/Vscode/ILSVRC2012_img_val';
+    
+            let exec = cp.spawn('docker', ['exec', '-w', `${mlperfLocation}`, '08d907ac8adf', 'python3', `${mlperfDriver}`,
+                                '--profile', `${profile}`,'--backend',`${backend}` ,'--model', `${model}`, '--dataset-path', `${dataset}`,
+                                '--output', `/Vscode/${result}`, '--data-format', `${dataFormat}`, '--accuracy',
                                 '--count', `${count}`]);
-            console.log(containerModelPath);
-            console.log(containerDatasetPath);
-            console.log(model);
+           // console.log(containerModelPath);
+            //console.log(containerDatasetPath);
+            //console.log(model);
             exec.on('error', (err) => {
                 console.log('Running validation failed.');
             });
@@ -292,7 +295,9 @@ export class DockerManager {
                     vscode.window.showInformationMessage("Validation done!");
                     console.log("Validation done!");
                     let result_file = path.join(os.tmpdir(), "result.json");
-
+                    if (currentPanel !== undefined) {
+                        currentPanel.webview.postMessage({ command: 'result', payload: "DONE" });
+                    }
                     if (fs.existsSync(result_file)) {
                         fs.readFile(result_file, (err, data) => {
                             if (err || data === undefined) {

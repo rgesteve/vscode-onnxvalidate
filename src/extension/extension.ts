@@ -150,14 +150,14 @@ export function activate(context: vscode.ExtensionContext) {
                         profile = msg.text;
 
                         //For debug
-                        vscode.window.showInformationMessage(profile);
+                        //vscode.window.showInformationMessage(profile);
 
                         break;
                     }
                     case "setBackend": {
                         backend = msg.text;
                         //For debug
-                        vscode.window.showInformationMessage(backend);
+                        // vscode.window.showInformationMessage(backend);
 
                         break;
                     }
@@ -166,7 +166,7 @@ export function activate(context: vscode.ExtensionContext) {
                         dataFormat = msg.text;
 
                         //For debug
-                        vscode.window.showInformationMessage(dataFormat);
+                        //vscode.window.showInformationMessage(dataFormat);
 
                         break;
                     }
@@ -177,48 +177,74 @@ export function activate(context: vscode.ExtensionContext) {
                         count = parseInt(stringNumberOfImages);
 
                         //For debug
-                        vscode.window.showInformationMessage(`number of images ${count}`);
+                        //vscode.window.showInformationMessage(`number of images ${count}`);
                         break;
                     }
                     case "startVerification": {
-                        if (pathToModel !== "" && pathToDataset !== "") {
-                            //checks
-                            if (profile === "resnet50-tf" || profile === "mobilenet-tf") {
-                                if (backend === "tensorflow" && dataFormat === "NHWC") {
-                                    // TODO -change this to call dockerRunMLPerfValidation
-                                    dockerManager.dockerRunMLPerfValidation(pathToModel, result, backend, dataFormat, count, pathToDataset, currentPanel);
-                                    //testResultsHandler();
-                                    //testPerformanceHandler();
-                                    vscode.window.showInformationMessage("Should be showing the results of validation");
-                                    if (currentPanel) {
-                                        currentPanel.webview.postMessage({ command: "result", payload: "Verification complete" });
+
+                        //checks for tensorflow profiles
+                        if (profile === "resnet50-tf" || profile === "mobilenet-tf") {
+                            if (backend === "tensorflow") {
+
+                                if (dataFormat === "NHWC") {
+
+                                    if (pathToModel !== "" && pathToDataset !== "") {
+
+                                        dockerManager.dockerRunMLPerfValidation(pathToModel, result, backend, profile, dataFormat, count, pathToDataset, currentPanel);
+                                        vscode.window.showInformationMessage("Should be showing the results of validation");
+                                        if (currentPanel) {
+                                            currentPanel.webview.postMessage({ command: "result", payload: "Verification complete" });
+                                        }
+                                    }
+                                    else {
+                                        vscode.window.showErrorMessage("Path to model and dataset is empty");
+                                        pathToModel = "";
+                                        pathToDataset = "";
                                     }
                                 }
                                 else {
-                                    console.log("Something went wrong! Incorrect combination of input parameters selected");
+                                    vscode.window.showErrorMessage("Incorrect Data Format selected");
                                 }
-
                             }
-                            if (profile == "resnet50-onnxruntime" || profile == "mobilenet-onnxruntime") {
-                                if (backend == "onnxruntime" && dataFormat == "NCHW") {
-                                    // TODO -change this to call dockerRunMLPerfValidation
-                                    dockerManager.dockerRunMLPerfValidation(pathToModel, result, backend, dataFormat, count, pathToDataset, currentPanel);
-                                    //testResultsHandler();
-                                    //testPerformanceHandler();
-                                    vscode.window.showInformationMessage("Should be showing the results of validation");
+                            else {
+
+                                vscode.window.showErrorMessage("Incorrect backend selected");
+                            }
+
+                        }
+                        //Checks for onnxruntime profiles
+                        if (profile === "resnet50-onnxruntime" || profile === "mobilenet-onnxruntime") {
+                            if (backend === "onnxruntime") {
+
+                                if (dataFormat === "NCHW") {
+
+                                    if (pathToModel !== "" && pathToDataset !== "") {
+
+                                        dockerManager.dockerRunMLPerfValidation(pathToModel, result, backend, profile, dataFormat, count, pathToDataset, currentPanel);
+                                        vscode.window.showInformationMessage("Should be showing the results of validation");
+                                        if (currentPanel) {
+                                            currentPanel.webview.postMessage({ command: "result", payload: "Verification complete" });
+                                        }
+                                    }
+                                    else {
+                                        vscode.window.showErrorMessage("Path to model and dataset is empty");
+                                        pathToModel = "";
+                                        pathToDataset = "";
+                                    }
                                 }
                                 else {
-                                    console.log("Something went wrong! Incorrect combination of input parameters selected");
+                                    vscode.window.showErrorMessage("Incorrect Data Format selected");
                                 }
+                            }
+                            else {
 
+                                vscode.window.showErrorMessage("Incorrect backend selected");
                             }
 
                         }
-                        else {
-                            console.log("Something went wrong! Path to model and dataset is empty");
-                            pathToModel = "";
-                            pathToDataset = "";
-                        }
+
+
+
                         break;
                     }
                     case "cancel": {
