@@ -4,11 +4,12 @@ import { DockerManager } from './dockerManager';
 import { basename, join } from 'path';
 import * as fs from 'fs';
 import { spawn } from 'child_process';
+import { rejects } from 'assert';
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext): Promise<void> {
 
     console.log(`Extension "first-extension" is now active from path ${context.extensionPath}!!`);
-    
+
     let currentPanel: vscode.WebviewPanel | undefined = undefined;
 
 
@@ -17,25 +18,35 @@ export function activate(context: vscode.ExtensionContext) {
     // The on.exit is when we have all the images. So that needs to ha
 
 
-    let startDocker = vscode.commands.registerCommand('extension.startOnnxEcosystem', () => {
-        // tell the user that the development/deployment env is getting ready
-        // using a pop up.
-        console.log("After the startOnnxEcosystem");
-        vscode.window.showInformationMessage("Starting the target development environment...\n \
-											  This might take a minute.\n ");
+    // let containerId = await dockerManager.runImage();
+
+    // if (containerId) {
+    //     vscode.window.showInformationMessage("Your development environment is ready");
+    // }
+    let startDocker = vscode.commands.registerCommand('extension.startOnnxEcosystem', async () => {
+        await dockerManager.getImageId().then(async () => {
+            let containerId = await dockerManager.runImage();
+            if (containerId) {
+                vscode.window.showInformationMessage("Your development environment is ready");
+            }
+        }, reason => {
+            vscode.window.showInformationMessage(`Starting your development environment failed with ${reason}`);
+        });
 
     });
 
 
-    let convert = vscode.commands.registerCommand('extension.Convert', (fileuri: any) => {
+    let convert = vscode.commands.registerCommand('extension.Convert', async (fileuri: any) => {
         // get the file name with which the right click command was executed
-        dockerManager.dockerExec(fileuri);
-        vscode.window.showInformationMessage(`Converting ${basename(fileuri.fsPath)} to ONNX...`);
-        console.log(`Converting....${basename(fileuri.fsPath)}`);
-    });
-
+        await dockerManager.convert(fileuri).then(async () => {
+                vscode.window.showInformationMessage("Converted to ONNX!");
+            }, reason => {
+                vscode.window.showInformationMessage(`Conversion failed with ${reason}`);
+            });
+        });
+     
     let display = vscode.commands.registerCommand('extension.Display', (modeluri: vscode.Uri) => {
-        const pathToChrome : string = join ("c:", "Program Files (x86)", "Google", "Chrome", "Application", "chrome.exe");
+        const pathToChrome: string = join("c:", "Program Files (x86)", "Google", "Chrome", "Application", "chrome.exe");
         const vizModelPath: string = join(context.extensionPath, 'src', 'test', 'data', 'model.svg');
         // get the file name with which the right click command was executed
         //dockerManager.dockerDisplay(modeluri);
@@ -50,21 +61,21 @@ export function activate(context: vscode.ExtensionContext) {
 
 
     let runValidation = vscode.commands.registerCommand('extension.RunValidation', () => {
-        dockerManager.dockerExec("dockerRun_command");
+        //dockerManager.dockerExec("dockerRun_command");
         console.log("Running validation....");
     });
 
     let validate = vscode.commands.registerCommand('extension.Validate', (modeluri: vscode.Uri) => {
 
         let userMountLocation: string = "";
-        
+
         if (modeluri === undefined) {
             vscode.window.showErrorMessage("Validate requires a file argument!!");
             return;
         }
 
         let model: string = modeluri.fsPath;
-        
+
         if (vscode.workspace.workspaceFolders && vscode.window.activeTextEditor) {
             let folder = vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri);
             if (folder) {
@@ -90,8 +101,8 @@ export function activate(context: vscode.ExtensionContext) {
             );
             let pathToModel: string = "";
             let pathToDataset: string = "";
-            let count:number=0;
-            let Profile:string="";
+            let count: number = 0;
+            let Profile: string = "";
             currentPanel.webview.onDidReceiveMessage(msg => {
                 let txtMessage = "generic command";
                 switch (msg.command) {
@@ -101,9 +112,9 @@ export function activate(context: vscode.ExtensionContext) {
                             canSelectFolders: false, canSelectFiles: true, canSelectMany: false,
                             openLabel: 'Select model',
                             //added this for an example - searches for .tf, .pb,.onnx format - can change this back to default
-                            filters:{
-                               'TensorFlow models .pb' : ['pb'],
-                               'Onnxruntime models .onnx': ['onnx']
+                            filters: {
+                                'TensorFlow models .pb': ['pb'],
+                                'Onnxruntime models .onnx': ['onnx']
                             }
 
                         }).then((folderUris) => {
@@ -143,37 +154,37 @@ export function activate(context: vscode.ExtensionContext) {
                         break;
                     }
                     case "setProfileOption": {
-                        Profile=msg.text;
+                        Profile = msg.text;
 
                         if (currentPanel) {
-                         currentPanel.webview.postMessage({ command: "selectedItem", payload: Profile });
-                     }
-                     
+                            currentPanel.webview.postMessage({ command: "selectedItem", payload: Profile });
+                        }
+
                         vscode.window.showInformationMessage(`inside extension.ts`);
                         vscode.window.showInformationMessage(Profile);
-                   
-                     break;
-                 }
-                 case "startVerification": {
-                    if (pathToModel !== "" && pathToDataset !== "") {
-                        // TODO -- uncomment this 
-                        dockerManager.dockerRunValidation(model, pathToModel, pathToDataset, currentPanel);
-                        //testResultsHandler();
-                        //testPerformanceHandler();
-                        vscode.window.showInformationMessage("Should be showing the results of validation");
+
+                        break;
                     }
-                    else {
-                        console.log("Something went wrong! Input or/and ref output folder are empty");
+                    case "startVerification": {
+                        if (pathToModel !== "" && pathToDataset !== "") {
+                            // TODO -- uncomment this 
+                            dockerManager.dockerRunValidation(model, pathToModel, pathToDataset, currentPanel);
+                            //testResultsHandler();
+                            //testPerformanceHandler();
+                            vscode.window.showInformationMessage("Should be showing the results of validation");
+                        }
+                        else {
+                            console.log("Something went wrong! Input or/and ref output folder are empty");
+                            pathToModel = "";
+                            pathToDataset = "";
+                        }
+                        break;
+                    }
+                    case "cancel": {
                         pathToModel = "";
                         pathToDataset = "";
+                        console.log("Canceling verification");
                     }
-                    break;
-                }
-                case "cancel": {
-                    pathToModel = "";
-                    pathToDataset = "";
-                    console.log("Canceling verification");
-                }
                 }
 
             }, undefined, context.subscriptions);
@@ -197,10 +208,11 @@ export function activate(context: vscode.ExtensionContext) {
                     let results = JSON.parse(data.toString());
                     try {
                         // Be mindful that the new object created in the lambda *has* to be enclosed in brackets
-                        let forGrid : any = Object.entries(results).map(kv => ({ "input" : kv[0], 
-                                                                                "actual" : (<any>kv[1])["actual"],
-                                                                                "expected" : (<any>kv[1])["expected"]
-                                                                            }));
+                        let forGrid: any = Object.entries(results).map(kv => ({
+                            "input": kv[0],
+                            "actual": (<any>kv[1])["actual"],
+                            "expected": (<any>kv[1])["expected"]
+                        }));
                         console.log("Results parsing worked");
                         if (currentPanel !== undefined) {
                             currentPanel.webview.postMessage({ command: 'result', payload: forGrid });
@@ -227,10 +239,11 @@ export function activate(context: vscode.ExtensionContext) {
                 } else {
                     let perfData = JSON.parse(data.toString());
                     try {
-                        let forChart : any = Array.from(perfData).filter(rec => { return ((<any>rec)["cat"] === "Node"); })
-                                                                 .map(rec => ({ "name" : `${(<any>rec)["name"]/(<any>rec)["args"]["op_name"]}`, 
-                                                                                "dur" : (<any>rec)["dur"]
-                                                                            }));
+                        let forChart: any = Array.from(perfData).filter(rec => { return ((<any>rec)["cat"] === "Node"); })
+                            .map(rec => ({
+                                "name": `${(<any>rec)["name"] / (<any>rec)["args"]["op_name"]}`,
+                                "dur": (<any>rec)["dur"]
+                            }));
                         console.log('Should be sending perfdata');
                         if (currentPanel !== undefined) {
                             currentPanel.webview.postMessage({ command: 'perfData', payload: forChart });

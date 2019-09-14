@@ -8,8 +8,9 @@ import ContentProvider from './ContentProvider';
 import * as utils from './osUtils';
 import { supported_models, docker_images } from './config';
 
-export class DockerManager {
-    private _imageIds: string[]; // declare an array of image ids, that exists on the system, conversionContainerImage, QuantizationImage
+export class DockerManager implements vscode.Disposable { // can dispose the vscode context?
+    private _imageId: string | undefined; // declare an array of image ids, that exists on the system, conversionContainerImage, QuantizationImage
+    private _imageIds: string[];
     private _containerIds: string[];
     private _workspace: vscode.WorkspaceFolder | undefined;
     private _extensionPath: string;
@@ -33,7 +34,7 @@ export class DockerManager {
             let containerTypeCP = cp.spawn('docker', ['info', '-f', `"{{.OSType}}"`]);
             let containerType = "";
             containerTypeCP.stdout.on("data", (data: string): void => {
-                containerType = data.toString();
+                containerType = data.toString(); // this should say something like not installed so used that instead of error
             });
 
             containerTypeCP.on('error', (err) => {
@@ -42,61 +43,118 @@ export class DockerManager {
 
             containerTypeCP.on("exit", (data: string | Buffer): void => {
                 if (this._workspace) {
-                    utils.setMountLocations(this._workspace.uri.fsPath, os.tmpdir(), containerType);
-                }
-            });
-
-            let images: cp.ChildProcess;
-
-            if (utils.g_containerType === 'windows'){
-                images = cp.spawn('docker', ['images', `${docker_images["windows-mlperf"]["name"]}`]);
-            }
-            else {
-                images = cp.spawn('docker', ['images', `${docker_images["linux-mlperf"]["name"]}`]);
-            }
-
-            let allImages: string = "";
-            images.stdout.on("data", (data: string): void => {
-                allImages = allImages + data.toString();
-            });
-            images.on("exit", (data: string | Buffer): void => {
-                console.log(`Testing... ${allImages}`);
-                this._imageIds.push(allImages.trim().split(/\s+ \s+/)[4].split('\n')[1]);
-                if (this._workspace) {
-                    let userWorkspaceMount: string = `source=${this._workspace.uri.fsPath},target=${utils.getLocationOnContainer(this._workspace.uri.fsPath)},type=bind`;
-                    let extensionMount: string = `source=${utils.g_hostOutputLocation},target=${utils.g_mountOutputLocation},type=bind`;
-                    console.log(`mount location:${userWorkspaceMount}`);
-                    console.log(`${this._imageIds[0]}`);
-                    console.log(`extension:${extensionMount}`);
-                    //this._usermountlocation = `${utils.getLocationOnContainer(this._workspace.uri.fsPath)}`; //TOFO: fix the params for both OSs
-                    //let runningContainer = cp.spawn('docker', ['run', '-m', '8g','-t', '-d', '--mount', userWorkspaceMount, '--mount', extensionMount, this._imageIds[0]]);
-                    let runningContainer =  cp.spawn('docker', ['images']);//cp.spawn('docker', ['run', '-t', '-d', '--mount', userWorkspaceMount, '--mount', extensionMount, this._imageIds[0]]);
-
-                    console.log(this._workspace.uri.fsPath);
-                    runningContainer.on('error', (err) => {
-                        console.log('Failed to start the container.');
-                    });
-
-                    runningContainer.stdout.on('data', (data: string) => {
-                        console.log(`Creating container id ${data.toString()}`);
-                        currentContainerId = data.toString();
-                    });
-
-                    runningContainer.on('exit', (err) => {
-                        if (err != 0) {
-                            vscode.window.showInformationMessage("Something wrong happening while starting the development environment is ready");
-                            console.log(`Exit with error code:  ${err}`);
-                        }
-                        else {
-                            this._containerIds.push(currentContainerId.substr(0, 12));
-                            vscode.window.showInformationMessage("Development environment is ready!");
-                            console.log("Development environment successfully running!");
-                        }
-
-                    });
+                    utils.setMountLocations(this._workspace.uri.fsPath, os.tmpdir(), containerType.trim().replace(/\"/g, ""));
+                    console.log('Mount locations set!');
                 }
             });
         }
+    }
+
+    async executeCommand(command: string, args: string[], options: cp.SpawnOptions = { shell: true }): Promise<string> {
+        return new Promise((resolve: (res: string) => void, reject: (error : string) => void): void => {
+            let result: string = "";
+    
+            const childProc: cp.ChildProcess = cp.spawn(command, args, { ...options});
+    
+            childProc.stdout.on("data", (data: string | Buffer) => {
+                data = data.toString();
+                result = result.concat(data);
+                console.log(`childProc.stdout.on ${result}`);
+            });
+    
+            childProc.stderr.on("data", (data: string | Buffer) => {});
+    
+            childProc.on("error", reject);
+    
+            childProc.on("close", (code: number) => {
+                if (code !== 0) {
+                    reject(`Exited with error code ${code}`);
+                } else {
+                    resolve(result);
+                }
+            });
+        });
+    }
+    async executeCommandWithProgress(doneMessage: string, message: string, command: string, args: string[], options: cp.SpawnOptions = { shell: true }): Promise<string> {
+        let result: string = "";
+        await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification }, async (p: vscode.Progress<{}>) => {
+            return new Promise(async (resolve: (res: string) => void, reject: (e: Error) => void): Promise<void> => {
+                p.report({ message }); 
+                try {
+                    result = await this.executeCommand(command, args, options);
+                    p.report({ increment: 100, doneMessage }); // havent figured out how to show the final message yet :(
+                    resolve(result);
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        });
+        return result;
+    }
+
+    public async getImageId(): Promise<void> {
+        let result: string;
+        if (utils.g_containerType === "linux") {
+            result = await this.executeCommand("docker", ['images', `${docker_images["linux-mlperf"]["name"]}`, '--format', '"{{.Repository}}"']);
+            console.log(`executeCommand Result: ${result}`);
+        }
+        else {
+            result = await this.executeCommand("docker", ['images', `${docker_images["windows-mlperf"]["name"]}`, '--format', '"{{.Repository}}"']);
+        }
+        this._imageId = result.split(':')[0];
+        console.log(`Result: ${this._imageId}`);
+    }
+
+    public async runImage(): Promise<string|undefined> {
+        let runningContainer: string | undefined;
+        if (this._imageId && this._workspace) {
+            let userWorkspaceMount: string = `source=${this._workspace.uri.fsPath},target=${utils.getLocationOnContainer(this._workspace.uri.fsPath)},type=bind`;
+            let extensionMount: string = `source=${utils.g_hostOutputLocation},target=${utils.g_mountOutputLocation},type=bind`;
+            let args: string[] = ['run', '-m', '8g','-t', '-d', '--mount', userWorkspaceMount, '--mount', extensionMount, this._imageId];
+            runningContainer =  await this.executeCommandWithProgress("Your development environment is ready!", "Starting your development environment...","docker", args);
+            this._containerIds.push(runningContainer.substr(0, 12));
+            console.log(`Container id: ${this._containerIds[0]}`);
+        }
+        return runningContainer;
+       
+    }
+            
+    public async runExec(): Promise<string|undefined> {
+        if (this._containerIds && this._workspace) { // we have a valid running container and a mounted user workspace
+
+        }
+        return "";
+    }
+
+    public async convert(fileuri: vscode.Uri, ...args: any[]): Promise<void> {
+        if (!this._workspace){
+            console.log(`No workspace defined`);
+            return undefined;
+        }
+        if (this._workspace) {
+            let model: string | undefined;
+
+            if (path.basename(fileuri.fsPath).toLowerCase().includes("resnet")) {
+                model = "resnet50";
+            }
+            else if (path.basename(fileuri.fsPath).toLowerCase().includes("mobilenet")){
+                model =  "mobilenet";
+            }
+            else {
+                console.log("This model is not part of the supported models!");
+                return undefined;
+            }
+            if (model) {
+                let args: string[] = ['exec', '-w', `/Documents/final_models/resnet50/`, `${this._containerIds[0]}`, 'python3', '-m', 'tf2onnx.convert', 
+                                      '--fold_const', '--opset', '8' ,'--inputs',`${supported_models[model]["inputs"]}`, '--outputs', `${supported_models[model]["outputs"]}`,
+                                      '--inputs-as-nchw', `${supported_models[model]["inputs"]}` ,'--input' , `${path.basename(fileuri.fsPath)}` , '--output', 
+                                      `${path.basename(fileuri.fsPath).replace(".pb", ".onnx")}`];
+                let result = await this.executeCommandWithProgress("Finished converting to ONNX!", "Converting to ONNX... ", "docker", args);
+                
+            }
+
+        }
+
     }
     // Docker exec needs a running container, 
     // TODO:
@@ -104,7 +162,7 @@ export class DockerManager {
     // only supporting conversion from frozen models. The inputs and outputs of the graph are expected to be what 
     // that model generally has.  
 
-    dockerExec(fileuri: any) {
+    public async dockerExec(fileuri: vscode.Uri, ...args: any[]): Promise<void> {
         
         if (!this._workspace || !vscode.workspace.workspaceFolders) { 
             console.log(`No workspace defined`);
@@ -360,7 +418,7 @@ export class DockerManager {
         }
     }
 
-    dispose(): void {
+    public dispose(): void {
 
     }
 }
