@@ -51,7 +51,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
     }
 
     async executeCommand(command: string, args: string[], options: cp.SpawnOptions = { shell: true }): Promise<string> {
-        return new Promise((resolve: (res: string) => void, reject: (error : string) => void): void => {
+        return new Promise((resolve: (res: string) => void, reject: (error : string | Buffer) => void): void => {
             let result: string = "";
     
             const childProc: cp.ChildProcess = cp.spawn(command, args, { ...options});
@@ -62,7 +62,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
                 console.log(`childProc.stdout.on ${result}`);
             });
     
-            childProc.stderr.on("data", (data: string | Buffer) => {});
+            childProc.stderr.on("data", (data: string | Buffer) => {reject(data)});
     
             childProc.on("error", reject);
     
@@ -149,7 +149,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
                                       '--fold_const', '--opset', '8' ,'--inputs',`${supported_models[model]["inputs"]}`, '--outputs', `${supported_models[model]["outputs"]}`,
                                       '--inputs-as-nchw', `${supported_models[model]["inputs"]}` ,'--input' , `${path.basename(fileuri.fsPath)}` , '--output', 
                                       `${path.basename(fileuri.fsPath).replace(".pb", ".onnx")}`];
-                let result = await this.executeCommandWithProgress("Finished converting to ONNX!", "Converting to ONNX... ", "docker", args);
+                let result = await this.executeCommandWithProgress("Finished converting to ONNX!", "Converting to ONNX... ", "docker", args);  
                 
             }
 
