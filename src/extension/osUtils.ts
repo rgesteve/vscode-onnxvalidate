@@ -8,6 +8,7 @@ export let g_hostOutputLocation: string = "";
 export let g_containerType: string = "";
 
 export async function setMountLocations(userMount: string, extMount: string, containerType: string) : Promise<void> { 
+    console.log(`1 Mount locations: ${g_mountLocation}, ${g_mountOutputLocation} , ${g_containerType}`, `${containerType}`);
     g_containerType = containerType;
 
     if ((isWindows() && containerType === 'linux') || !isWindows()) {
@@ -22,6 +23,7 @@ export async function setMountLocations(userMount: string, extMount: string, con
         g_hostOutputLocation = extMount; 
         g_mountOutputLocation = `/${path.basename(extMount)}`;
     }
+    console.log(`2 Mount locations: ${g_mountLocation}, ${g_mountOutputLocation} , ${g_containerType}`, `${containerType}`);
 }
 
 
