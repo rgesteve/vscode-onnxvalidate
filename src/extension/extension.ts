@@ -99,6 +99,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                     retainContextWhenHidden: true
                 }
             );
+            let mlperfParam: Map<string, string> = new Map<string, string>(); // delete?
             let pathToModel: string = "";
             let pathToDataset: string = "";
             let count: number = 0;
@@ -124,6 +125,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                                     // TODO: fix this for the case when multiple folders are selected
                                     //inputFolders = value.path.toString() + ',' + inputFolders;
                                     pathToModel = value.fsPath;
+                                    mlperfParam.set("model", pathToModel);
                                 });
                             }
                             if (currentPanel) {
@@ -144,6 +146,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                                     // TODO: fix this for the case when multiple folders are selected
                                     //refFolders = value.path.toString() + ',' + refFolders;
                                     pathToDataset = value.fsPath;
+                                    mlperfParam.set("dataset-path", pathToDataset);
                                 });
                             }
                             if (currentPanel) {
@@ -155,7 +158,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                     }
                     case "setProfileOption": {
                         Profile = msg.text;
-
+                        mlperfParam.set("profile", Profile);
                         if (currentPanel) {
                             currentPanel.webview.postMessage({ command: "selectedItem", payload: Profile });
                         }
@@ -167,8 +170,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                     }
                     case "startVerification": {
                         if (pathToModel !== "" && pathToDataset !== "") {
-                            // TODO -- uncomment this 
-                            dockerManager.dockerRunValidation(model, pathToModel, pathToDataset, currentPanel);
+
+                            //dockerManager.dockerRunValidation(model, pathToModel, pathToDataset, currentPanel);
+                            dockerManager.validation(mlperfParam);
                             //testResultsHandler();
                             //testPerformanceHandler();
                             vscode.window.showInformationMessage("Should be showing the results of validation");

@@ -69,7 +69,7 @@
                 },
                 {
                     "command": "extension.Validate",
-                    "when": "resourceExtname == .onnx"
+                    "when": "resourceExtname =~ /.pb|.onnx/"
                 },
                 {
                     "command": "extension.Display",
