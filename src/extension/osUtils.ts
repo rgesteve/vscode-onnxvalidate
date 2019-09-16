@@ -45,12 +45,14 @@ export function getMLPerfDriver(): string {
         return "python/main.py";
 }
 
-export function getLocationOnContainer (pathOnHost: string ): string {
+export function getLocationOnContainer (pathOnHost: string | undefined): string {
     let retString = "";
-    if (isWindows())
-        retString = `${g_mountLocation}\\${pathOnHost.replace(g_hostLocation, "")}`;
-    else {
-        retString = `${g_mountLocation}${pathOnHost.replace(g_hostLocation, "")}`;
+    if (pathOnHost != undefined) {
+        if (isWindows())
+            retString = `${g_mountLocation}\\${pathOnHost.replace(g_hostLocation, "")}`;
+        else 
+            retString = `${g_mountLocation}${pathOnHost.replace(g_hostLocation, "")}`;
     }
+
     return retString;
 }  

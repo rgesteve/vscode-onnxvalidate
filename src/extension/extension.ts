@@ -9,7 +9,7 @@ import { rejects } from 'assert';
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 
     console.log(`Extension "first-extension" is now active from path ${context.extensionPath}!!`);
-    
+
     let currentPanel: vscode.WebviewPanel | undefined = undefined;
 
 
@@ -46,7 +46,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         });
      
     let display = vscode.commands.registerCommand('extension.Display', (modeluri: vscode.Uri) => {
-        const pathToChrome : string = join ("c:", "Program Files (x86)", "Google", "Chrome", "Application", "chrome.exe");
+        const pathToChrome: string = join("c:", "Program Files (x86)", "Google", "Chrome", "Application", "chrome.exe");
         const vizModelPath: string = join(context.extensionPath, 'src', 'test', 'data', 'model.svg');
         // get the file name with which the right click command was executed
         //dockerManager.dockerDisplay(modeluri);
@@ -68,14 +68,14 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     let validate = vscode.commands.registerCommand('extension.Validate', (modeluri: vscode.Uri) => {
 
         let userMountLocation: string = "";
-        
+
         if (modeluri === undefined) {
             vscode.window.showErrorMessage("Validate requires a file argument!!");
             return;
         }
 
         let model: string = modeluri.fsPath;
-        
+
         if (vscode.workspace.workspaceFolders && vscode.window.activeTextEditor) {
             let folder = vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri);
             if (folder) {
@@ -99,6 +99,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                     retainContextWhenHidden: true
                 }
             );
+            let mlperfParam: Map<string, string> = new Map<string, string>(); // delete?
             let pathToModel: string = "";
             let pathToDataset: string = "";
             let profile: string = "";
@@ -129,6 +130,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                                     // TODO: fix this for the case when multiple folders are selected
                                     //inputFolders = value.path.toString() + ',' + inputFolders;
                                     pathToModel = value.fsPath;
+                                    mlperfParam.set("model", pathToModel);
                                 });
                             }
                             if (currentPanel) {
@@ -149,6 +151,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                                     // TODO: fix this for the case when multiple folders are selected
                                     //refFolders = value.path.toString() + ',' + refFolders;
                                     pathToDataset = value.fsPath;
+                                    mlperfParam.set("dataset-path", pathToDataset);
                                 });
                             }
                             if (currentPanel) {
@@ -160,7 +163,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                     }
                     case "setProfileOption": {
                         profile = msg.text;
-
+                        mlperfParam.set("profile", Profile);
                         //For debug
                         //vscode.window.showInformationMessage(profile);
 
