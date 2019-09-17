@@ -34,7 +34,8 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
             let containerTypeCP = cp.spawn('docker', ['info', '-f', `"{{.OSType}}"`]);
             let containerType = "";
             containerTypeCP.stdout.on("data", (data: string): void => {
-                containerType = data.toString(); // this should say something like not installed so used that instead of error
+                console.log(`containerTypeCP.stdout.on ${data}`);
+                containerType = containerType + data.toString(); // this should say something like not installed so used that instead of error
             });
 
             containerTypeCP.on('error', (err) => {
@@ -43,6 +44,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
 
             containerTypeCP.on("exit", (data: string | Buffer): void => {
                 if (this._workspace) {
+                    console.log(this._workspace.uri.fsPath, os.tmpdir(), containerType.trim().replace(/\"/g, ""));
                     utils.setMountLocations(this._workspace.uri.fsPath, os.tmpdir(), containerType.trim().replace(/\"/g, ""));
                     console.log('Mount locations set!');
                 }
@@ -108,7 +110,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
     public async runImage(): Promise<string|undefined> {
         let runningContainer: string | undefined;
         if (this._imageId && this._workspace) {
-            let userWorkspaceMount: string = `source=${this._workspace.uri.fsPath},target=${utils.getLocationOnContainer(this._workspace.uri.fsPath)},type=bind`;
+            let userWorkspaceMount: string = `source=${utils.g_hostLocation},target=${utils.g_mountLocation},type=bind`;
             let extensionMount: string = `source=${utils.g_hostOutputLocation},target=${utils.g_mountOutputLocation},type=bind`;
             let args: string[] = ['run', '-m', '8g','-t', '-d', '--mount', userWorkspaceMount, '--mount', extensionMount, this._imageId];
             runningContainer =  await this.executeCommandWithProgress("Your development environment is ready!", "Starting your development environment...","docker", args);
@@ -145,7 +147,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
                 return undefined;
             }
             if (model) {
-                let args: string[] = ['exec', '-w', `/Documents/final_models/resnet50/`, `${this._containerIds[0]}`, 'python3', '-m', 'tf2onnx.convert', 
+                let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(path.dirname(fileuri.fsPath))}`, "ee6c3277aefe", 'python3', '-m', 'tf2onnx.convert', 
                                       '--fold_const', '--opset', '8' ,'--inputs',`${supported_models[model]["inputs"]}`, '--outputs', `${supported_models[model]["outputs"]}`,
                                       '--inputs-as-nchw', `${supported_models[model]["inputs"]}` ,'--input' , `${path.basename(fileuri.fsPath)}` , '--output', 
                                       `${path.basename(fileuri.fsPath).replace(".pb", ".onnx")}`];
@@ -274,7 +276,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
 
     public async validation(mlperfParams: Map<string, string>): Promise<void> {
         if (this._workspace) {
-            let args: string[] = ['exec', '-w', `${utils.getMLPerfLocation()}`, "34822be55482", 'python3', `${utils.getMLPerfDriver()}`,];
+            let args: string[] = ['exec', '-w', `${utils.getMLPerfLocation()}`, `${this._containerIds[0]}`, 'python3', `${utils.getMLPerfDriver()}`,];
            for (var [key, value] of mlperfParams) {
                 if (key === 'dataset-path' || key === 'model') {
                     args.push(`--${key}`);   
@@ -287,6 +289,11 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
                 }
 
            }
+           args.push("--count");
+           args.push("10");
+           args.push("--accuracy");
+
+           console.log(`MLPerf args ${args}`);
            this.executeCommandWithProgress("Finished Validation", "Validating model with MLPerf... ", "docker", args);  
         }
     }
