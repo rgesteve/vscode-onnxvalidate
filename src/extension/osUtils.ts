@@ -32,14 +32,14 @@ export function isWindows(): boolean {
 }
 
 export function getMLPerfLocation(): string {
-    if (isWindows())
+    if (g_containerType === 'windows')
         return "C:\\inference\\v0.5\\classification_and_detection";
     else
         return "/inference/v0.5/classification_and_detection";
 }
 
 export function getMLPerfDriver(): string {
-    if (isWindows())
+    if (g_containerType === 'windows')
         return "python\\main.py";
     else
         return "python/main.py";
@@ -48,9 +48,15 @@ export function getMLPerfDriver(): string {
 export function getLocationOnContainer (pathOnHost: string | undefined): string {
     let retString = "";
     if (pathOnHost != undefined) {
-        if (isWindows())
+        if (isWindows() && g_containerType === 'windows')
             retString = `${g_mountLocation}\\${pathOnHost.replace(g_hostLocation, "")}`;
-        else 
+        else if (isWindows() && g_containerType === 'linux') {
+            let temp:string  = `${pathOnHost.replace(g_hostLocation, g_mountLocation)}`;
+            retString = temp.replace(/\\/g, "/");
+            console.log(`Path ${pathOnHost} translates to ${retString}`);
+        }
+
+        else
             retString = `${g_mountLocation}${pathOnHost.replace(g_hostLocation, "")}`;
     }
 

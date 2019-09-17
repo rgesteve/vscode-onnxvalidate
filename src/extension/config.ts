@@ -30,7 +30,7 @@ export const docker_images : { [key: string]: {name: string, memory: string, cpu
         "cpu": ""
     },
     "linux-mlperf": {
-        "name": "mlperf_linux:latest",
+        "name": "chanchala7/mlperf_linux:latest",
         "memory" : "",
         "cpu": ""
     },
