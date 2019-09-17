@@ -12,18 +12,21 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
     let currentPanel: vscode.WebviewPanel | undefined = undefined;
 
-
     let dockerManager: DockerManager = new DockerManager(context.extensionPath, context);  // constructor gets all the images in the host. This needs to get the 
-    // images from dockerhub if the images that we need arent there in the host.
-    // The on.exit is when we have all the images. So that needs to ha
-
-
-    // let containerId = await dockerManager.runImage();
-
-    // if (containerId) {
-    //     vscode.window.showInformationMessage("Your development environment is ready");
-    // }
+    
     let startDocker = vscode.commands.registerCommand('extension.startOnnxEcosystem', async () => {
+        await dockerManager.getImageId().then(async () => {
+            let containerId = await dockerManager.runImage();
+            if (containerId) {
+                vscode.window.showInformationMessage("Your development environment is ready");
+            }
+        }, reason => {
+            vscode.window.showInformationMessage(`Starting your development environment failed with ${reason}`);
+        });
+
+    });
+
+    let startDocker1 = vscode.commands.registerCommand('extension.initializeOnnxEcosystem', async () => {
         await dockerManager.getImageId().then(async () => {
             let containerId = await dockerManager.runImage();
             if (containerId) {

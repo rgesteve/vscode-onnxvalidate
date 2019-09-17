@@ -11,7 +11,7 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:extension.InitializeOnnxEcosystem",
+        "onCommand:extension.initializeOnnxEcosystem",
         "onCommand:firstextension.addCountToPanel",
         "onCommand:firstextension.tryResults",
         "onCommand:extension.Validate",
@@ -21,7 +21,7 @@
     "contributes": {
         "commands": [
             {
-                "command": "extension.InitializeOnnxEcosystem",
+                "command": "extension.initializeOnnxEcosystem",
                 "title": "ONNX: Initialize ONNX ecosystem"
             },
             {
