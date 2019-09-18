@@ -236,9 +236,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
                     vscode.window.showInformationMessage("Validation done!");
                     console.log("Validation done!");
                     let result_file = path.join(os.tmpdir(), "result.json");
-                    if (currentPanel !== undefined) {
-                        currentPanel.webview.postMessage({ command: 'result', payload: "DONE" });
-                    }
+
                     if (fs.existsSync(result_file)) {
                         fs.readFile(result_file, (err, data) => {
                             if (err || data === undefined) {
@@ -264,6 +262,104 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
                         console.log(`Couldn't find: ${result_file} on disk.`);
                     }
                     
+                    //console.log('In testperformanceHandler');
+                    //const perfDataPath: string = path.join(this._context.extensionPath, 'src', 'test', 'data', 'onnxruntime_profile__2019-06-28_04-56-43.json');
+                    const perfDataPath: string = path.join(os.tmpdir(), "profile.json");
+                    if (fs.existsSync(perfDataPath)) {
+                        fs.readFile(perfDataPath, (err, data) => {
+                            if (err || data === undefined) {
+                                console.log('Error reading data file.');
+                            } else {
+                                let perfData = JSON.parse(data.toString());
+                                try {
+                                    let forChart: any = Array.from(perfData).filter(rec => { return ((<any>rec)["cat"] === "Node"); })
+                                        .map(rec => ({
+                                            "name": `${(<any>rec)["name"] / (<any>rec)["args"]["op_name"]}`,
+                                            "dur": (<any>rec)["dur"]
+                                        }));
+                                    console.log('Should be sending perfdata');
+                                    if (currentPanel !== undefined) {
+                                        currentPanel.webview.postMessage({ command: 'perfData', payload: forChart });
+                                    }
+                                    vscode.window.showInformationMessage("Apparently parsed the data!");
+                                } catch {
+                                    console.log("Likely couldn't pull the result.");
+                                }
+                            }
+                        });
+                    } else {
+                        console.log(`Couldn't find: ${perfDataPath} on disk.`);
+                    }
+
+
+                }
+            });
+        }
+    }
+
+
+    dockerRunMLPerfValidation(model: string, result: string, backend: string ,profile: string, dataFormat: string, count: number, dataset:string, currentPanel: vscode.WebviewPanel | undefined) {
+        if (this._workspace) {
+            let temp = this._workspace.uri.fsPath + "\\";
+         //   let containerModelPath = `C:\\${path.basename(this._workspace.uri.fsPath)}\\${model.replace(temp, "")}`;
+           // let containerDatasetPath = `C:\\${path.basename(this._workspace.uri.fsPath)}\\${dataset.replace(temp, "")}`;
+            //TODO need to handle windows to linux path conversion for model and dataset
+
+            model = '/Vscode/resnet50_v15.pb';
+            dataset = '/Vscode/ILSVRC2012_img_val';
+
+            let exec = cp.spawn('docker', ['exec', '-w', `${mlperfLocation}`, 'df04531b1269', 'python3', `${mlperfDriver}`,
+                                '--profile', `${profile}`,'--backend',`${backend}` ,'--model', `${model}`, '--dataset-path', `${dataset}`,
+                                '--output', `/Vscode/${result}`, '--data-format', `${dataFormat}`, '--accuracy',
+                                '--count', `${count}`]);
+           // console.log(containerModelPath);
+            //console.log(containerDatasetPath);
+            //console.log(model);
+            exec.on('error', (err) => {
+                console.log('Running validation failed.');
+            });
+            exec.stdout.on('data', (data: string) => {
+                console.log("Running validation...");
+
+            });
+            exec.on('exit', (err: any) => {
+                if (err != 0) {
+                    vscode.window.showInformationMessage("Running validation failed");
+                    console.log(`Exit with error code:  ${err}`);
+                }
+                else {
+                    vscode.window.showInformationMessage("Validation done!");
+                    console.log("Validation done!");
+                    let result_file = path.join(os.tmpdir(), "result.json");
+
+                    if (currentPanel !== undefined) {
+                        currentPanel.webview.postMessage({ command: 'result', payload: "DONE" });
+                    }
+                    if (fs.existsSync(result_file)) {
+                        fs.readFile(result_file, (err, data) => {
+                            if (err || data === undefined) {
+                                console.log('Error reading data file.');
+                            } else {
+                                let results = JSON.parse(data.toString());
+                                try {
+                                    // Be mindful that the new object created in the lambda *has* to be enclosed in brackets
+                                    let forGrid : any = Object.entries(results).map(kv => ({ "input" : kv[0],
+                                                                                            "actual" : (<any>kv[1])["actual"],
+                                                                                            "expected" : (<any>kv[1])["expected"]
+                                                                                        }));
+                                    console.log("Results parsing worked");
+                                    if (currentPanel !== undefined) {
+                                        currentPanel.webview.postMessage({ command: 'result', payload: forGrid });
+                                    }
+                                } catch {
+                                    console.log("Likely pulling from array didn't work.");
+                                }
+                            }
+                        });
+                    } else {
+                        console.log(`Couldn't find: ${result_file} on disk.`);
+                    }
+
                     //console.log('In testperformanceHandler');
                     //const perfDataPath: string = path.join(this._context.extensionPath, 'src', 'test', 'data', 'onnxruntime_profile__2019-06-28_04-56-43.json');
                     const perfDataPath: string = path.join(os.tmpdir(), "profile.json");
