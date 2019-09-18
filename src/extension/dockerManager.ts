@@ -7,6 +7,8 @@ import * as os from 'os';
 import ContentProvider from './ContentProvider';
 import * as utils from './osUtils';
 import { supported_models, docker_images } from './config';
+import { resolve } from 'url';
+import { rejects } from 'assert';
 
 export class DockerManager implements vscode.Disposable { // can dispose the vscode context?
     private _imageId: string | undefined; // declare an array of image ids, that exists on the system, conversionContainerImage, QuantizationImage
@@ -15,14 +17,14 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
     private _workspace: vscode.WorkspaceFolder | undefined;
     private _extensionPath: string;
     private _context: vscode.ExtensionContext | undefined;
-    private _usermountlocation: string = "";
+
     // the constructor might need to get the required images from the docker hub too.
     constructor(extensionPath: string, context: vscode.ExtensionContext) {
         this._imageIds = [];
         this._containerIds = [];
         this._extensionPath = extensionPath;
         this._context = context;
-        let currentContainerId: string = "";
+
         //TODO: Make sure that the host system has docker and this image.
         // if not, get it from docker hub? that part needs to be decided.
         console.log("Coming here");
@@ -121,14 +123,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
        
     }
             
-    public async runExec(): Promise<string|undefined> {
-        if (this._containerIds && this._workspace) { // we have a valid running container and a mounted user workspace
-
-        }
-        return "";
-    }
-
-    public async convert(fileuri: vscode.Uri, ...args: any[]): Promise<void> {
+    public async convert(fileuri: vscode.Uri, ...args: any[]): Promise<string|undefined> {
         if (!this._workspace){
             console.log(`No workspace defined`);
             return undefined;
@@ -147,11 +142,11 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
                 return undefined;
             }
             if (model) {
-                let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(path.dirname(fileuri.fsPath))}`, "ee6c3277aefe", 'python3', '-m', 'tf2onnx.convert', 
+                let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(path.dirname(fileuri.fsPath))}`, `${this._containerIds[0]}`, 'python3', '-m', 'tf2onnx.convert', 
                                       '--fold_const', '--opset', '8' ,'--inputs',`${supported_models[model]["inputs"]}`, '--outputs', `${supported_models[model]["outputs"]}`,
                                       '--inputs-as-nchw', `${supported_models[model]["inputs"]}` ,'--input' , `${path.basename(fileuri.fsPath)}` , '--output', 
                                       `${path.basename(fileuri.fsPath).replace(".pb", ".onnx")}`];
-                let result = await this.executeCommandWithProgress("Finished converting to ONNX!", "Converting to ONNX... ", "docker", args);  
+                return await this.executeCommandWithProgress("Finished converting to ONNX!", "Converting to ONNX... ", "docker", args);  
                 // check this out
                 
             }
@@ -181,100 +176,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
         })
     }
 
-    //validation (modelpath: string, inputPath: string, referenceOutputPath: string, currentPanel: vscode.WebviewPanel | undefined) {
-    public async validation1(mlperfParams: Map<string, string>): Promise<void> {
-
-
-        return undefined;
-        // if (this._workspace) {
-        //     let temp = this._workspace.uri.fsPath + "\\";
-        //     let containerInputPath = `C:\\${path.basename(this._workspace.uri.fsPath)}\\${inputPath.replace(temp, "")}`;
-        //     let containerRefPath = `C:\\${path.basename(this._workspace.uri.fsPath)}\\${referenceOutputPath.replace(temp, "")}`;
-        //     let model = `C:\\${path.basename(this._workspace.uri.fsPath)}\\${modelpath.replace(temp, "")}`;
-        //     //let exec = cp.spawn('docker', ['exec', this._imageIds[0], 'python', `C:\\scripts\\mnist_validate.py`, model,  containerInputPath, containerRefPath]);
-        //     let exec = cp.spawn('docker', ['exec', this._imageIds[0], 'python', `C:\\scripts\\mnist_validate.py`, model,  containerInputPath, containerRefPath]);
-        //     console.log(containerInputPath);
-        //     console.log(containerRefPath);
-        //     console.log(model);
-        //     exec.on('error', (err) => {
-        //         console.log('Running validation failed.');
-        //     });
-        //     exec.stdout.on('data', (data: string) => {
-        //         console.log("Running validation...");
-
-        //     });
-        //     exec.on('exit', (err: any) => {
-        //         if (err != 0) {
-        //             vscode.window.showInformationMessage("Running validation failed");
-        //             console.log(`Exit with error code:  ${err}`);
-        //         }
-        //         else {
-        //             vscode.window.showInformationMessage("Validation done!");
-        //             console.log("Validation done!");
-        //             let result_file = path.join(os.tmpdir(), "result.json");
-
-        //             if (fs.existsSync(result_file)) {
-        //                 fs.readFile(result_file, (err, data) => {
-        //                     if (err || data === undefined) {
-        //                         console.log('Error reading data file.');
-        //                     } else {
-        //                         let results = JSON.parse(data.toString());
-        //                         try {
-        //                             // Be mindful that the new object created in the lambda *has* to be enclosed in brackets
-        //                             let forGrid : any = Object.entries(results).map(kv => ({ "input" : kv[0], 
-        //                                                                                     "actual" : (<any>kv[1])["actual"],
-        //                                                                                     "expected" : (<any>kv[1])["expected"]
-        //                                                                                 }));
-        //                             console.log("Results parsing worked");
-        //                             if (currentPanel !== undefined) {
-        //                                 currentPanel.webview.postMessage({ command: 'result', payload: forGrid });
-        //                             }
-        //                         } catch {
-        //                             console.log("Likely pulling from array didn't work.");
-        //                         }
-        //                     }
-        //                 });
-        //             } else {
-        //                 console.log(`Couldn't find: ${result_file} on disk.`);
-        //             }
-                    
-        //             //console.log('In testperformanceHandler');
-        //             //const perfDataPath: string = path.join(this._context.extensionPath, 'src', 'test', 'data', 'onnxruntime_profile__2019-06-28_04-56-43.json');
-        //             const perfDataPath: string = path.join(os.tmpdir(), "profile.json");
-        //             if (fs.existsSync(perfDataPath)) {
-        //                 fs.readFile(perfDataPath, (err, data) => {
-        //                     if (err || data === undefined) {
-        //                         console.log('Error reading data file.');
-        //                     } else {
-        //                         let perfData = JSON.parse(data.toString());
-        //                         try {
-        //                             let forChart: any = Array.from(perfData).filter(rec => { return ((<any>rec)["cat"] === "Node"); })
-        //                                 .map(rec => ({
-        //                                     "name": `${(<any>rec)["name"] / (<any>rec)["args"]["op_name"]}`,
-        //                                     "dur": (<any>rec)["dur"]
-        //                                 }));
-        //                             console.log('Should be sending perfdata');
-        //                             if (currentPanel !== undefined) {
-        //                                 currentPanel.webview.postMessage({ command: 'perfData', payload: forChart });
-        //                             }
-        //                             vscode.window.showInformationMessage("Apparently parsed the data!");
-        //                         } catch {
-        //                             console.log("Likely couldn't pull the result.");
-        //                         }
-        //                     }
-        //                 });
-        //             } else {
-        //                 console.log(`Couldn't find: ${perfDataPath} on disk.`);
-        //             }
-
-
-        //         }
-        //     });
-        // }
-       // return "";
-    }
-
-    public async validation(mlperfParams: Map<string, string>): Promise<void> {
+    public async validation(mlperfParams: Map<string, string>): Promise<string|undefined> { // Check this
         if (this._workspace) {
             let args: string[] = ['exec', '-w', `${utils.getMLPerfLocation()}`, `${this._containerIds[0]}`, 'python3', `${utils.getMLPerfDriver()}`,];
            for (var [key, value] of mlperfParams) {
@@ -289,13 +191,21 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
                 }
 
            }
-           //args.push("--count");
-           //args.push("10");
            args.push("--accuracy");
+           args.push("--output");
 
+           if (utils.g_containerType === 'linux') {
+                args.push(`${utils.g_mountOutputLocation}/MLPerf/`);
+           }
+           else {
+                args.push(`${utils.g_mountOutputLocation}\\MLPerf`);
+           }
+           
            console.log(`MLPerf args ${args}`);
-           this.executeCommandWithProgress("Finished Validation", "Validating model with MLPerf... ", "docker", args);  
+           return await this.executeCommandWithProgress("Finished Validation", "Validating model with MLPerf... ", "docker", args);  
         }
+
+        
     }
     dockerRunMLPerfValidation(model: string, result: string, profile: string, dataFormat: string, count: number, dataset:string, currentPanel: vscode.WebviewPanel | undefined) {
         if (this._workspace) {

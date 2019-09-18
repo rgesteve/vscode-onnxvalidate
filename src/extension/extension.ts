@@ -7,14 +7,19 @@ import { spawn } from 'child_process';
 import { rejects } from 'assert';
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
+    let extensionStatusBar: vscode.StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 25);
 
-    console.log(`Extension "first-extension" is now active from path ${context.extensionPath}!!`);
+    console.log(`Extension "vscode-onnxvalidate" is now active from path ${context.extensionPath}!!`);
 
     let currentPanel: vscode.WebviewPanel | undefined = undefined;
 
-
     let dockerManager: DockerManager = new DockerManager(context.extensionPath, context);  // constructor gets all the images in the host. This needs to get the 
     
+    let initialize = vscode.commands.registerCommand('extension.initializeOnnxEcosystem', async () => {
+        extensionStatusBar.text = "Extension initialized!" ;
+        extensionStatusBar.show();
+    });
+
     let startDocker = vscode.commands.registerCommand('extension.startOnnxEcosystem', async () => {
         await dockerManager.getImageId().then(async () => {
             let containerId = await dockerManager.runImage();
@@ -27,25 +32,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
     });
 
-    let startDocker1 = vscode.commands.registerCommand('extension.initializeOnnxEcosystem', async () => {
-        await dockerManager.getImageId().then(async () => {
-            let containerId = await dockerManager.runImage();
-            if (containerId) {
-                vscode.window.showInformationMessage("Your development environment is ready");
-            }
-        }, reason => {
-            vscode.window.showInformationMessage(`Starting your development environment failed with ${reason}`);
-        });
-
-    });
-
-
     let convert = vscode.commands.registerCommand('extension.Convert', async (fileuri: any) => {
         // get the file name with which the right click command was executed
         await dockerManager.convert(fileuri).then(async () => {
                 vscode.window.showInformationMessage("Converted to ONNX!");
             }, reason => {
-                vscode.window.showInformationMessage(`Conversion failed with ${reason}`);
+                vscode.window.showInformationMessage(`Conversion failed. ${reason}`);
             });
         });
      
@@ -61,12 +53,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
     let quantize = vscode.commands.registerCommand('extension.Quantize', () => {
         console.log("Quantize....");
-    });
-
-
-    let runValidation = vscode.commands.registerCommand('extension.RunValidation', () => {
-        //dockerManager.dockerExec("dockerRun_command");
-        console.log("Running validation....");
     });
 
     let validate = vscode.commands.registerCommand('extension.Validate', (modeluri: vscode.Uri) => {
@@ -91,17 +77,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                 }
             );
             let mlperfParam: Map<string, string> = new Map<string, string>(); // delete?
-            let pathToModel: string = "";
-            let pathToDataset: string = "";
-            let profile: string = "";
-            let backend: string = "";
-            let dataFormat: string = "";
-            let stringNumberOfImages: string = "";
-            let count: number = 0;
-            let result: string = "result";
-
-            currentPanel.webview.onDidReceiveMessage(msg => {
-                let txtMessage = "generic command";
+            // refactor this function out.
+            currentPanel.webview.onDidReceiveMessage(async msg => {
                 switch (msg.command) {
                     case "setModelPath": {
                         vscode.window.showOpenDialog({
@@ -116,9 +93,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                         }).then((folderUris) => {
                             if (folderUris) {
                                 folderUris.forEach(function (value) {
-                                    console.log(value.fsPath);
-                                    // TODO: fix this for the case when multiple folders are selected
-                                    //inputFolders = value.path.toString() + ',' + inputFolders;
                                     mlperfParam.set("model", value.fsPath);
                                 });
                             }
@@ -136,14 +110,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                         }).then((folderUris) => {
                             if (folderUris) {
                                 folderUris.forEach(function (value) {
-                                    console.log(value.fsPath);
-                                    // TODO: fix this for the case when multiple folders are selected
-                                    //refFolders = value.path.toString() + ',' + refFolders;
                                     mlperfParam.set("dataset-path", value.fsPath);
                                 });
                             }
                             if (currentPanel) {
-                                currentPanel.webview.postMessage({ command: "dataSet", payload: pathToDataset });
+                                currentPanel.webview.postMessage({ command: "dataSet", payload: mlperfParam.get("dataset-path") });
                             }
                             vscode.window.showInformationMessage(`Seems like I should be opening ${folderUris}!`);
                         });
@@ -159,7 +130,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                     }
 
                     case "setDataFormat": {
-                        dataFormat = msg.text;
                         mlperfParam.set("data-format", msg.text);
                         break;
                     }
@@ -168,76 +138,16 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                         break;
                     }
                     case "startVerification": {
-                        dockerManager.validation(mlperfParam);
-                        //checks for tensorflow profiles
-                        // if (profile === "resnet50-tf" || profile === "mobilenet-tf") {
-                        //     if (backend === "tensorflow") {
-
-                        //         if (dataFormat === "NHWC") {
-
-                        //             if (pathToModel !== "" && pathToDataset !== "") {
-
-                        //                 //dockerManager.dockerRunMLPerfValidation(pathToModel, result, backend, profile, dataFormat, count, pathToDataset, currentPanel);
-                        //                 vscode.window.showInformationMessage("Should be showing the results of validation");
-                        //                 if (currentPanel) {
-                        //                     currentPanel.webview.postMessage({ command: "result", payload: "Verification complete" });
-                        //                 }
-                        //             }
-                        //             else {
-                        //                 vscode.window.showErrorMessage("Path to model and dataset is empty");
-                        //                 pathToModel = "";
-                        //                 pathToDataset = "";
-                        //             }
-                        //         }
-                        //         else {
-                        //             vscode.window.showErrorMessage("Incorrect Data Format selected");
-                        //         }
-                        //     }
-                        //     else {
-
-                        //         vscode.window.showErrorMessage("Incorrect backend selected");
-                        //     }
-
-                        // }
-                        // //Checks for onnxruntime profiles
-                        // if (profile === "resnet50-onnxruntime" || profile === "mobilenet-onnxruntime") {
-                        //     if (backend === "onnxruntime") {
-
-                        //         if (dataFormat === "NCHW") {
-
-                        //             if (pathToModel !== "" && pathToDataset !== "") {
-
-                        //                 //dockerManager.dockerRunMLPerfValidation(pathToModel, result, backend, profile, dataFormat, count, pathToDataset, currentPanel);
-                        //                 vscode.window.showInformationMessage("Should be showing the results of validation");
-                        //                 if (currentPanel) {
-                        //                     currentPanel.webview.postMessage({ command: "result", payload: "Verification complete" });
-                        //                 }
-                        //             }
-                        //             else {
-                        //                 vscode.window.showErrorMessage("Path to model and dataset is empty");
-                        //                 pathToModel = "";
-                        //                 pathToDataset = "";
-                        //             }
-                        //         }
-                        //         else {
-                        //             vscode.window.showErrorMessage("Incorrect Data Format selected");
-                        //         }
-                        //     }
-                        //     else {
-
-                        //         vscode.window.showErrorMessage("Incorrect backend selected");
-                        //     }
-
-                        // }
-
-
-
+                        await dockerManager.validation(mlperfParam).then(async () => {
+                            vscode.window.showInformationMessage("Validation Done");
+                        }, reason => {
+                            vscode.window.showInformationMessage(`Validation failed. ${reason}`);
+                        });
                         break;
                     }
                     case "cancel": {
-                        pathToModel = "";
-                        pathToDataset = "";
-                        console.log("Canceling verification");
+                        mlperfParam.clear();
+                        console.log("Canceling verification, cleared mlperfParam");
                     }
                 }
 
@@ -314,7 +224,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     };
 
     let testResults = vscode.commands.registerCommand('firstextension.tryResults', testPerformanceHandler);
-
+    context.subscriptions.push(initialize);
     context.subscriptions.push(startDocker);
     context.subscriptions.push(convert);
     context.subscriptions.push(quantize);
