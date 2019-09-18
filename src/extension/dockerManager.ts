@@ -289,8 +289,8 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
                 }
 
            }
-           args.push("--count");
-           args.push("10");
+           //args.push("--count");
+           //args.push("10");
            args.push("--accuracy");
 
            console.log(`MLPerf args ${args}`);

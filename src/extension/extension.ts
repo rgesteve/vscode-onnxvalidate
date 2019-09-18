@@ -69,30 +69,17 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     });
 
     let validate = vscode.commands.registerCommand('extension.Validate', (modeluri: vscode.Uri) => {
-
-        let userMountLocation: string = "";
-
         if (modeluri === undefined) {
             vscode.window.showErrorMessage("Validate requires a file argument!!");
             return;
         }
-
         let model: string = modeluri.fsPath;
-
-        if (vscode.workspace.workspaceFolders && vscode.window.activeTextEditor) {
-            let folder = vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri);
-            if (folder) {
-                userMountLocation = folder.uri.fsPath;
-            }
-        }
-        else {
-            console.log("No workspace folders found... ");
-        }
-        const contentProvider = new ContentProvider(userMountLocation);
+        const contentProvider = new ContentProvider();
 
         if (currentPanel) {
             currentPanel.reveal(vscode.ViewColumn.Two);
-        } else {
+        } 
+        else {
             currentPanel = vscode.window.createWebviewPanel(
                 "onnxvalidate",
                 "ONNXValidate",
@@ -125,19 +112,17 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                                'TensorFlow models .pb' : ['pb'],
                                'Onnxruntime models .onnx': ['onnx']
                             }
-
                         }).then((folderUris) => {
                             if (folderUris) {
                                 folderUris.forEach(function (value) {
                                     console.log(value.fsPath);
                                     // TODO: fix this for the case when multiple folders are selected
                                     //inputFolders = value.path.toString() + ',' + inputFolders;
-                                    pathToModel = value.fsPath;
-                                    mlperfParam.set("model", pathToModel);
+                                    mlperfParam.set("model", value.fsPath);
                                 });
                             }
                             if (currentPanel) {
-                                currentPanel.webview.postMessage({ command: "modelPath", payload: pathToModel });
+                                currentPanel.webview.postMessage({ command: "modelPath", payload: mlperfParam.get("model") });
                             }
                             vscode.window.showInformationMessage(`Seems like I should be opening ${folderUris}!`);
                         });
@@ -153,113 +138,96 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                                     console.log(value.fsPath);
                                     // TODO: fix this for the case when multiple folders are selected
                                     //refFolders = value.path.toString() + ',' + refFolders;
-                                    pathToDataset = value.fsPath;
-                                    mlperfParam.set("dataset-path", pathToDataset);
+                                    mlperfParam.set("dataset-path", value.fsPath);
                                 });
                             }
                             if (currentPanel) {
-                                currentPanel.webview.postMessage({ command: "dataSet", payload: pathToDataset });
+                                currentPanel.webview.postMessage({ command: "dataSet", payload: mlperfParam.get("dataset-path") });
                             }
                             vscode.window.showInformationMessage(`Seems like I should be opening ${folderUris}!`);
                         });
                         break;
                     }
                     case "setProfileOption": {
-                        profile = msg.text;
-                        mlperfParam.set("profile", Profile);
-                        //For debug
-                        //vscode.window.showInformationMessage(profile);
-
+                        mlperfParam.set("profile", msg.text);
                         break;
                     }
                     case "setBackend": {
-                        backend = msg.text;
-                        //For debug
-                        // vscode.window.showInformationMessage(backend);
-
+                        mlperfParam.set("backend", msg.text);
                         break;
                     }
 
                     case "setDataFormat": {
                         dataFormat = msg.text;
-
-                        //For debug
-                        //vscode.window.showInformationMessage(dataFormat);
-
+                        mlperfParam.set("data-format", msg.text);
                         break;
                     }
                     case "setnumberOfImages": {
-                        stringNumberOfImages = msg.text;
-
-                        //converting to number from string
-                        count = parseInt(stringNumberOfImages);
-
-                        //For debug
-                        //vscode.window.showInformationMessage(`number of images ${count}`);
+                        mlperfParam.set("count", msg.text);
                         break;
                     }
                     case "startVerification": {
-
+                        dockerManager.validation(mlperfParam);
                         //checks for tensorflow profiles
-                        if (profile === "resnet50-tf" || profile === "mobilenet-tf") {
-                            if (backend === "tensorflow") {
+                        // if (profile === "resnet50-tf" || profile === "mobilenet-tf") {
+                        //     if (backend === "tensorflow") {
 
-                                if (dataFormat === "NHWC") {
+                        //         if (dataFormat === "NHWC") {
 
-                                    if (pathToModel !== "" && pathToDataset !== "") {
+                        //             if (pathToModel !== "" && pathToDataset !== "") {
 
-                                        dockerManager.dockerRunMLPerfValidation(pathToModel, result, backend, profile, dataFormat, count, pathToDataset, currentPanel);
-                                        vscode.window.showInformationMessage("Should be showing the results of validation");
-                                        if (currentPanel) {
-                                            currentPanel.webview.postMessage({ command: "result", payload: "Verification complete" });
-                                        }
-                                    }
-                                    else {
-                                        vscode.window.showErrorMessage("Path to model and dataset is empty");
-                                        pathToModel = "";
-                                        pathToDataset = "";
-                                    }
-                                }
-                                else {
-                                    vscode.window.showErrorMessage("Incorrect Data Format selected");
-                                }
-                            }
-                            else {
+                        //                 //dockerManager.dockerRunMLPerfValidation(pathToModel, result, backend, profile, dataFormat, count, pathToDataset, currentPanel);
+                        //                 vscode.window.showInformationMessage("Should be showing the results of validation");
+                        //                 if (currentPanel) {
+                        //                     currentPanel.webview.postMessage({ command: "result", payload: "Verification complete" });
+                        //                 }
+                        //             }
+                        //             else {
+                        //                 vscode.window.showErrorMessage("Path to model and dataset is empty");
+                        //                 pathToModel = "";
+                        //                 pathToDataset = "";
+                        //             }
+                        //         }
+                        //         else {
+                        //             vscode.window.showErrorMessage("Incorrect Data Format selected");
+                        //         }
+                        //     }
+                        //     else {
 
-                                vscode.window.showErrorMessage("Incorrect backend selected");
-                            }
+                        //         vscode.window.showErrorMessage("Incorrect backend selected");
+                        //     }
 
-                        }
-                        //Checks for onnxruntime profiles
-                        if (profile === "resnet50-onnxruntime" || profile === "mobilenet-onnxruntime") {
-                            if (backend === "onnxruntime") {
+                        // }
+                        // //Checks for onnxruntime profiles
+                        // if (profile === "resnet50-onnxruntime" || profile === "mobilenet-onnxruntime") {
+                        //     if (backend === "onnxruntime") {
 
-                                if (dataFormat === "NCHW") {
+                        //         if (dataFormat === "NCHW") {
 
-                                    if (pathToModel !== "" && pathToDataset !== "") {
+                        //             if (pathToModel !== "" && pathToDataset !== "") {
 
-                                        dockerManager.dockerRunMLPerfValidation(pathToModel, result, backend, profile, dataFormat, count, pathToDataset, currentPanel);
-                                        vscode.window.showInformationMessage("Should be showing the results of validation");
-                                        if (currentPanel) {
-                                            currentPanel.webview.postMessage({ command: "result", payload: "Verification complete" });
-                                        }
-                                    }
-                                    else {
-                                        vscode.window.showErrorMessage("Path to model and dataset is empty");
-                                        pathToModel = "";
-                                        pathToDataset = "";
-                                    }
-                                }
-                                else {
-                                    vscode.window.showErrorMessage("Incorrect Data Format selected");
-                                }
-                            }
-                            else {
+                        //                 //dockerManager.dockerRunMLPerfValidation(pathToModel, result, backend, profile, dataFormat, count, pathToDataset, currentPanel);
+                        //                 vscode.window.showInformationMessage("Should be showing the results of validation");
+                        //                 if (currentPanel) {
+                        //                     currentPanel.webview.postMessage({ command: "result", payload: "Verification complete" });
+                        //                 }
+                        //             }
+                        //             else {
+                        //                 vscode.window.showErrorMessage("Path to model and dataset is empty");
+                        //                 pathToModel = "";
+                        //                 pathToDataset = "";
+                        //             }
+                        //         }
+                        //         else {
+                        //             vscode.window.showErrorMessage("Incorrect Data Format selected");
+                        //         }
+                        //     }
+                        //     else {
 
-                                vscode.window.showErrorMessage("Incorrect backend selected");
-                            }
+                        //         vscode.window.showErrorMessage("Incorrect backend selected");
+                        //     }
 
-                        }
+                        // }
 
 
 
