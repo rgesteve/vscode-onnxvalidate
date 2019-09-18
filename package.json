@@ -11,7 +11,7 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:extension.startOnnxEcosystem",
+        "onCommand:extension.initializeOnnxEcosystem",
         "onCommand:firstextension.addCountToPanel",
         "onCommand:firstextension.tryResults",
         "onCommand:extension.Validate",
@@ -20,6 +20,10 @@
     "main": "./out/extension/extension.js",
     "contributes": {
         "commands": [
+            {
+                "command": "extension.initializeOnnxEcosystem",
+                "title": "ONNX: Initialize ONNX ecosystem"
+            },
             {
                 "command": "extension.startOnnxEcosystem",
                 "title": "ONNX: Start ONNX ecosystem"
@@ -65,7 +69,7 @@
                 },
                 {
                     "command": "extension.Validate",
-                    "when": "resourceExtname == .onnx"
+                    "when": "resourceExtname =~ /.pb|.onnx/"
                 },
                 {
                     "command": "extension.Display",
@@ -102,7 +106,7 @@
         "tslint": "^5.12.1",
         "typescript": "^3.3.1",
         "vscode": "^1.1.28",
-        "webpack": "^4.33.0",
+        "webpack": "^4.39.3",
         "webpack-cli": "^3.3.3",
         "webpack-dev-server": "^3.7.1"
     },
