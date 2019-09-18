@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
 import ContentProvider from './ContentProvider';
-// this class manages the docker commands like build, run, exec, 
+// this class manages the docker commands like build, run, exec,
 
 let supported_models : { [key: string]: {inputs: string, outputs: string}} = {
     // resnet
@@ -91,17 +91,17 @@ export class DockerManager {
         });
     }
 
-    // Docker exec needs a running container, 
+    // Docker exec needs a running container,
     // TODO:
     // I am using the CLI tf2onnx.convert for converting, right now, right now
-    // only supporting conversion from frozen models. The inputs and outputs of the graph are expected to be what 
-    // that model generally has.  
+    // only supporting conversion from frozen models. The inputs and outputs of the graph are expected to be what
+    // that model generally has.
 
     dockerExec(fileuri: any) {
-        
-        if (!this._workspace || !vscode.workspace.workspaceFolders) { 
+
+        if (!this._workspace || !vscode.workspace.workspaceFolders) {
             console.log(`No workspace defined`);
-            return undefined; 
+            return undefined;
         }
         if (this._workspace && vscode.workspace.workspaceFolders) {
             console.log(`${path.dirname(fileuri.fsPath).replace(this._workspace.uri.fsPath, this._usermountlocation)}`);
@@ -115,7 +115,7 @@ export class DockerManager {
                 model =  "mobilenet";
             }
 
-            let exec = cp.spawn('docker', ['exec', '-w', `${path.dirname(fileuri.fsPath).replace(this._workspace.uri.fsPath, this._usermountlocation)}`, 
+            let exec = cp.spawn('docker', ['exec', '-w', `${path.dirname(fileuri.fsPath).replace(this._workspace.uri.fsPath, this._usermountlocation)}`,
                                 'b3586d48d085', 'python', '-m', 'tf2onnx.convert', '--fold_const', '--opset', '8' ,'--inputs',`${supported_models[model]["inputs"]}`,
                                 '--outputs', `${supported_models[model]["outputs"]}`, '--inputs-as-nchw', `${supported_models[model]["inputs"]}` ,'--input' ,
                                 `${path.basename(fileuri.fsPath)}` , '--output',`${path.basename(fileuri.fsPath).replace(".pb", ".onnx")}`]);
@@ -172,7 +172,7 @@ export class DockerManager {
     // TODO: Using mlperf to do the validation, so we should
     // probably have a ui which gives us the info to feed to mlperf, which will be running
     // inside a second container.
-    // 
+    //
     dockerRunValidation(modelpath: string, inputPath: string, referenceOutputPath: string, currentPanel: vscode.WebviewPanel | undefined) {
 
         if (this._workspace) {
@@ -210,7 +210,7 @@ export class DockerManager {
                                 let results = JSON.parse(data.toString());
                                 try {
                                     // Be mindful that the new object created in the lambda *has* to be enclosed in brackets
-                                    let forGrid : any = Object.entries(results).map(kv => ({ "input" : kv[0], 
+                                    let forGrid : any = Object.entries(results).map(kv => ({ "input" : kv[0],
                                                                                             "actual" : (<any>kv[1])["actual"],
                                                                                             "expected" : (<any>kv[1])["expected"]
                                                                                         }));
@@ -226,7 +226,7 @@ export class DockerManager {
                     } else {
                         console.log(`Couldn't find: ${result_file} on disk.`);
                     }
-                    
+
                     //console.log('In testperformanceHandler');
                     //const perfDataPath: string = path.join(this._context.extensionPath, 'src', 'test', 'data', 'onnxruntime_profile__2019-06-28_04-56-43.json');
                     const perfDataPath: string = path.join(os.tmpdir(), "profile.json");
@@ -269,10 +269,11 @@ export class DockerManager {
          //   let containerModelPath = `C:\\${path.basename(this._workspace.uri.fsPath)}\\${model.replace(temp, "")}`;
            // let containerDatasetPath = `C:\\${path.basename(this._workspace.uri.fsPath)}\\${dataset.replace(temp, "")}`;
             //TODO need to handle windows to linux path conversion for model and dataset
+
             model = '/Vscode/resnet50_v15.pb';
             dataset = '/Vscode/ILSVRC2012_img_val';
-    
-            let exec = cp.spawn('docker', ['exec', '-w', `${mlperfLocation}`, '08d907ac8adf', 'python3', `${mlperfDriver}`,
+
+            let exec = cp.spawn('docker', ['exec', '-w', `${mlperfLocation}`, 'df04531b1269', 'python3', `${mlperfDriver}`,
                                 '--profile', `${profile}`,'--backend',`${backend}` ,'--model', `${model}`, '--dataset-path', `${dataset}`,
                                 '--output', `/Vscode/${result}`, '--data-format', `${dataFormat}`, '--accuracy',
                                 '--count', `${count}`]);
@@ -295,6 +296,7 @@ export class DockerManager {
                     vscode.window.showInformationMessage("Validation done!");
                     console.log("Validation done!");
                     let result_file = path.join(os.tmpdir(), "result.json");
+
                     if (currentPanel !== undefined) {
                         currentPanel.webview.postMessage({ command: 'result', payload: "DONE" });
                     }
@@ -306,7 +308,7 @@ export class DockerManager {
                                 let results = JSON.parse(data.toString());
                                 try {
                                     // Be mindful that the new object created in the lambda *has* to be enclosed in brackets
-                                    let forGrid : any = Object.entries(results).map(kv => ({ "input" : kv[0], 
+                                    let forGrid : any = Object.entries(results).map(kv => ({ "input" : kv[0],
                                                                                             "actual" : (<any>kv[1])["actual"],
                                                                                             "expected" : (<any>kv[1])["expected"]
                                                                                         }));
@@ -322,7 +324,7 @@ export class DockerManager {
                     } else {
                         console.log(`Couldn't find: ${result_file} on disk.`);
                     }
-                    
+
                     //console.log('In testperformanceHandler');
                     //const perfDataPath: string = path.join(this._context.extensionPath, 'src', 'test', 'data', 'onnxruntime_profile__2019-06-28_04-56-43.json');
                     const perfDataPath: string = path.join(os.tmpdir(), "profile.json");

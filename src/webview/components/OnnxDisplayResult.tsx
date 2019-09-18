@@ -22,7 +22,7 @@ const OnnxDisplayResult: React.FunctionComponent = () => {
     var result_instance = new Result().deserialize(myData);
 
     return (
-        <div>
+
             <Stack verticalFill gap='15'>
                 <Stack.Item>
                     <Header name={"ONNX Validation Results"} />
@@ -98,7 +98,7 @@ const OnnxDisplayResult: React.FunctionComponent = () => {
                 </Stack.Item>
 
             </Stack>
-        </div>
+
     );
 }
 
