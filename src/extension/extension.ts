@@ -12,7 +12,7 @@ export function activate(context: vscode.ExtensionContext) {
     let currentPanel: vscode.WebviewPanel | undefined = undefined;
 
 
-    let dockerManager: DockerManager = new DockerManager(context.extensionPath, context);  // constructor gets all the images in the host. This needs to get the 
+    let dockerManager: DockerManager = new DockerManager(context.extensionPath, context);  // constructor gets all the images in the host. This needs to get the
     // images from dockerhub if the images that we need arent there in the host.
     // The on.exit is when we have all the images. So that needs to ha
 
@@ -193,7 +193,7 @@ export function activate(context: vscode.ExtensionContext) {
                                         dockerManager.dockerRunMLPerfValidation(pathToModel, result, backend, profile, dataFormat, count, pathToDataset, currentPanel);
                                         vscode.window.showInformationMessage("Should be showing the results of validation");
                                         if (currentPanel) {
-                                            currentPanel.webview.postMessage({ command: "result", payload: "Verification complete" });
+                                            currentPanel.webview.postMessage({ command: "result", payload: "IN_PROGRESS" });
                                         }
                                     }
                                     else {
@@ -223,7 +223,7 @@ export function activate(context: vscode.ExtensionContext) {
                                         dockerManager.dockerRunMLPerfValidation(pathToModel, result, backend, profile, dataFormat, count, pathToDataset, currentPanel);
                                         vscode.window.showInformationMessage("Should be showing the results of validation");
                                         if (currentPanel) {
-                                            currentPanel.webview.postMessage({ command: "result", payload: "Verification complete" });
+                                            currentPanel.webview.postMessage({ command: "result", payload: "IN_PROGRESS" });
                                         }
                                     }
                                     else {
@@ -242,8 +242,6 @@ export function activate(context: vscode.ExtensionContext) {
                             }
 
                         }
-
-
 
                         break;
                     }
