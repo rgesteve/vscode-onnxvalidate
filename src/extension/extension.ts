@@ -13,8 +13,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
     let currentPanel: vscode.WebviewPanel | undefined = undefined;
 
-    let dockerManager: DockerManager = new DockerManager(context.extensionPath, context);  // constructor gets all the images in the host. This needs to get the 
-    
+    let dockerManager: DockerManager = new DockerManager(context.extensionPath, context);  // constructor gets all the images in the host. This needs to get the
+
     let initialize = vscode.commands.registerCommand('extension.initializeOnnxEcosystem', async () => {
         extensionStatusBar.text = "Extension initialized!" ;
         extensionStatusBar.show();
@@ -40,7 +40,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                 vscode.window.showInformationMessage(`Conversion failed. ${reason}`);
             });
         });
-     
+
     let display = vscode.commands.registerCommand('extension.Display', (modeluri: vscode.Uri) => {
         const pathToChrome: string = join("c:", "Program Files (x86)", "Google", "Chrome", "Application", "chrome.exe");
         const vizModelPath: string = join(context.extensionPath, 'src', 'test', 'data', 'model.svg');
@@ -65,7 +65,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
         if (currentPanel) {
             currentPanel.reveal(vscode.ViewColumn.Two);
-        } 
+        }
         else {
             currentPanel = vscode.window.createWebviewPanel(
                 "onnxvalidate",
@@ -172,7 +172,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                     let results = JSON.parse(data.toString());
                     try {
                         // Be mindful that the new object created in the lambda *has* to be enclosed in brackets
-                        let forGrid : any = Object.entries(results).map(kv => ({ "input" : kv[0], 
+                        let forGrid : any = Object.entries(results).map(kv => ({ "input" : kv[0],
                                                                                 "actual" : (<any>kv[1])["actual"],
                                                                                 "expected" : (<any>kv[1])["expected"]
                                                                             }));
@@ -203,7 +203,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                     let perfData = JSON.parse(data.toString());
                     try {
                         let forChart : any = Array.from(perfData).filter(rec => { return ((<any>rec)["cat"] === "Node"); })
-                                                                 .map(rec => ({ "name" : `${(<any>rec)["name"]/(<any>rec)["args"]["op_name"]}`, 
+                                                                 .map(rec => ({ "name" : `${(<any>rec)["name"]/(<any>rec)["args"]["op_name"]}`,
                                                                                 "dur" : (<any>rec)["dur"]
                                                                             }));
                         console.log('Should be sending perfdata');

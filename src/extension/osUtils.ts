@@ -7,20 +7,20 @@ export let g_mountOutputLocation: string = "";
 export let g_hostOutputLocation: string = "";
 export let g_containerType: string = "";
 
-export async function setMountLocations(userMount: string, extMount: string, containerType: string) : Promise<void> { 
+export async function setMountLocations(userMount: string, extMount: string, containerType: string) : Promise<void> {
     console.log(`1 Mount locations: ${g_mountLocation}, ${g_mountOutputLocation} , ${g_containerType}`, `${containerType}`);
     g_containerType = containerType;
 
     if ((isWindows() && containerType === 'linux') || !isWindows()) {
-        g_hostLocation = userMount; 
+        g_hostLocation = userMount;
         g_mountLocation = `/${path.basename(userMount)}`;
-        g_hostOutputLocation = extMount; 
+        g_hostOutputLocation = extMount;
         g_mountOutputLocation = `/${path.basename(extMount)}`;
     }
     else {
-        g_hostLocation = userMount; 
+        g_hostLocation = userMount;
         g_mountLocation = `C:\\${path.basename(userMount)}`;
-        g_hostOutputLocation = extMount; 
+        g_hostOutputLocation = extMount;
         g_mountOutputLocation = `/${path.basename(extMount)}`;
     }
     console.log(`2 Mount locations: ${g_mountLocation}, ${g_mountOutputLocation} , ${g_containerType}`, `${containerType}`);
@@ -61,4 +61,4 @@ export function getLocationOnContainer (pathOnHost: string | undefined): string 
     }
 
     return retString;
-}  
+}

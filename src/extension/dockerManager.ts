@@ -57,19 +57,19 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
     async executeCommand(command: string, args: string[], options: cp.SpawnOptions = { shell: true }): Promise<string> {
         return new Promise((resolve: (res: string) => void, reject: (error : string | Buffer) => void): void => {
             let result: string = "";
-    
+
             const childProc: cp.ChildProcess = cp.spawn(command, args, { ...options});
-    
+
             childProc.stdout.on("data", (data: string | Buffer) => {
                 data = data.toString();
                 result = result.concat(data);
                 console.log(`childProc.stdout.on ${result}`);
             });
-    
+
             //childProc.stderr.on("data", (data: string | Buffer) => {reject(`Exited with error ${data}`)});
-    
+
             childProc.on("error", (data: string | Buffer) => {reject(`Exited with error ${data}`)});
-    
+
             childProc.on("close", (code: number) => {
                 if (code !== 0) {
                     reject(`Exited with error ${code}`);
@@ -83,7 +83,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
         let result: string = "";
         await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification }, async (p: vscode.Progress<{}>) => {
             return new Promise(async (resolve: (res: string) => void, reject: (e: Error) => void): Promise<void> => {
-                p.report({ message }); 
+                p.report({ message });
                 try {
                     result = await this.executeCommand(command, args, options);
                     p.report({ increment: 100, doneMessage }); // havent figured out how to show the final message yet :(
@@ -120,9 +120,9 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
             console.log(`Container id: ${this._containerIds[0]}`);
         }
         return runningContainer;
-       
+
     }
-            
+
     public async convert(fileuri: vscode.Uri, ...args: any[]): Promise<string|undefined> {
         if (!this._workspace){
             console.log(`No workspace defined`);
@@ -142,13 +142,13 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
                 return undefined;
             }
             if (model) {
-                let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(path.dirname(fileuri.fsPath))}`, `${this._containerIds[0]}`, 'python3', '-m', 'tf2onnx.convert', 
+                let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(path.dirname(fileuri.fsPath))}`, `${this._containerIds[0]}`, 'python3', '-m', 'tf2onnx.convert',
                                       '--fold_const', '--opset', '8' ,'--inputs',`${supported_models[model]["inputs"]}`, '--outputs', `${supported_models[model]["outputs"]}`,
-                                      '--inputs-as-nchw', `${supported_models[model]["inputs"]}` ,'--input' , `${path.basename(fileuri.fsPath)}` , '--output', 
+                                      '--inputs-as-nchw', `${supported_models[model]["inputs"]}` ,'--input' , `${path.basename(fileuri.fsPath)}` , '--output',
                                       `${path.basename(fileuri.fsPath).replace(".pb", ".onnx")}`];
-                return await this.executeCommandWithProgress("Finished converting to ONNX!", "Converting to ONNX... ", "docker", args);  
+                return await this.executeCommandWithProgress("Finished converting to ONNX!", "Converting to ONNX... ", "docker", args);
                 // check this out
-                
+
             }
 
         }
@@ -181,12 +181,12 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
             let args: string[] = ['exec', '-w', `${utils.getMLPerfLocation()}`, `${this._containerIds[0]}`, 'python3', `${utils.getMLPerfDriver()}`,];
            for (var [key, value] of mlperfParams) {
                 if (key === 'dataset-path' || key === 'model') {
-                    args.push(`--${key}`);   
+                    args.push(`--${key}`);
                     args.push(utils.getLocationOnContainer(value));
                     console.log (`Location on container: ${utils.getLocationOnContainer(value)}`)
                 }
                 else {
-                    args.push(`--${key}`);   
+                    args.push(`--${key}`);
                     args.push(value);
                 }
 
@@ -200,104 +200,14 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
            else {
                 args.push(`${utils.g_mountOutputLocation}\\MLPerf`);
            }
-           
+
            console.log(`MLPerf args ${args}`);
-           return await this.executeCommandWithProgress("Finished Validation", "Validating model with MLPerf... ", "docker", args);  
+           return await this.executeCommandWithProgress("Finished Validation", "Validating model with MLPerf... ", "docker", args);
         }
 
-        
+
     }
-    dockerRunMLPerfValidation(model: string, result: string, profile: string, dataFormat: string, count: number, dataset:string, currentPanel: vscode.WebviewPanel | undefined) {
-        if (this._workspace) {
-            let temp = this._workspace.uri.fsPath + "\\";
-            let containerModelPath = `C:\\${path.basename(this._workspace.uri.fsPath)}\\${model.replace(temp, "")}`;
-            let containerDatasetPath = `C:\\${path.basename(this._workspace.uri.fsPath)}\\${dataset.replace(temp, "")}`;
-
-            let exec = cp.spawn('docker', ['exec', '-w', `${utils.getMLPerfLocation()}`, 'b3586d48d085', 'python', `${utils.getMLPerfDriver()}`,
-                                '--profile', `${profile}`, '--model', `${model}`, '--dataset-path', `${dataset}`,
-                                '--output', 'C:\\mount\\'+ result, '--data-format', `${dataFormat}`, '--accuracy',
-                                '--count', `${count}`]);
-            console.log(containerModelPath);
-            console.log(containerDatasetPath);
-            console.log(model);
-            exec.on('error', (err) => {
-                console.log('Running validation failed.');
-            });
-            exec.stdout.on('data', (data: string) => {
-                console.log("Running validation...");
-
-            });
-            exec.on('exit', (err: any) => {
-                if (err != 0) {
-                    vscode.window.showInformationMessage("Running validation failed");
-                    console.log(`Exit with error code:  ${err}`);
-                }
-                else {
-                    vscode.window.showInformationMessage("Validation done!");
-                    console.log("Validation done!");
-                    let result_file = path.join(os.tmpdir(), "result.json");
-
-                    if (fs.existsSync(result_file)) {
-                        fs.readFile(result_file, (err, data) => {
-                            if (err || data === undefined) {
-                                console.log('Error reading data file.');
-                            } else {
-                                let results = JSON.parse(data.toString());
-                                try {
-                                    // Be mindful that the new object created in the lambda *has* to be enclosed in brackets
-                                    let forGrid : any = Object.entries(results).map(kv => ({ "input" : kv[0], 
-                                                                                            "actual" : (<any>kv[1])["actual"],
-                                                                                            "expected" : (<any>kv[1])["expected"]
-                                                                                        }));
-                                    console.log("Results parsing worked");
-                                    if (currentPanel !== undefined) {
-                                        currentPanel.webview.postMessage({ command: 'result', payload: forGrid });
-                                    }
-                                } catch {
-                                    console.log("Likely pulling from array didn't work.");
-                                }
-                            }
-                        });
-                    } else {
-                        console.log(`Couldn't find: ${result_file} on disk.`);
-                    }
-                    
-                    //console.log('In testperformanceHandler');
-                    //const perfDataPath: string = path.join(this._context.extensionPath, 'src', 'test', 'data', 'onnxruntime_profile__2019-06-28_04-56-43.json');
-                    const perfDataPath: string = path.join(os.tmpdir(), "profile.json");
-                    if (fs.existsSync(perfDataPath)) {
-                        fs.readFile(perfDataPath, (err, data) => {
-                            if (err || data === undefined) {
-                                console.log('Error reading data file.');
-                            } else {
-                                let perfData = JSON.parse(data.toString());
-                                try {
-                                    let forChart: any = Array.from(perfData).filter(rec => { return ((<any>rec)["cat"] === "Node"); })
-                                        .map(rec => ({
-                                            "name": `${(<any>rec)["name"] / (<any>rec)["args"]["op_name"]}`,
-                                            "dur": (<any>rec)["dur"]
-                                        }));
-                                    console.log('Should be sending perfdata');
-                                    if (currentPanel !== undefined) {
-                                        currentPanel.webview.postMessage({ command: 'perfData', payload: forChart });
-                                    }
-                                    vscode.window.showInformationMessage("Apparently parsed the data!");
-                                } catch {
-                                    console.log("Likely couldn't pull the result.");
-                                }
-                            }
-                        });
-                    } else {
-                        console.log(`Couldn't find: ${perfDataPath} on disk.`);
-                    }
-
-
-                }
-            });
-        }
-    }
-
-
+    // This function can be removed.
     dockerRunMLPerfValidation(model: string, result: string, backend: string ,profile: string, dataFormat: string, count: number, dataset:string, currentPanel: vscode.WebviewPanel | undefined) {
         if (this._workspace) {
             let temp = this._workspace.uri.fsPath + "\\";
@@ -308,7 +218,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
             model = '/Vscode/resnet50_v15.pb';
             dataset = '/Vscode/ILSVRC2012_img_val';
 
-            let exec = cp.spawn('docker', ['exec', '-w', `${mlperfLocation}`, 'df04531b1269', 'python3', `${mlperfDriver}`,
+            let exec = cp.spawn('docker', ['exec', '-w', `${utils.getMLPerfLocation()}`, `this._containerIds[0]`, 'python3', `${utils.getMLPerfDriver()}`,
                                 '--profile', `${profile}`,'--backend',`${backend}` ,'--model', `${model}`, '--dataset-path', `${dataset}`,
                                 '--output', `/Vscode/${result}`, '--data-format', `${dataFormat}`, '--accuracy',
                                 '--count', `${count}`]);
