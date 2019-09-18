@@ -270,11 +270,9 @@ export class DockerManager {
            // let containerDatasetPath = `C:\\${path.basename(this._workspace.uri.fsPath)}\\${dataset.replace(temp, "")}`;
             //TODO need to handle windows to linux path conversion for model and dataset
 
-            console.log(`Poornima3 ${temp}`)
             model = '/Vscode/resnet50_v15.pb';
             dataset = '/Vscode/ILSVRC2012_img_val';
 
-            console.log(`Poornima trfgd: ${this._usermountlocation}`)
             let exec = cp.spawn('docker', ['exec', '-w', `${mlperfLocation}`, 'df04531b1269', 'python3', `${mlperfDriver}`,
                                 '--profile', `${profile}`,'--backend',`${backend}` ,'--model', `${model}`, '--dataset-path', `${dataset}`,
                                 '--output', `/Vscode/${result}`, '--data-format', `${dataFormat}`, '--accuracy',
@@ -298,7 +296,7 @@ export class DockerManager {
                     vscode.window.showInformationMessage("Validation done!");
                     console.log("Validation done!");
                     let result_file = path.join(os.tmpdir(), "result.json");
-                    console.log(`Poornima: result_file ${result_file}`);
+
                     if (currentPanel !== undefined) {
                         currentPanel.webview.postMessage({ command: 'result', payload: "DONE" });
                     }

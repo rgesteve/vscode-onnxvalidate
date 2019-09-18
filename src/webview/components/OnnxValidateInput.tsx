@@ -201,18 +201,15 @@ const OnnxValidateInput: React.FunctionComponent = () => {
                     </Stack.Item>
 
                     <Stack.Item>
-                        <Label>ONNX Validation in Progress</Label>
-                        <Spinner label="Please wait..." />
+                        <Spinner label="ONNX Validation in Progress" />
                     </Stack.Item>
                 </Stack>
             );
 
         default:
             return (
-
-                <div>
-                    {/* TODO: Add different modes accurancy modes. perf mode etc
-                                  Add different streams: single stream, multi stream etc */}
+                    // TODO: Add different modes accurancy modes. perf mode etc
+                    //               Add different streams: single stream, multi stream etc
                     <Stack tokens={tokens.numericalSpacing}>
                         <Stack>
                             <Stack.Item>
@@ -273,7 +270,7 @@ const OnnxValidateInput: React.FunctionComponent = () => {
 
                     </Stack>
 
-                </div>
+
             );
     }
 
