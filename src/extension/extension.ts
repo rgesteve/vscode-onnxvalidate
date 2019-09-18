@@ -12,6 +12,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
     let currentPanel: vscode.WebviewPanel | undefined = undefined;
 
+
     let dockerManager: DockerManager = new DockerManager(context.extensionPath, context);  // constructor gets all the images in the host. This needs to get the 
     
     let startDocker = vscode.commands.registerCommand('extension.startOnnxEcosystem', async () => {
@@ -142,7 +143,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                                 });
                             }
                             if (currentPanel) {
-                                currentPanel.webview.postMessage({ command: "dataSet", payload: mlperfParam.get("dataset-path") });
+                                currentPanel.webview.postMessage({ command: "dataSet", payload: pathToDataset });
                             }
                             vscode.window.showInformationMessage(`Seems like I should be opening ${folderUris}!`);
                         });
