@@ -138,8 +138,14 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                         break;
                     }
                     case "startVerification": {
+                        if (currentPanel !== undefined) {
+                            currentPanel.webview.postMessage({ command: 'result', payload: 'IN_PROGRESS' });
+                        }
                         await dockerManager.validation(mlperfParam).then(async () => {
                             vscode.window.showInformationMessage("Validation Done");
+                            if (currentPanel !== undefined) {
+                                currentPanel.webview.postMessage({ command: 'result', payload: 'DONE' });
+                            }
                         }, reason => {
                             vscode.window.showInformationMessage(`Validation failed. ${reason}`);
                         });
