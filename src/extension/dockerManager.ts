@@ -306,6 +306,6 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
     }
 
     public dispose(): void {
-
+        this.executeCommand("docker", ["stop", `${this._containerIds[0]}`]);
     }
 }
