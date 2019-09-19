@@ -215,7 +215,7 @@ const OnnxValidateInput: React.FunctionComponent = () => {
                     //               Add different streams: single stream, multi stream etc
                     <Stack tokens={tokens.numericalSpacing}>
                         <Stack>
-                            <Stack.Item>
+                            <Stack.Item >
                                 <Header name={"ONNX Validation Input Parameters"} />
                             </Stack.Item>
 
