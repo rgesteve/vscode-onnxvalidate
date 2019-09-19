@@ -189,9 +189,12 @@ const OnnxValidateInput: React.FunctionComponent = () => {
 
     };
 
-    switch (result) {
+    switch (result.split(' ')[0]) {
+        case 'FAILED':
+            return <div>Verification Failed</div>;
+
         case 'DONE':
-            return <OnnxDisplayResult />;
+            return <OnnxDisplayResult resultJSON = {result.replace("DONE", "")}/>;
 
         case 'IN_PROGRESS':
             return (

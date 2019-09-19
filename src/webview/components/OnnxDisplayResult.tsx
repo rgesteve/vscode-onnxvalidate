@@ -9,6 +9,10 @@ import { MLPERF_TERMS } from '../constants/Constants'
 import Header from './Header';
 import myData from '../../test/data/result.json'
 
+interface DisplayResult {
+    resultJSON: string,
+}
+
 function roundFloatValue(num: number) {
     return (Math.round(num * 100) / 100).toFixed(2);
 }
@@ -17,9 +21,9 @@ function getToolTipID(i: number) {
     return getId('tooltipHost' + i)
 }
 
-const OnnxDisplayResult: React.FunctionComponent = () => {
+const OnnxDisplayResult: React.FunctionComponent<DisplayResult> = (props) => {
 
-    var result_instance = new Result().deserialize(myData);
+    const [result_instance, setResultInstance] = React.useState(new Result().deserialize(JSON.parse(props.resultJSON)));
 
     return (
 
