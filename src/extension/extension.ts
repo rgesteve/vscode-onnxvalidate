@@ -3,6 +3,8 @@ import ContentProvider from './ContentProvider';
 import { DockerManager } from './dockerManager';
 import { basename, join } from 'path';
 import * as fs from 'fs';
+import * as path from 'path';
+import * as os from 'os';
 import { spawn } from 'child_process';
 import { rejects } from 'assert';
 
@@ -143,11 +145,24 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                         }
                         await dockerManager.validation(mlperfParam).then(async () => {
                             vscode.window.showInformationMessage("Validation Done");
-                            if (currentPanel !== undefined) {
-                                currentPanel.webview.postMessage({ command: 'result', payload: 'DONE' });
+                            //Read JSON file from stored location here
+
+                            var result_file: string = path.join(os.tmpdir(), "MLPerf", "results.json");
+                            console.log(`I got result path: ${result_file}`);
+
+                            if(fs.existsSync(result_file)) {
+
+                                let results = JSON.parse(fs.readFileSync(result_file).toString());
+                                if (currentPanel !== undefined) {
+                                    currentPanel.webview.postMessage({ command: 'result', payload: `DONE ${JSON.stringify(results)}` });
+                                }
+
                             }
                         }, reason => {
                             vscode.window.showInformationMessage(`Validation failed. ${reason}`);
+                            if (currentPanel !== undefined) {
+                                currentPanel.webview.postMessage({ command: 'result', payload: `FAILED` });
+                            }
                         });
                         break;
                     }
@@ -237,8 +252,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     context.subscriptions.push(dockerManager);
     context.subscriptions.push(validate);
     context.subscriptions.push(testResults);
-
-
 
     context.subscriptions.push(vscode.commands.registerCommand('firstextension.addCountToPanel', () => {
         if (currentPanel !== undefined) {
