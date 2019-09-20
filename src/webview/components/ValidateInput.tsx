@@ -9,7 +9,7 @@ declare var acquireVsCodeApi: any;
 const vscode = acquireVsCodeApi();
 
 
-type ValidInputState = {
+interface IValidInputState {
     count: number,
     modelPath: string,
     dataSet: string,
@@ -20,9 +20,15 @@ type ValidInputState = {
     selectedDataFormat: string
 }
 
-class ValidateInput extends Component<{}, ValidInputState> {
+interface IValidInputProps {
 
-    constructor(props: any) {
+}
+
+class ValidateInput extends Component<IValidInputProps, IValidInputState> {
+
+    state: IValidInputState;
+
+    constructor(props: IValidInputProps) {
         super(props);
         this.state = {
             count: 0,

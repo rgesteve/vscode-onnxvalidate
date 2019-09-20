@@ -8,13 +8,19 @@ import { Result } from './Result'
 import { MLPERF_TERMS } from '../constants/Constants'
 import Header from './Header';
 
-type VResultState = {
+interface IVResultState {
     result_instance: Result;
 }
 
-class ValidationResult extends Component<{}, VResultState> {
+interface IVResultProps {
+    resultJSON: string;
+}
 
-    constructor(props: any) {
+class ValidationResult extends Component<IVResultProps, IVResultState> {
+
+    state: IVResultState;
+
+    constructor(props: IVResultProps) {
         super(props);
         this.state = {
             result_instance: new Result().deserialize(JSON.parse(props.resultJSON))
