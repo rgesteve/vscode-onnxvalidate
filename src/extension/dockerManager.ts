@@ -27,7 +27,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
 
         //TODO: Make sure that the host system has docker and this image.
         // if not, get it from docker hub? that part needs to be decided.
-        console.log("Coming here");
+
         const workspaceFolders: vscode.WorkspaceFolder[] = vscode.workspace.workspaceFolders || [];
         if (workspaceFolders.length != 0 ) {
             // Check if docker is installed and has the image that we require
@@ -96,17 +96,34 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
         return result;
     }
 
-    public async getImageId(): Promise<void> {
-        let result: string;
+    public async getImageId(): Promise<string|undefined> {
+        let imageID: string | undefined;
         if (utils.g_containerType === "linux") {
-            result = await this.executeCommand("docker", ['images', `${docker_images["linux-mlperf"]["name"]}`, '--format', '"{{.Repository}}"']);
-            console.log(`executeCommand Result: ${result}`);
+            imageID = await this.executeCommand("docker", ['images', "chanchala7/my_ubuntu", '--format', '"{{.Repository}}"']);
+            if (!imageID || 0 === imageID.length)
+            { // image doesnt exist
+                await this.executeCommand("docker", ["pull", "chanchala7/my_ubuntu:firsttry"]).then(async()=> {
+                        imageID =  await this.executeCommand("docker", ['images', "chanchala7/my_ubuntu", '--format', '"{{.Repository}}"']);
+                        console.log(`imageID: ${imageID}`);
+                    }, reason => {
+                        console.log("Docker pull failed");
+                    });
+            }   
         }
-        else {
-            result = await this.executeCommand("docker", ['images', `${docker_images["windows-mlperf"]["name"]}`, '--format', '"{{.Repository}}"']);
+        else if (utils.g_containerType === "windows") {
+            imageID = await this.executeCommand("docker", ['images', `${docker_images["windows-mlperf"]["name"]}`, '--format', '"{{.Repository}}"']);
+            if (!imageID || 0 === imageID.length)
+            { // image doesnt exist
+                await this.executeCommand("docker", ["pull", `${docker_images["windows-mlperf"]["name"]}`]).then(async()=> {
+                    imageID =  await this.executeCommand("docker", ['images', "chanchala7/my_ubuntu", '--format', '"{{.Repository}}"']);
+                    console.log(`imageID: ${imageID}`);
+                    }, reason => {
+                        console.log("Docker pull failed");
+                    });
+            }   
         }
-        this._imageId = result.split(':')[0];
-        console.log(`Result: ${this._imageId}`);
+        console.log(`Returning: ${imageID}`);
+        return imageID;
     }
 
     public async runImage(): Promise<string|undefined> {

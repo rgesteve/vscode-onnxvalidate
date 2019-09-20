@@ -23,15 +23,19 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     });
 
     let startDocker = vscode.commands.registerCommand('extension.startOnnxEcosystem', async () => {
-        await dockerManager.getImageId().then(async () => {
+        let imageID = await dockerManager.getImageId();
+        if (imageID) {
             let containerId = await dockerManager.runImage();
             if (containerId) {
                 vscode.window.showInformationMessage("Your development environment is ready");
             }
-        }, reason => {
-            vscode.window.showInformationMessage(`Starting your development environment failed with ${reason}`);
-        });
-
+            else{
+                vscode.window.showInformationMessage("Could not run your development environment");
+            }
+        }
+        else {
+            vscode.window.showInformationMessage(`Starting your development environment failed`);
+        }
     });
 
     let convert = vscode.commands.registerCommand('extension.Convert', async (fileuri: any) => {
