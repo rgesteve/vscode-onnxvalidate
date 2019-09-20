@@ -260,8 +260,6 @@ class ValidateInput extends Component<{}, ValidInputState> {
                             </Stack>
 
                         </Stack>
-
-
                 );
         }
     }
