@@ -1,16 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import OnnxValidateInput from './components/OnnxValidateInput';
 import './css/index.css';
-import Tabs from './components/Tabs'
+import App from './components/App'
 
-const App: React.FunctionComponent = () => {
+const Index: React.FunctionComponent = () => {
     return (
         <div className="container">
-              {/* <OnnxValidateInput /> */}
-               <Tabs /> 
+               <App />
         </div>
     );
 };
 
-ReactDOM.render(<App />, document.getElementById('root'));
+ReactDOM.render(<Index />, document.getElementById('root'));

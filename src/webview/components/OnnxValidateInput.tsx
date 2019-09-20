@@ -1,9 +1,8 @@
 import React from 'react';
 import Header from './Header';
 import OnnxDisplayResult from './OnnxDisplayResult';
-import { Dropdown, DropdownMenuItemType, IDropdownStyles, IDropdownOption } from 'office-ui-fabric-react/lib/Dropdown';
+import { Dropdown, IDropdownStyles } from 'office-ui-fabric-react/lib/Dropdown';
 import { Stack, TextField, PrimaryButton, Label, Spinner} from "office-ui-fabric-react";
-import Tabs from "./Tabs";
 //initializeIcons();
 declare var acquireVsCodeApi: any;
 const vscode = acquireVsCodeApi();
@@ -24,29 +23,6 @@ const OnnxValidateInput: React.FunctionComponent = () => {
         //dropdown: { width: 300}
         caretDown: { width: 300 }
     };
-
-    //TODO: Add other models as needed (takes care of resnet 50 and mobilenet)
-    const Profileoptions: IDropdownOption[] = [
-        { key: 'Resnet50Header', text: 'Resnet50', itemType: DropdownMenuItemType.Header },
-        { key: 'resnet50-tf', text: 'resnet50-tf' },
-        { key: 'resnet50-onnxruntime', text: 'resnet50-onnxruntime' },
-        { key: 'divider_2', text: '-', itemType: DropdownMenuItemType.Divider },
-        { key: 'MobilenetHeader', text: 'MobileNet', itemType: DropdownMenuItemType.Header },
-        { key: 'mobilenet-tf', text: 'mobilenet-tf' },
-        { key: 'mobilenet-onnxruntime', text: 'mobilenet-onnxruntime' }
-    ];
-
-    //TODO: Add other backends as needed
-    const Backendoptions: IDropdownOption[] = [
-        { key: 'tensorflow', text: 'tensorflow' },
-        { key: 'onnxruntime', text: 'onnxruntime' },
-    ];
-
-    //TODO: Add other formats as needed
-    const DataFormatoptions: IDropdownOption[] = [
-        { key: 'NHWC', text: 'NHWC' },
-        { key: 'NCHW', text: 'NCHW' },
-    ];
 
     const [count, setCount] = React.useState(0);
     const [modelPath, setModelPath] = React.useState("");
