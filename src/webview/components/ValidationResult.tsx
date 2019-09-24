@@ -24,7 +24,7 @@ class ValidationResult extends Component<IVResultProps, {}> {
         return (
             <Stack verticalFill gap='15'>
                 <Stack.Item>
-                    <Header name={"ONNX Validation Results"} />
+                    <Header name={"MLPERF Validation Results"} />
                 </Stack.Item>
 
                 <Stack.Item>
