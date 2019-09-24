@@ -2,13 +2,13 @@ import React, {Component} from 'react';
 import ValidateInput from './ValidateInput';
 import ValidationResult from './ValidationResult'
 import Result from './Result';
-import { Dropdown, IDropdownStyles, IDropdownOption } from 'office-ui-fabric-react/lib/Dropdown';
 
 declare var acquireVsCodeApi: any;
 const vscode = acquireVsCodeApi();
 
 interface IValidateState {
     result: Result,
+    displayResult: Boolean,
     count: number,
     modelPath: string,
     dataSet: string,
@@ -24,7 +24,8 @@ class Validate extends Component<{}, IValidateState>{
     constructor(props:any){
         super(props)
         this.state = {
-            result: new Result(),
+            result:new Result(),
+            displayResult: false,
             count: 0,
             modelPath: "",
             dataSet: "",
@@ -119,6 +120,7 @@ class Validate extends Component<{}, IValidateState>{
                     if( temp.startsWith("DONE") ){
                         let result_string = ev.data.payload.replace("DONE", "");
                         this.setState(state => ({ result: new Result().deserialize(JSON.parse(result_string)) }));
+                        this.setState( state => ({ displayResult: true }));
                     }
                 } catch {
                     console.log("Couldn't display keys to the element");
@@ -152,7 +154,7 @@ class Validate extends Component<{}, IValidateState>{
         window.console.log(`Curious to see where ${this.state.count} value is.`);
         vscode.postMessage({
             command: 'startVerification',
-            text: 'check out from host'
+            text: 'check out from host',
         });
         window.console.log(`Sent message to host.`);
     };
@@ -182,31 +184,36 @@ class Validate extends Component<{}, IValidateState>{
             text: 'Cancel'
         });
         window.console.log(`Sent message to host.`);
+        //TODO: Add code to clear form fields
     };
 
     render(){
-        return (
-            <div>
-                <ValidateInput
-                    count={this.state.count}
-                    modelPath={this.state.modelPath}
-                    dataSet={this.state.dataSet}
-                    selectedItem={this.state.selectedItem}
-                    numberOfImages={this.state.numberOfImages}
-                    selectedBackend={this.state.selectedBackend}
-                    selectedDataFormat={this.state.selectedDataFormat}
-                    onItemChangedHandler={this.onItemChangedHandler}
-                    onBackendSelectedHandler={this.onBackendSelectedHandler}
-                    onDataFormatSelectedHandler={this.onDataFormatSelectedHandler}
-                    onImageCountChangeHandler={this.onImageCountChangeHandler}
-                    clickHandler={this.clickHandler}
-                    pathToModelHandler={this.pathToModelHandler}
-                    pathToDatasetHandler={this.pathToDatasetHandler}
-                    cancelHandler={this.cancelHandler}
-                />
-                {/* <ValidationResult resultJSON={this.state.result}/>; */}
-            </div>
-        );
+
+        if(!this.state.displayResult){
+            return (
+                <div>
+                    <ValidateInput
+                        count={this.state.count}
+                        modelPath={this.state.modelPath}
+                        dataSet={this.state.dataSet}
+                        selectedItem={this.state.selectedItem}
+                        numberOfImages={this.state.numberOfImages}
+                        selectedBackend={this.state.selectedBackend}
+                        selectedDataFormat={this.state.selectedDataFormat}
+                        onItemChangedHandler={this.onItemChangedHandler}
+                        onBackendSelectedHandler={this.onBackendSelectedHandler}
+                        onDataFormatSelectedHandler={this.onDataFormatSelectedHandler}
+                        onImageCountChangeHandler={this.onImageCountChangeHandler}
+                        clickHandler={this.clickHandler}
+                        pathToModelHandler={this.pathToModelHandler}
+                        pathToDatasetHandler={this.pathToDatasetHandler}
+                        cancelHandler={this.cancelHandler}
+                    />
+                </div>
+            );
+        }
+        else
+            return <ValidationResult resultJSON={this.state.result}/>;
     }
 }
 
