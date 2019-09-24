@@ -99,7 +99,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
     public async getImageId(): Promise<string|undefined> {
         let imageID: string | undefined;
         if (utils.g_containerType === "linux") {
-            imageID = await this.executeCommand("docker", ['images', "chanchala7/my_ubuntu", '--format', '"{{.Repository}}"']);
+            imageID = await this.executeCommand("docker", ['images', "chanchala7/mlperf_linux:latest", '--format', '"{{.Repository}}"']);
             if (!imageID || 0 === imageID.length)
             { // image doesnt exist
                 await this.executeCommand("docker", ["pull", "chanchala7/my_ubuntu:firsttry"]).then(async()=> {
@@ -122,6 +122,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
                     });
             }   
         }
+        this._imageId = imageID;
         console.log(`Returning: ${imageID}`);
         return imageID;
     }
