@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import ValidateInput from './ValidateInput';
 import ValidationResult from './ValidationResult'
 import { Result, ValidationInputParams } from './ValidationHelper';
@@ -15,18 +15,17 @@ class Validate extends Component<{}, IValidateState>{
 
     state: IValidateState;
 
-    constructor(props:any){
+    constructor(props: any) {
         super(props)
         this.state = {
-            result:new Result(),
+            result: new Result(),
             displayResult: false,
             inputParams: new ValidationInputParams()
         }
         this.handleWindowListner = this.handleWindowListner.bind(this);
     }
 
-
-    componentDidMount(){
+    componentDidMount() {
         window.addEventListener('message', this.handleWindowListner);
     }
 
@@ -108,12 +107,11 @@ class Validate extends Component<{}, IValidateState>{
 
                 try {
                     console.log(`My payload after verification is ${ev.data.payload}`)
-                    let temp:string = ev.data.payload;
-                    console.log(`Poornima: ${temp}`)
-                    if( temp.startsWith("DONE") ){
+                    let temp: string = ev.data.payload;
+                    if (temp.startsWith("DONE")) {
                         let result_string = ev.data.payload.replace("DONE", "");
                         this.setState(state => ({ result: new Result().deserialize(JSON.parse(result_string)) }));
-                        this.setState( state => ({ displayResult: true }));
+                        this.setState(state => ({ displayResult: true }));
                     }
                 } catch {
                     console.log("Couldn't display keys to the element");
@@ -123,24 +121,24 @@ class Validate extends Component<{}, IValidateState>{
         }
     }
 
-    formHandler = (e:any, task: String): void => {
+    formHandler = (event: any, task: String): void => {
         let myobj = this.state.inputParams;
-        switch(task){
+        switch (task) {
             case 'onItemChangedHandler':
-                    myobj.selectedItem = e.text;
-                    break;
+                myobj.selectedItem = event.text;
+                break;
 
             case 'onBackendSelectedHandler':
-                    myobj.selectedBackend = e.text;
-                    break;
+                myobj.selectedBackend = event.text;
+                break;
 
             case 'onDataFormatSelectedHandler':
-                    myobj.selectedDataFormat = e.text;
-                    break;
+                myobj.selectedDataFormat = event.text;
+                break;
 
             case "onImageCountChangeHandler":
-                    myobj.numberOfImages = e.target.value;
-                    break;
+                myobj.numberOfImages = event.target.value;
+                break;
         }
         this.setState({ inputParams: myobj });
     }
@@ -181,25 +179,20 @@ class Validate extends Component<{}, IValidateState>{
         //TODO: Add code to clear form fields
     };
 
-    render(){
-
-        if(!this.state.displayResult){
-            return (
-                <div>
-                    <ValidateInput
-                        inputProps={this.state.inputParams}
-                        formHandler={this.formHandler}
-                        clickHandler={this.clickHandler}
-                        pathToModelHandler={this.pathToModelHandler}
-                        pathToDatasetHandler={this.pathToDatasetHandler}
-                        cancelHandler={this.cancelHandler}
-                    />
-                </div>
-            );
-        }
-        else
-            return <ValidationResult resultJSON={this.state.result}/>;
+    render() {
+        return (
+            <div>
+                <ValidateInput
+                    inputProps={this.state.inputParams}
+                    formHandler={this.formHandler}
+                    clickHandler={this.clickHandler}
+                    pathToModelHandler={this.pathToModelHandler}
+                    pathToDatasetHandler={this.pathToDatasetHandler}
+                    cancelHandler={this.cancelHandler}
+                />
+                {this.state.displayResult == true ? <ValidationResult resultJSON={this.state.result} /> : null}
+            </div>
+        );
     }
 }
-
 export default Validate;

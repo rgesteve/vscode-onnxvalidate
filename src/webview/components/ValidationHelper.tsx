@@ -61,7 +61,6 @@ export class Result implements Serializable<Result>{
         this.version = input.version;
         return this;
     }
-
 }
 
 export class ValidationInputParams {

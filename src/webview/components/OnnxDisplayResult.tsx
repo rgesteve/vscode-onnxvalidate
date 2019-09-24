@@ -7,7 +7,6 @@ import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 import { Result } from './ValidationHelper'
 import { MLPERF_TERMS } from '../constants/Constants'
 import Header from './Header';
-import myData from '../../test/data/result.json'
 
 interface DisplayResult {
     resultJSON: string,

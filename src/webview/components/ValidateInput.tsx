@@ -30,12 +30,6 @@ class ValidateInput extends Component<IValidInputProps, {}> {
             //               Add different streams: single stream, multi stream etc
             <Stack tokens={tokens.numericalSpacing}>
 
-                <div>
-                    Selected Profile{selectedItem}
-                    Selected backend {selectedBackend}
-                    Data format{selectedDataFormat}
-                    Count{numberOfImages}
-                </div>
                 <Stack>
                     <Stack.Item>
                         <Header name={"ONNX Validation Input Parameters"} />
