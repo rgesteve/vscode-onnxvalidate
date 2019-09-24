@@ -4,31 +4,23 @@ import { TooltipHost } from 'office-ui-fabric-react/lib/Tooltip';
 import { getId } from 'office-ui-fabric-react/lib/Utilities';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
-import { Result } from './Result'
 import { MLPERF_TERMS } from '../constants/Constants'
 import Header from './Header';
-
-interface IVResultState {
-    result_instance: Result;
-}
+import Result from './Result';
 
 interface IVResultProps {
-    resultJSON: string;
+    resultJSON: Result;
 }
 
-class ValidationResult extends Component<IVResultProps, IVResultState> {
-
-    state: IVResultState;
+class ValidationResult extends Component<IVResultProps, {}> {
 
     constructor(props: IVResultProps) {
         super(props);
-        this.state = {
-            result_instance: new Result().deserialize(JSON.parse(props.resultJSON))
-        }
     }
 
     render() {
-        let result_instance = this.state.result_instance;
+        let result_instance = this.props.resultJSON;
+
         return (
             <Stack verticalFill gap='15'>
                 <Stack.Item>

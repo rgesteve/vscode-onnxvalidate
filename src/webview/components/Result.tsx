@@ -45,7 +45,7 @@ class TestScenarioSingleStream implements Serializable<TestScenarioSingleStream>
     }
 }
 
-export class Result implements Serializable<Result>{
+class Result implements Serializable<Result>{
 
     "TestScenario.SingleStream": TestScenarioSingleStream;
     "cmdline": string;
@@ -63,3 +63,5 @@ export class Result implements Serializable<Result>{
     }
 
 }
+
+export default Result;
