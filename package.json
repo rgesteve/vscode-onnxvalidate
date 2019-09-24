@@ -22,39 +22,39 @@
         "commands": [
             {
                 "command": "extension.initializeOnnxEcosystem",
-                "title": "ONNX: Initialize ONNX ecosystem"
+                "title": "DL Toolkit: Initialize ecosystem"
             },
             {
                 "command": "extension.startOnnxEcosystem",
-                "title": "ONNX: Start ONNX ecosystem"
+                "title": "DL Toolkit: Start ecosystem"
             },
             {
                 "command": "firstextension.addCountToPanel",
-                "title": "ONNX: Test count"
+                "title": "DL Toolkit: Test count"
             },
             {
                 "command": "extension.Convert",
-                "title": "ONNX: Convert to ONNX"
+                "title": "DL Toolkit: Convert to ONNX"
             },
             {
                 "command": "extension.Quantize",
-                "title": "ONNX: Quantize"
+                "title": "DL Toolkit: Quantize"
             },
             {
                 "command": "extension.Validate",
-                "title": "ONNX: Validate"
+                "title": "DL Toolkit: Validate using MLPerf"
             },
             {
                 "command": "extension.RunValidation",
-                "title": "ONNX: Run Validation"
+                "title": "DL Toolkit: Run Validation"
             },
             {
                 "command": "firstextension.tryResults",
-                "title": "ONNX: Test results"
+                "title": "DL Toolkit: Test results"
             },
             {
                 "command": "extension.Display",
-                "title": "ONNX: Visualize model"
+                "title": "DL Toolkit: Visualize model"
             }
         ],
         "menus": {
@@ -65,7 +65,7 @@
                 },
                 {
                     "command": "extension.Quantize",
-                    "when": "resourceExtname == .onnx"
+                    "when": "resourceExtname =~ /.pb|.onnx/"
                 },
                 {
                     "command": "extension.Validate",
@@ -73,7 +73,7 @@
                 },
                 {
                     "command": "extension.Display",
-                    "when": "resourceExtname == .onnx"
+                    "when": "resourceExtname =~ /.pb|.onnx/"
                 }
             ]
         }
@@ -111,8 +111,8 @@
         "webpack-dev-server": "^3.7.1"
     },
     "dependencies": {
-        "@fortawesome/fontawesome-svg-core": "^1.2.22",
-        "@fortawesome/free-solid-svg-icons": "^5.10.2",
+        "@fortawesome/fontawesome-svg-core": "^1.2.24",
+        "@fortawesome/free-solid-svg-icons": "^5.11.1",
         "@fortawesome/react-fontawesome": "^0.1.4",
         "react": "^16.8.6",
         "react-dom": "^16.8.6",
