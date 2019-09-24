@@ -3,7 +3,7 @@ import Header from './Header';
 import OnnxDisplayResult from './OnnxDisplayResult';
 import { Dropdown, DropdownMenuItemType, IDropdownStyles, IDropdownOption } from 'office-ui-fabric-react/lib/Dropdown';
 import { Stack, TextField, PrimaryButton, Label, Spinner} from "office-ui-fabric-react";
-
+import Tabs from "./Tabs";
 //initializeIcons();
 declare var acquireVsCodeApi: any;
 const vscode = acquireVsCodeApi();
@@ -107,6 +107,7 @@ const OnnxValidateInput: React.FunctionComponent = () => {
 
     React.useEffect(() => {
         console.log("Selecting profile");
+        window.console.log(selectedItem);
         window.console.log("Testing......");
         vscode.postMessage(
             {
@@ -216,7 +217,7 @@ const OnnxValidateInput: React.FunctionComponent = () => {
                     <Stack tokens={tokens.numericalSpacing}>
                         <Stack>
                             <Stack.Item >
-                                <Header name={"ONNX Validation Input Parameters"} />
+                                <Header name={"MLPerf Validation Input Parameters"} />
                             </Stack.Item>
 
                         </Stack>

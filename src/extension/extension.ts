@@ -70,8 +70,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         }
         else {
             currentPanel = vscode.window.createWebviewPanel(
-                "onnxvalidate",
-                "ONNXValidate",
+                 "onnxvalidate",
+                 "DL Toolkit Webview",
+              
                 vscode.ViewColumn.One,
                 {
                     enableScripts: true,
