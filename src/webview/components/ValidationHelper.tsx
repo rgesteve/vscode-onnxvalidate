@@ -61,5 +61,24 @@ export class Result implements Serializable<Result>{
         this.version = input.version;
         return this;
     }
-
 }
+
+export class ValidationInputParams {
+    "count": number;
+    "modelPath": string;
+    "dataSet": string;
+    "selectedItem": string;
+    "numberOfImages": string;
+    "selectedBackend": string;
+    "selectedDataFormat": string;
+
+    ValidationInputParams() {
+      this.count = 0;
+      this.modelPath = "";
+      this.dataSet = "";
+      this.selectedItem = "";
+      this.numberOfImages = "";
+      this.selectedBackend = "";
+      this.selectedDataFormat = "";
+    }
+  }
