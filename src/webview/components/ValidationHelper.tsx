@@ -45,7 +45,7 @@ class TestScenarioSingleStream implements Serializable<TestScenarioSingleStream>
     }
 }
 
-class Result implements Serializable<Result>{
+export class Result implements Serializable<Result>{
 
     "TestScenario.SingleStream": TestScenarioSingleStream;
     "cmdline": string;
@@ -64,4 +64,22 @@ class Result implements Serializable<Result>{
 
 }
 
-export default Result;
+export class ValidationInputParams {
+    "count": number;
+    "modelPath": string;
+    "dataSet": string;
+    "selectedItem": string;
+    "numberOfImages": string;
+    "selectedBackend": string;
+    "selectedDataFormat": string;
+
+    ValidationInputParams() {
+      this.count = 0;
+      this.modelPath = "";
+      this.dataSet = "";
+      this.selectedItem = "";
+      this.numberOfImages = "";
+      this.selectedBackend = "";
+      this.selectedDataFormat = "";
+    }
+  }

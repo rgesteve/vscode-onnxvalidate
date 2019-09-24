@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import ValidateInput from './ValidateInput';
 import ValidationResult from './ValidationResult'
-import Result from './Result';
+import { Result, ValidationInputParams } from './ValidationHelper';
 
 declare var acquireVsCodeApi: any;
 const vscode = acquireVsCodeApi();
@@ -9,13 +9,7 @@ const vscode = acquireVsCodeApi();
 interface IValidateState {
     result: Result,
     displayResult: Boolean,
-    count: number,
-    modelPath: string,
-    dataSet: string,
-    selectedItem: string,
-    numberOfImages: string,
-    selectedBackend: string,
-    selectedDataFormat: string
+    inputParams: ValidationInputParams
 }
 class Validate extends Component<{}, IValidateState>{
 
@@ -26,13 +20,7 @@ class Validate extends Component<{}, IValidateState>{
         this.state = {
             result:new Result(),
             displayResult: false,
-            count: 0,
-            modelPath: "",
-            dataSet: "",
-            selectedItem: "",
-            numberOfImages: "",
-            selectedBackend: "",
-            selectedDataFormat: ""
+            inputParams: new ValidationInputParams()
         }
         this.handleWindowListner = this.handleWindowListner.bind(this);
     }
@@ -48,7 +36,7 @@ class Validate extends Component<{}, IValidateState>{
         vscode.postMessage(
             {
                 command: 'setProfileOption',
-                text: this.state.selectedItem
+                text: this.state.inputParams.selectedItem
             }
         );
         window.console.log(`Sent message to host.`);
@@ -58,7 +46,7 @@ class Validate extends Component<{}, IValidateState>{
         vscode.postMessage(
             {
                 command: 'setBackend',
-                text: this.state.selectedBackend
+                text: this.state.inputParams.selectedBackend
             }
         );
         window.console.log(`Sent message to host.`);
@@ -68,7 +56,7 @@ class Validate extends Component<{}, IValidateState>{
         vscode.postMessage(
             {
                 command: 'setDataFormat',
-                text: this.state.selectedDataFormat
+                text: this.state.inputParams.selectedDataFormat
             }
         );
 
@@ -79,7 +67,7 @@ class Validate extends Component<{}, IValidateState>{
         vscode.postMessage(
             {
                 command: 'setnumberOfImages',
-                text: this.state.numberOfImages
+                text: this.state.inputParams.numberOfImages
             }
         );
     }
@@ -89,25 +77,30 @@ class Validate extends Component<{}, IValidateState>{
     }
 
     handleWindowListner(ev: any) {
+        let myobj = this.state.inputParams;
         switch (ev.data.command) {
             case "modelPath": {
                 console.log(`Got a message from the host ${ev.data}`);
-                this.setState(state => ({ modelPath: ev.data.payload }));
+                myobj.modelPath = ev.data.payload;
+                this.setState(state => ({ inputParams: myobj }));
                 break;
             }
             case "dataSet": {
                 console.log(`Got a message from the host ${ev.data}`);
-                this.setState(state => ({ dataSet: ev.data.payload }));
+                myobj.dataSet = ev.data.payload;
+                this.setState(state => ({ inputParams: myobj }));
                 break;
             }
             case "count": {
                 console.log(`Got a message from the host ${ev.data}`);
-                this.setState(state => ({ count: ev.data.payload }));
+                myobj.count = ev.data.payload;
+                this.setState(state => ({ inputParams: myobj }));
                 break;
             }
             case "selectedItem": {
                 console.log(`Got a message from the host ${ev.data}`);
-                this.setState(state => ({ selectedItem: ev.data.payload }));
+                myobj.selectedItem = ev.data.payload;
+                this.setState(state => ({ inputParams: myobj }));
                 break;
             }
             case "result": {
@@ -130,28 +123,29 @@ class Validate extends Component<{}, IValidateState>{
         }
     }
 
-    onItemChangedHandler = (e: any): void => {
-        console.log(`Poornima Selected profile ${e.text}`)
-        this.setState({ selectedItem: e.text });
-    }
+    formHandler = (e:any, task: String): void => {
+        let myobj = this.state.inputParams;
+        switch(task){
+            case 'onItemChangedHandler':
+                    myobj.selectedItem = e.text;
+                    break;
 
-    onBackendSelectedHandler = (e: any) => {
-        console.log(`Poornima Backend ${e.text}`)
-        this.setState({ selectedBackend: e.text });
-    }
+            case 'onBackendSelectedHandler':
+                    myobj.selectedBackend = e.text;
+                    break;
 
-    onDataFormatSelectedHandler = (e: any) => {
-        console.log(`Poornima DataFormat ${e.text}`)
-        this.setState({ selectedDataFormat: e.text });
-    }
+            case 'onDataFormatSelectedHandler':
+                    myobj.selectedDataFormat = e.text;
+                    break;
 
-    onImageCountChangeHandler = (e: any) => {
-        console.log(`Poornima count ${e.target.value}`)
-        this.setState({ numberOfImages: e.target.value });
+            case "onImageCountChangeHandler":
+                    myobj.numberOfImages = e.target.value;
+                    break;
+        }
+        this.setState({ inputParams: myobj });
     }
 
     clickHandler = () => {
-        window.console.log(`Curious to see where ${this.state.count} value is.`);
         vscode.postMessage({
             command: 'startVerification',
             text: 'check out from host',
@@ -193,17 +187,8 @@ class Validate extends Component<{}, IValidateState>{
             return (
                 <div>
                     <ValidateInput
-                        count={this.state.count}
-                        modelPath={this.state.modelPath}
-                        dataSet={this.state.dataSet}
-                        selectedItem={this.state.selectedItem}
-                        numberOfImages={this.state.numberOfImages}
-                        selectedBackend={this.state.selectedBackend}
-                        selectedDataFormat={this.state.selectedDataFormat}
-                        onItemChangedHandler={this.onItemChangedHandler}
-                        onBackendSelectedHandler={this.onBackendSelectedHandler}
-                        onDataFormatSelectedHandler={this.onDataFormatSelectedHandler}
-                        onImageCountChangeHandler={this.onImageCountChangeHandler}
+                        inputProps={this.state.inputParams}
+                        formHandler={this.formHandler}
                         clickHandler={this.clickHandler}
                         pathToModelHandler={this.pathToModelHandler}
                         pathToDatasetHandler={this.pathToDatasetHandler}

@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 import { MLPERF_TERMS } from '../constants/Constants'
 import Header from './Header';
-import Result from './Result';
+import {Result} from './ValidationHelper';
 
 interface IVResultProps {
     resultJSON: Result;
