@@ -1,6 +1,7 @@
 import React from 'react';
 import Validate from './Validate';
 import { Pivot, PivotItem, PivotLinkFormat, PivotLinkSize, IPivotStyles } from 'office-ui-fabric-react/lib/Pivot';
+import {IStyleSet} from "office-ui-fabric-react/lib/Styling";
 import OnnxConvertModel from './OnnxConvertModel';
 import OnnxQuantizeModel from './OnnxQuantizeModel';
 import { Label } from 'office-ui-fabric-react/lib/Label';
@@ -8,7 +9,7 @@ import { Label } from 'office-ui-fabric-react/lib/Label';
 const App: React.FunctionComponent = () => {
     return (
         <div className="container-header">
-            <Pivot styles={temp} linkFormat={PivotLinkFormat.tabs} linkSize={PivotLinkSize.large}>
+            <Pivot styles={pivotStyles} linkFormat={PivotLinkFormat.tabs} linkSize={PivotLinkSize.large}>
                 <PivotItem headerText="Convert">
                     <Label style={{ color: 'white' }}><OnnxConvertModel /></Label>
                 </PivotItem>
@@ -23,18 +24,14 @@ const App: React.FunctionComponent = () => {
     );
 };
 
-const temp: IPivotStyles = {
-    root: {
-        //  // padding: '0 550px',
-        //  //marginLeft:'100px',
-        //  margin:"300%",
-        //  width:"100%",
-        //  marginLeft:"auto",
-        //  marginRight:'auto',
-        //  display:"inline-flex",
-        lineHeight: "100px"
-
-    },
-    count: {}, icon: {}, itemContainer: {}, link: { borderImageWidth: "100px" }, linkContent: {}, linkIsSelected: {}, text: {}
-}
+const pivotStyles: Partial<IStyleSet<IPivotStyles>> = {
+    linkContent: {
+        fontSize: "20px",
+        width: "525px" ,
+      },
+      root:{
+        lineHeight:"100px"
+        
+      }
+  };
 export default App;

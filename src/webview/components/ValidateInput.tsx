@@ -32,7 +32,7 @@ class ValidateInput extends Component<IValidInputProps, {}> {
 
                 <Stack>
                     <Stack.Item>
-                        <Header name={"ONNX Validation Input Parameters"} />
+                        <Header name={"MLPerf Validation Input Parameters"} />
                     </Stack.Item>
 
                 </Stack>
