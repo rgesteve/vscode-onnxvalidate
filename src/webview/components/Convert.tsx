@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import Header from './Header';
-import { Stack, TextField, PrimaryButton, Label, Spinner } from "office-ui-fabric-react";
+import { Stack, TextField, PrimaryButton, Label, Spinner,ILabelStyles } from "office-ui-fabric-react";
 import { ConversionInputParams } from './ConversionHelper';
 
 interface IConvertState {
@@ -121,15 +121,15 @@ class Convert extends Component<{}, IConvertState>{
                 <Stack tokens={tokens.numericalSpacing}>
                     <Stack horizontal gap={7}>
                         <Stack.Item grow>
-                            <Label style={{ color: 'white' }}>Enter Input node </Label>
+                            <Label styles={labelStyles} >Enter Input node </Label>
                             <TextField placeholder="Enter Input node" value={inputNode} onChange={(e: any) => this.formHandler(e, "onInputNodeChange")} />
                         </Stack.Item>
                         <Stack.Item grow>
-                            <Label style={{ color: 'white' }}>Enter Output node </Label>
+                            <Label styles={labelStyles}>Enter Output node </Label>
                             <TextField placeholder="Enter Output node" value={outputNode} onChange={(e: any) => this.formHandler(e, "onOutputNodeChange")} />
                         </Stack.Item>
                         <Stack.Item grow>
-                            <Label style={{ color: 'white' }}>Enter opset </Label>
+                            <Label styles={labelStyles}>Enter opset </Label>
                             <TextField placeholder="Default value is 8" value={opset} onChange={(e: any) => this.formHandler(e, "onOpsetChange")} />
                         </Stack.Item>
                     </Stack>
@@ -158,5 +158,15 @@ const tokens = {
     customSpacing: {
         childrenGap: '10'
     },
+};
+
+const labelStyles: Partial<ILabelStyles > = {
+    
+    root: {
+        textAlign:'start',
+        color:'white'
+
+
+    }
 };
 export default Convert;

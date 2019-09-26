@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import Header from './Header';
-import { Stack, TextField, PrimaryButton, Label, Toggle, IToggleStyles } from "office-ui-fabric-react";
+import { Stack, TextField, PrimaryButton, Label, Toggle, ILabelStyles  } from "office-ui-fabric-react";
 import { render } from 'react-dom';
 import { QuantizeInputParams } from './QuantizeHelper';
 
@@ -28,6 +28,7 @@ class Quantize extends Component<{}, IStateQuantize>  {
 
     componentDidUpdate() {
 
+        
     }
 
     componentWillUnmount() {
@@ -66,13 +67,14 @@ class Quantize extends Component<{}, IStateQuantize>  {
         window.console.log(`Sent message to host.`);
         //TODO: Add code to clear form fields
     };
-    
-   toggleShowFields =(event: any) : void=>{
-       let myobj=  this.state.inputParams;
-       myobj.showFields=event;
-       this.setState({inputParams:myobj});
-   }
-    
+
+    toggleShowFields =(event: any) : void=>{
+        let myobj=  this.state.inputParams;
+        myobj.showFields=event;
+        this.setState({inputParams:myobj});
+    }
+     
+   
 
     render() {
         let { showFields, representativeDataPath } = this.state.inputParams;
@@ -84,14 +86,14 @@ class Quantize extends Component<{}, IStateQuantize>  {
                     </Stack.Item>
                 </Stack>
                 <Stack tokens={tokens.numericalSpacing}>
-                    <Label style={{ color: 'white' }}>Quantize with representative data? </Label>
+                    <Label style={{color:'white'}}>Quantize with representative data? </Label>
                     <Toggle inlineLabel checked={showFields} onChange={(e:any) => {this.toggleShowFields(e)}} />
                     {showFields && (
                         <>
                             <Stack horizontal gap={7}>
 
                                 <Stack.Item grow>
-                                    <Label style={{ color: 'white' }}>Path To Representative Data </Label>
+                                    <Label styles={labelStyles}>Path To Representative Data </Label>
                                     <TextField placeholder="Enter path to data" value={representativeDataPath} />
                                 </Stack.Item>
                                 <Stack.Item align="end" >
@@ -126,6 +128,15 @@ const tokens = {
     },
 };
 
+const labelStyles: Partial<ILabelStyles > = {
+    
+    root: {
+        textAlign:'start',
+        color:'white'
+
+
+    }
+};
 
 
 export default Quantize;

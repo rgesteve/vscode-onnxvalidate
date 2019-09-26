@@ -11,13 +11,13 @@ const App: React.FunctionComponent = () => {
         <div className="container-header">
             <Pivot styles={pivotStyles} linkFormat={PivotLinkFormat.tabs} linkSize={PivotLinkSize.large}>
                 <PivotItem headerText="Convert">
-                    <Label style={{ color: 'white' }}><Convert /></Label>
+                    <Label style={{ color: 'white'}}><Convert /></Label>
                 </PivotItem>
                 <PivotItem headerText="Quantize">
-                    <Label style={{ color: 'white' }}><Quantize /></Label>
+                    <Label style={{ color: 'white'}}><Quantize /></Label>
                 </PivotItem>
                 <PivotItem headerText="Validate">
-                    <Label style={{ color: 'white' }}><Validate /></Label>
+                    <Label style={{ color: 'white'}}><Validate /></Label>
                 </PivotItem>
             </Pivot>
         </div>

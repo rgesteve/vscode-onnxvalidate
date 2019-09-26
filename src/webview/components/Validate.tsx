@@ -195,4 +195,6 @@ class Validate extends Component<{}, IValidateState>{
         );
     }
 }
+
+
 export default Validate;

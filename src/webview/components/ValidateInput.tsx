@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Header from './Header';
 import { ValidationInputParams } from './ValidationHelper';
 import { Dropdown, IDropdownStyles } from 'office-ui-fabric-react/lib/Dropdown';
-import { Stack, TextField, PrimaryButton, Label} from "office-ui-fabric-react";
+import { Stack, TextField, PrimaryButton, Label,ILabelStyles, ITextFieldStyles} from "office-ui-fabric-react";
 import { Profileoptions, Backendoptions, DataFormatoptions } from '../constants/Constants';
 
 interface IValidInputProps {
@@ -39,26 +39,26 @@ class ValidateInput extends Component<IValidInputProps, {}> {
 
                 <Stack horizontal gap={7} >
                     <Stack.Item grow>
-                        <Label style={{ color: 'white' }}>Select a Profile</Label>
+                        <Label styles={labelStyles}>Select a Profile</Label>
                         <Dropdown placeholder="Select a profile" options={Profileoptions} styles={dropdownStyles} selectedKey={selectedItem} onChanged={ (e:any) => {this.props.formHandler(e, "onItemChangedHandler")}} />
                     </Stack.Item>
                     <Stack.Item grow>
-                        <Label style={{ color: 'white' }}>Select Backend</Label>
+                        <Label styles={labelStyles}>Select Backend</Label>
                         <Dropdown placeholder="Select backend" options={Backendoptions} styles={dropdownStyles} selectedKey={selectedBackend} onChanged={ (e:any) => this.props.formHandler(e, "onBackendSelectedHandler") } />
                     </Stack.Item>
                     <Stack.Item grow>
-                        <Label style={{ color: 'white' }}>Select data format</Label>
+                        <Label styles={labelStyles}>Select data format</Label>
                         <Dropdown placeholder="Select data format" options={DataFormatoptions} styles={dropdownStyles} selectedKey={selectedDataFormat} onChanged={(e:any) => this.props.formHandler(e, "onDataFormatSelectedHandler") } />
                     </Stack.Item>
                     <Stack.Item grow>
-                        <Label style={{ color: 'white' }}>Enter count </Label>
+                        <Label styles={labelStyles}>Enter count </Label>
                         <TextField placeholder="Enter number of images you need to test from the selected dataset" value={numberOfImages} onChange={(e:any) => this.props.formHandler(e, "onImageCountChangeHandler")} />
                     </Stack.Item>
                 </Stack>
 
                 <Stack horizontal gap={5} >
                     <Stack.Item grow>
-                        <Label style={{ color: 'white' }}>Enter path to model </Label>
+                        <Label styles={labelStyles}>Enter path to model </Label>
                         <TextField placeholder="Enter path to model" value={modelPath} />
                     </Stack.Item>
                     <Stack.Item align="end" >
@@ -68,7 +68,7 @@ class ValidateInput extends Component<IValidInputProps, {}> {
 
                 <Stack horizontal gap={5} >
                     <Stack.Item grow>
-                        <Label style={{ color: 'white' }}>Enter path to data set </Label>
+                        <Label styles={labelStyles}>Enter path to data set </Label>
                         <TextField placeholder="Enter path to data set" value={dataSet} />
                     </Stack.Item>
                     <Stack.Item align="end" >
@@ -101,8 +101,22 @@ const tokens = {
 };
 
 const dropdownStyles: Partial<IDropdownStyles> = {
-    caretDown: { width: 300 }
+    caretDown: { width: 300 },
+    root:{
+        textAlign:"start"
+    }
 };
+const labelStyles: Partial<ILabelStyles > = {
+    
+    root: {
+        textAlign:'start',
+        color:'white'
+
+
+    }
+};
+
+
 
 export default ValidateInput;
 
