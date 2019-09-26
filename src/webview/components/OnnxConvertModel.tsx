@@ -3,8 +3,6 @@ import Header from './Header';
 import { Stack, TextField, PrimaryButton, Label, Spinner } from "office-ui-fabric-react";
  
 
-// declare var acquireVsCodeApi: any;
-// const vscode = acquireVsCodeApi();
 const OnnxConvertModel: React.FunctionComponent = () => {
 
     const tokens = {
@@ -76,7 +74,7 @@ const OnnxConvertModel: React.FunctionComponent = () => {
                 </Stack.Item>
                 <Stack.Item grow>
                     <Label style={{ color: 'white' }}>Enter opset </Label>
-                    <TextField placeholder="Default value is 8" value={opsetNode} onChange={event => { setOutputNode((event.target as HTMLInputElement).value)}} />
+                    <TextField placeholder="Default value is 8"  value={opsetNode} onChange={event => { setOutputNode((event.target as HTMLInputElement).value)}} />
                 </Stack.Item>
                 </Stack>
            
