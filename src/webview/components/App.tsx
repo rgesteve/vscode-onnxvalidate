@@ -8,6 +8,9 @@ import { QuantizeInputParams } from './QuantizeHelper';
 import ValidateInput from './ValidateInput';
 import ValidationResult from './ValidationResult'
 import { Result, ValidationInputParams } from './ValidationHelper';
+import { initializeIcons } from '@uifabric/icons';
+
+initializeIcons(undefined, { disableWarnings: true });
 
 declare var acquireVsCodeApi: any;
 const vscode = acquireVsCodeApi();
@@ -41,6 +44,8 @@ class App extends Component<{}, IState> {
     }
 
     componentDidUpdate() {
+
+        //update on input validation components
         console.log("Selecting profile");
         window.console.log("Testing......");
         vscode.postMessage(
@@ -80,6 +85,37 @@ class App extends Component<{}, IState> {
                 text: this.state.validateInputParams.numberOfImages
             }
         );
+
+        //update on any convert components 
+        console.log("Entering Input node for conversion");
+        window.console.log("Entering Input node for conversion");
+        vscode.postMessage(
+            {
+                command: 'setInputNode',
+                text: this.state.convertInputParams.inputNode
+            }
+        );
+
+        console.log("Entering output node for conversion");
+        window.console.log("Entering Output node for conversion");
+        vscode.postMessage(
+            {
+                command: 'setOutputNode',
+                text: this.state.convertInputParams.outputNode
+            }
+        );
+        console.log("Entering opset node for conversion");
+        window.console.log("Entering Output node for conversion");
+        vscode.postMessage(
+            {
+                command: 'setOpsetNode',
+                text: this.state.convertInputParams.opset
+            }
+        );
+
+
+
+
 
     }
     componentWillUnmount() {
@@ -135,56 +171,49 @@ class App extends Component<{}, IState> {
     PathToRepresentativeData = () => {
         console.log("inside select path to representative data");
         window.console.log("Select path to representative data");
-        //  vscode.postMessage({
-        //    command: 'setRepresentativeDataPath',
-        //     text: 'Select path to representative data'
-        //  });
+        vscode.postMessage({
+            command: 'setRepresentativeDataPath',
+             text: 'Select path to representative data'
+          });
         window.console.log(`Sent message to host.`);
 
     };
 
     startQuantization = () => {
-
-        // vscode.postMessage({
-        //     command: 'startVerification',
-        //     text: 'check out from host',
-        // });
+        vscode.postMessage({
+             command: 'startQuantization',
+             text: 'start process of quantization',
+         });
         window.console.log(`Sent message to host.`);
     };
 
     cancelQuantization = () => {
-        window.console.log("Select reference output");
-        // vscode.postMessage({
-        //     command: 'cancel',
-        //     text: 'Cancel'
-        // });
+        vscode.postMessage({
+             command: 'cancel',
+             text: 'Cancel'
+         });
         window.console.log(`Sent message to host.`);
         //TODO: Add code to clear form fields
     };
     startConversion = () => {
 
-        // vscode.postMessage({
-        //     command: 'startVerification',
-        //     text: 'check out from host',
-        // });
+        vscode.postMessage({
+           command: 'startConversion',
+           text: 'start process of conversion',
+         });
         window.console.log(`Sent message to host.`);
     };
 
     cancelConversion = () => {
-        window.console.log("Select reference output");
-        // vscode.postMessage({
-        //     command: 'cancel',
-        //     text: 'Cancel'
-        // });
+      
+        vscode.postMessage({
+             command: 'cancel',
+            text: 'Cancel'
+         });
         window.console.log(`Sent message to host.`);
         //TODO: Add code to clear form fields
     };
 
-    toggleShowFields = (event: any): void => {
-        let myobj = this.state.quantizeInputParams;
-        myobj.showFields = event;
-        this.setState({ quantizeInputParams: myobj });
-    }
 
     formHandler = (event: any, task: String): void => {
         let myobj = this.state.convertInputParams;
@@ -271,6 +300,7 @@ class App extends Component<{}, IState> {
 
         return (
             <div className="container-header">
+               
                 <Pivot styles={pivotStyles} linkFormat={PivotLinkFormat.tabs} linkSize={PivotLinkSize.large}>
                     <PivotItem headerText="Convert">
                         <Label style={{ color: 'white' }}><Convert
@@ -286,7 +316,6 @@ class App extends Component<{}, IState> {
                             startQuantization={this.startConversion}
                             cancelQuantization={this.cancelConversion}
                             PathToRepresentativeData={this.PathToRepresentativeData}
-                            toggleShowFields={this.toggleShowFields}
                         /></Label>
                     </PivotItem>
                     <PivotItem headerText="Validate">

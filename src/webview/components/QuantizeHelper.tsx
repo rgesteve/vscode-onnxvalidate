@@ -4,7 +4,7 @@ export class QuantizeInputParams {
     
 
     QuantizeInputParams() {
-      this.showFields = false;
+      // this.showFields = false;
       this.representativeDataPath = "";
    
      

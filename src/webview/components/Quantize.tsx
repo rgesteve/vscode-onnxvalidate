@@ -1,28 +1,38 @@
 import React, { Component } from 'react';
 import Header from './Header';
-import { Stack, TextField, PrimaryButton, Label, Toggle, ILabelStyles  } from "office-ui-fabric-react";
+import { Stack, TextField, PrimaryButton, Label, Toggle, ILabelStyles,IToggleStyles } from "office-ui-fabric-react";
 import { QuantizeInputParams } from './QuantizeHelper';
 
+interface IState {
+  
+    showFields:boolean |undefined
+}
 
 interface IQuantizeProps {
     inputProps:QuantizeInputParams;
 
-    toggleShowFields:(event: React.MouseEvent<HTMLButtonElement>)=>void
     PathToRepresentativeData:(event: React.MouseEvent<HTMLButtonElement>)=>void
     startQuantization: (event: React.MouseEvent<HTMLButtonElement>) => void
     cancelQuantization: (event: React.MouseEvent<HTMLButtonElement>) => void
 }
 
 
-class Quantize extends Component<IQuantizeProps,{}>  {
-
+class Quantize extends Component<IQuantizeProps,IState>  {
+ state:IState={
+   showFields:false
+};
     constructor(props: IQuantizeProps) {
         super(props)
+            
     }
-
+    
+    
+  
 
     render() {
-        let { showFields, representativeDataPath } = this.props.inputProps;
+      
+        let { representativeDataPath } = this.props.inputProps;
+        let {showFields}=this.state;
         return (
             <div>
                 <Stack>
@@ -31,8 +41,9 @@ class Quantize extends Component<IQuantizeProps,{}>  {
                     </Stack.Item>
                 </Stack>
                 <Stack tokens={tokens.numericalSpacing}>
-                    <Label style={{color:'white'}}>Quantize with representative data? </Label>
-                    <Toggle inlineLabel checked={showFields} onChange={(e:any) => {this.props.toggleShowFields(e)}} />
+                 
+                   
+                       <Toggle styles={tStyles} label="Quantize with representative data?" inlineLabel checked={showFields} onChange={this._toggleShowFields} />  
                     {showFields && (
                         <>
                             <Stack horizontal gap={7}>
@@ -62,7 +73,14 @@ class Quantize extends Component<IQuantizeProps,{}>  {
             </div>
         );
     }
-
+     _toggleShowFields = (ev: React.MouseEvent<HTMLElement>,checked:boolean| undefined) => {
+        
+        console.log(checked);
+        this.setState({showFields:checked});
+      
+        console.log(this.state.showFields);
+        console.log('toggle is ' + (checked ? 'checked' : 'not checked'));
+     };
 }
 const tokens = {
     numericalSpacing: {
@@ -81,6 +99,12 @@ const labelStyles: Partial<ILabelStyles > = {
 
 
     }
+};
+    const tStyles : Partial<IToggleStyles > = {
+      label:{
+          color:'white'
+      }
+       
 };
 
 
