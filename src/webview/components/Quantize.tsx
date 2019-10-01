@@ -20,10 +20,9 @@ interface IQuantizeProps {
 class Quantize extends Component<IQuantizeProps,IState>  {
  state:IState={
    showFields:false
-};
+  };
     constructor(props: IQuantizeProps) {
-        super(props)
-            
+        super(props)          
     }
     
     

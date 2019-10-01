@@ -172,6 +172,37 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
         }
 
     }
+    public async convert_test(inputNode:string,outputNode:string, opset:string,fileuri: vscode.Uri, ...args: any[]): Promise<string|undefined> {
+            if (!this._workspace){
+                console.log(`No workspace defined`);
+                return undefined;
+            }
+            if (this._workspace) {
+                let model: string | undefined;
+    
+                if (path.basename(fileuri.fsPath).toLowerCase().includes("resnet")) {
+                    model = "resnet50";
+                }
+                else if (path.basename(fileuri.fsPath).toLowerCase().includes("mobilenet")){
+                    model =  "mobilenet";
+                }
+                else {
+                    console.log("This model is not part of the supported models!");
+                    return undefined;
+                }
+                if (model) {
+                    let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(path.dirname(fileuri.fsPath))}`, `${this._containerIds[0]}`, 'python3', '-m', 'tf2onnx.convert',
+                                          '--fold_const', '--opset', `${opset}` ,'--inputs',`${inputNode}`, '--outputs', `${outputNode}`,
+                                          '--inputs-as-nchw', `${inputNode}` ,'--input' , `${path.basename(fileuri.fsPath)}` , '--output',
+                                          `${path.basename(fileuri.fsPath).replace(".pb", ".onnx")}`];
+                    return await this.executeCommandWithProgress("Finished converting to ONNX!", "Converting to ONNX... ", "docker", args);
+                    // check this out
+    
+                }
+    
+            }
+    
+        }
 
     dockerDisplay(modeluri : vscode.Uri) {
         //let netronCP = cp.spawn('C:\\Program Files\\Netron\\Netron.exe', [`${modeluri.fsPath}`], { env: [] });

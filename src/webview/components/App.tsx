@@ -8,9 +8,6 @@ import { QuantizeInputParams } from './QuantizeHelper';
 import ValidateInput from './ValidateInput';
 import ValidationResult from './ValidationResult'
 import { Result, ValidationInputParams } from './ValidationHelper';
-import { initializeIcons } from '@uifabric/icons';
-
-initializeIcons(undefined, { disableWarnings: true });
 
 declare var acquireVsCodeApi: any;
 const vscode = acquireVsCodeApi();
@@ -189,7 +186,7 @@ class App extends Component<{}, IState> {
 
     cancelQuantization = () => {
         vscode.postMessage({
-             command: 'cancel',
+             command: 'cancelQuantization',
              text: 'Cancel'
          });
         window.console.log(`Sent message to host.`);
@@ -207,8 +204,8 @@ class App extends Component<{}, IState> {
     cancelConversion = () => {
       
         vscode.postMessage({
-             command: 'cancel',
-            text: 'Cancel'
+             command: 'cancelConversion',
+             text: 'Cancel'
          });
         window.console.log(`Sent message to host.`);
         //TODO: Add code to clear form fields

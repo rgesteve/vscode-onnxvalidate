@@ -38,14 +38,82 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         }
     });
 
-    let convert = vscode.commands.registerCommand('extension.Convert', async (fileuri: any) => {
-        // get the file name with which the right click command was executed
-        await dockerManager.convert(fileuri).then(async () => {
-                vscode.window.showInformationMessage("Converted to ONNX!");
-            }, reason => {
-                vscode.window.showInformationMessage(`Conversion failed. ${reason}`);
-            });
-        });
+    // let convert = vscode.commands.registerCommand('extension.Convert', async (fileuri: any) => {
+    //     // get the file name with which the right click command was executed
+    //     await dockerManager.convert(fileuri).then(async () => {
+    //             vscode.window.showInformationMessage("Converted to ONNX!");
+    //         }, reason => {
+    //             vscode.window.showInformationMessage(`Conversion failed. ${reason}`);
+    //         });
+    //     });
+
+        let convert = vscode.commands.registerCommand('extension.Convert', async (fileuri: any) => {
+            // get the file name with which the right click command was executed
+            let modelPath:any= fileuri;
+            const contentProvider = new ContentProvider();
+            currentPanel = vscode.window.createWebviewPanel(
+                "dl toolkit webview",
+                "DL Toolkit Webview",
+                vscode.ViewColumn.One,
+                {
+                    enableScripts: true,
+                    retainContextWhenHidden: true
+                }
+            );
+            let inputNode:string;
+            let outputNode:string;
+            let opset:string;
+            currentPanel.webview.onDidReceiveMessage(async msg => {
+            switch (msg.command) {
+              case "setInputNode": {
+                        inputNode= msg.text;
+                       //debug 
+                       vscode.window.showInformationMessage(`Input Node is ${inputNode}`);
+                        break;
+                    }
+                    case "setOutputNode": {
+                        outputNode= msg.text;
+                       //debug 
+                        vscode.window.showInformationMessage(`Output Node is ${outputNode}`);
+                        break;
+                    }
+                    case "setOpsetNode": {
+                        opset= msg.text;
+                       //debug 
+                       vscode.window.showInformationMessage(`opset is ${opset}`);
+                        break;
+                    }
+                    case "startConversion": {
+                        
+                        await dockerManager.convert_test(inputNode, outputNode, opset,modelPath).then(async () => {
+                            vscode.window.showInformationMessage("Conversion Done");
+                            //Read JSON file from stored location here
+                        }, reason => {
+                            vscode.window.showInformationMessage(`Conversion failed. ${reason}`);
+                           
+                        });
+                        break;
+                    }
+                    case "cancelConversion": {
+                        
+                        await dockerManager.convert_test(inputNode, outputNode, opset,modelPath).then(async () => {
+                            vscode.window.showInformationMessage("Conversion Done");
+                            //Read JSON file from stored location here
+                        }, reason => {
+                            vscode.window.showInformationMessage(`Conversion failed. ${reason}`);
+                           
+                        });
+                        break;
+                    }
+            }
+
+            }, undefined, context.subscriptions);
+            currentPanel.webview.html = contentProvider.getProdContent(context);
+
+            vscode.window.showInformationMessage('Panel should be displayed');
+            console.log("Convert....");
+            })
+        
 
     let display = vscode.commands.registerCommand('extension.Display', (modeluri: vscode.Uri) => {
         const pathToChrome: string = join("c:", "Program Files (x86)", "Google", "Chrome", "Application", "chrome.exe");
@@ -84,6 +152,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             );
             let mlperfParam: Map<string, string> = new Map<string, string>(); // delete?
             // refactor this function out.
+
+            let inputNode:string;
+            let outputNode:string;
+            let opset:string;
             currentPanel.webview.onDidReceiveMessage(async msg => {
                 switch (msg.command) {
                     case "setModelPath": {
@@ -173,6 +245,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                     case "cancel": {
                         mlperfParam.clear();
                         console.log("Canceling verification, cleared mlperfParam");
+                        break;
                     }
                 }
 
