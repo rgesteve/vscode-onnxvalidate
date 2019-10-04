@@ -143,6 +143,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                     }
                    
                     case "startVerification": {
+                        await dockerManager.quantizeTFModel().then(async()=>{
+                            vscode.window.showInformationMessage("Quantization Done");
+                        });
                         if (currentPanel !== undefined) {
                             currentPanel.webview.postMessage({ command: 'result', payload: 'IN_PROGRESS' });
                         }

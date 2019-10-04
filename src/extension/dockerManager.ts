@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import ContentProvider from './ContentProvider';
 import * as utils from './osUtils';
-import { supported_models, docker_images } from './config';
+import { supported_models, docker_images, tensorflow_binaries, tensorflow_quantization_options } from './config';
 import { resolve } from 'url';
 import { rejects } from 'assert';
 
@@ -173,6 +173,39 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
             }
     
         }
+
+    
+
+    public async quantizeTFModel(fileuri?: vscode.Uri, ...args: any[]): Promise<string|undefined> {
+        if (!this._workspace){
+            console.log(`No workspace defined`);
+            return undefined;
+        }
+
+        if (this._workspace && fileuri) { // this is for the time being, need a good way to get the details of model, summarize_graph?
+            let model: string | undefined;
+
+            if (path.basename(fileuri.fsPath).toLowerCase().includes("resnet")) {
+                model = "resnet50";
+            }
+            else if (path.basename(fileuri.fsPath).toLowerCase().includes("mobilenet")){
+                model =  "mobilenet";
+            }
+            else {
+                console.log("This model is not part of the supported models!");
+                return undefined;
+            }
+            if (model) 
+            {
+            let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(path.dirname(fileuri.fsPath))}`, `${this._containerIds[0]}`, `${tensorflow_binaries["linux"]["transform"]}`, 
+                                '--in_graph=', `${path.basename(fileuri.fsPath)}`, '--out_graph=', `${path.basename(fileuri.fsPath).replace(".pb", "_quantized.pb")}`, 
+                                '--inputs=', `${supported_models[model]["inputs"]}`, '--outputs=', `${supported_models[model]["outputs"]}`, '--transforms=', `${tensorflow_quantization_options}` ];
+                                
+            return await this.executeCommandWithProgress("Quantization done", "Quantizing TF FP32 model to TF int8 model... ", "docker", args);
+            }
+        }
+
+    }
 
     dockerDisplay(modeluri : vscode.Uri) {
         //let netronCP = cp.spawn('C:\\Program Files\\Netron\\Netron.exe', [`${modeluri.fsPath}`], { env: [] });

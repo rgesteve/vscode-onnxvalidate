@@ -35,3 +35,29 @@ export const docker_images : { [key: string]: {name: string, memory: string, cpu
         "cpu": ""
     },
 }
+
+// Configs for tensorflow binaries
+export const tensorflow_binaries : { [key: string]: {transform: string, summarize: string, benchmark: string}} = {
+    "linux" : {
+        "transform": "/root/tensorflow/bazel-bin/tensorflow/tools/graph_transforms/transform_graph",
+        "summarize": "/root/tensorflow/bazel-bin/tensorflow/tools/graph_transforms/summarize_graph",
+        "benchmark" : ""
+    },
+    "windows" : {
+        "transform": "C:\\tensorflow\\bazel-bin\\tensorflow\\tools\\graph_transforms\\transform_graph",
+        "summarize": "C:\\tensorflow\\bazel-bin\\tensorflow\\tools\\graph_transforms\\summarize_graph",
+        "benchmark" : ""
+    }
+}
+
+export const tensorflow_quantization_options : string  = 
+    'add_default_attributes \
+     strip_unused_nodes(type=float, shape="1,224,224,3") \
+     remove_nodes(op=Identity, op=CheckNumerics) \
+     fold_constants(ignore_errors=true) \
+     fold_batch_norms \
+     fold_old_batch_norms \
+     quantize_weights \
+     quantize_nodes \
+     strip_unused_nodes' ;
+
