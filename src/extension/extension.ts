@@ -38,15 +38,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         }
     });
 
-    let convert = vscode.commands.registerCommand('extension.Convert', async (fileuri: any) => {
-        // get the file name with which the right click command was executed
-        await dockerManager.convert(fileuri).then(async () => {
-                vscode.window.showInformationMessage("Converted to ONNX!");
-            }, reason => {
-                vscode.window.showInformationMessage(`Conversion failed. ${reason}`);
-            });
-        });
-
     let display = vscode.commands.registerCommand('extension.Display', (modeluri: vscode.Uri) => {
         const pathToChrome: string = join("c:", "Program Files (x86)", "Google", "Chrome", "Application", "chrome.exe");
         const vizModelPath: string = join(context.extensionPath, 'src', 'test', 'data', 'model.svg');
@@ -61,12 +52,15 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         console.log("Quantize....");
     });
 
-    let validate = vscode.commands.registerCommand('extension.Validate', (modeluri: vscode.Uri) => {
+  
+
+    let DLToolKit = vscode.commands.registerCommand('extension.DLToolKit', (modeluri: vscode.Uri ) => {
         if (modeluri === undefined) {
-            vscode.window.showErrorMessage("Validate requires a file argument!!");
+            vscode.window.showErrorMessage("Requires a file argument!!");
             return;
         }
-        let model: string = modeluri.fsPath;
+      
+      
         const contentProvider = new ContentProvider();
 
         if (currentPanel) {
@@ -84,6 +78,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             );
             let mlperfParam: Map<string, string> = new Map<string, string>(); // delete?
             // refactor this function out.
+
+            let inputNode:string;
+            let outputNode:string;
+            let opset:string;
             currentPanel.webview.onDidReceiveMessage(async msg => {
                 switch (msg.command) {
                     case "setModelPath": {
@@ -143,6 +141,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                         mlperfParam.set("count", msg.text);
                         break;
                     }
+                   
                     case "startVerification": {
                         if (currentPanel !== undefined) {
                             currentPanel.webview.postMessage({ command: 'result', payload: 'IN_PROGRESS' });
@@ -170,10 +169,52 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                         });
                         break;
                     }
+                       //Need to fix. Add post message to send message to UI to clear input fields.
                     case "cancel": {
                         mlperfParam.clear();
                         console.log("Canceling verification, cleared mlperfParam");
+                        break;
                     }
+                    case "setInputNode": {
+                        inputNode= msg.text;
+                       //debug 
+                       //vscode.window.showInformationMessage(`Input Node is ${inputNode}`);
+                        break;
+                    }
+                    case "setOutputNode": {
+                        outputNode= msg.text;
+                       //debug 
+                        // vscode.window.showInformationMessage(`Output Node is ${outputNode}`);
+                        break;
+                    }
+                    case "setOpsetNode": {
+                        opset= msg.text;
+                       //debug 
+                    //    vscode.window.showInformationMessage(`opset is ${opset}`);
+                        break;
+                    }
+                    case "startConversion": {
+                        
+                        await dockerManager.convert(inputNode, outputNode, opset, modeluri).then(async () => {
+                            vscode.window.showInformationMessage("Conversion Done");
+                            //Read JSON file from stored location here
+                        }, reason => {
+                            vscode.window.showInformationMessage(`Conversion failed. ${reason}`);
+                           
+                        });
+                        break;
+                    }
+                    //Need to fix. Add post message to send message to UI to clear input fields.
+                    case "cancelConversion": {
+                        
+                        inputNode=""
+                        outputNode=""
+                        opset=""
+                        break;
+                    }
+
+
+
                 }
 
             }, undefined, context.subscriptions);
@@ -251,10 +292,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     let testResults = vscode.commands.registerCommand('firstextension.tryResults', testPerformanceHandler);
     context.subscriptions.push(initialize);
     context.subscriptions.push(startDocker);
-    context.subscriptions.push(convert);
+  //  context.subscriptions.push(convert);
     context.subscriptions.push(quantize);
     context.subscriptions.push(dockerManager);
-    context.subscriptions.push(validate);
+    context.subscriptions.push(DLToolKit);
     context.subscriptions.push(testResults);
 
     context.subscriptions.push(vscode.commands.registerCommand('firstextension.addCountToPanel', () => {
