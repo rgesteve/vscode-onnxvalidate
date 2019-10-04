@@ -141,38 +141,8 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
 
     }
 
-    public async convert(fileuri: vscode.Uri, ...args: any[]): Promise<string|undefined> {
-        if (!this._workspace){
-            console.log(`No workspace defined`);
-            return undefined;
-        }
-        if (this._workspace) {
-            let model: string | undefined;
-
-            if (path.basename(fileuri.fsPath).toLowerCase().includes("resnet")) {
-                model = "resnet50";
-            }
-            else if (path.basename(fileuri.fsPath).toLowerCase().includes("mobilenet")){
-                model =  "mobilenet";
-            }
-            else {
-                console.log("This model is not part of the supported models!");
-                return undefined;
-            }
-            if (model) {
-                let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(path.dirname(fileuri.fsPath))}`, `${this._containerIds[0]}`, 'python3', '-m', 'tf2onnx.convert',
-                                      '--fold_const', '--opset', '8' ,'--inputs',`${supported_models[model]["inputs"]}`, '--outputs', `${supported_models[model]["outputs"]}`,
-                                      '--inputs-as-nchw', `${supported_models[model]["inputs"]}` ,'--input' , `${path.basename(fileuri.fsPath)}` , '--output',
-                                      `${path.basename(fileuri.fsPath).replace(".pb", ".onnx")}`];
-                return await this.executeCommandWithProgress("Finished converting to ONNX!", "Converting to ONNX... ", "docker", args);
-                // check this out
-
-            }
-
-        }
-
-    }
-    public async convert_test(inputNode:string,outputNode:string, opset:string,fileuri: vscode.Uri, ...args: any[]): Promise<string|undefined> {
+    //TODO: Added default opset value in case user does not enter a value. Default is currently 8, we can add more default value
+    public async convert(inputNode:string,outputNode:string, opset:string='8',fileuri: vscode.Uri, ...args: any[]): Promise<string|undefined> {
             if (!this._workspace){
                 console.log(`No workspace defined`);
                 return undefined;
@@ -264,8 +234,8 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
            // let containerDatasetPath = `C:\\${path.basename(this._workspace.uri.fsPath)}\\${dataset.replace(temp, "")}`;
             //TODO need to handle windows to linux path conversion for model and dataset
 
-            model = '/Vscode/resnet50_v15.pb';
-            dataset = '/Vscode/ILSVRC2012_img_val';
+            // model = '/Vscode/resnet50_v15.pb';
+            // dataset = '/Vscode/ILSVRC2012_img_val';
 
             let exec = cp.spawn('docker', ['exec', '-w', `${utils.getMLPerfLocation()}`, `this._containerIds[0]`, 'python3', `${utils.getMLPerfDriver()}`,
                                 '--profile', `${profile}`,'--backend',`${backend}` ,'--model', `${model}`, '--dataset-path', `${dataset}`,

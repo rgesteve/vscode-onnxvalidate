@@ -32,17 +32,10 @@
                 "command": "firstextension.addCountToPanel",
                 "title": "DL Toolkit: Test count"
             },
+           
             {
-                "command": "extension.Convert",
-                "title": "DL Toolkit: Convert to ONNX"
-            },
-            {
-                "command": "extension.Quantize",
-                "title": "DL Toolkit: Quantize"
-            },
-            {
-                "command": "extension.Validate",
-                "title": "DL Toolkit: Validate using MLPerf"
+                "command": "extension.DLToolKit",
+                "title": "DL Toolkit: Convert, Quantize, Validate"
             },
             {
                 "command": "extension.RunValidation",
@@ -59,16 +52,9 @@
         ],
         "menus": {
             "explorer/context": [
+               
                 {
-                    "command": "extension.Convert",
-                    "when": "resourceFilename =~ /.pb|.pt|.h5/"
-                },
-                {
-                    "command": "extension.Quantize",
-                    "when": "resourceExtname =~ /.pb|.onnx/"
-                },
-                {
-                    "command": "extension.Validate",
+                    "command": "extension.DLToolKit",
                     "when": "resourceExtname =~ /.pb|.onnx/"
                 },
                 {
