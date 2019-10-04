@@ -141,6 +141,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                         mlperfParam.set("count", msg.text);
                         break;
                     }
+                   
                     case "startVerification": {
                         if (currentPanel !== undefined) {
                             currentPanel.webview.postMessage({ command: 'result', payload: 'IN_PROGRESS' });
@@ -168,6 +169,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                         });
                         break;
                     }
+                       //Need to fix. Add post message to send message to UI to clear input fields.
                     case "cancel": {
                         mlperfParam.clear();
                         console.log("Canceling verification, cleared mlperfParam");
@@ -202,16 +204,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                         });
                         break;
                     }
-                    //fix this 
+                    //Need to fix. Add post message to send message to UI to clear input fields.
                     case "cancelConversion": {
                         
-                        await dockerManager.convert(inputNode, outputNode, opset,modeluri).then(async () => {
-                            vscode.window.showInformationMessage("Conversion Done");
-                            //Read JSON file from stored location here
-                        }, reason => {
-                            vscode.window.showInformationMessage(`Conversion failed. ${reason}`);
-                           
-                        });
+                        inputNode=""
+                        outputNode=""
+                        opset=""
                         break;
                     }
 
