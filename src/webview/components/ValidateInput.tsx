@@ -37,25 +37,6 @@ class ValidateInput extends Component<IValidInputProps, {}> {
 
                 </Stack>
 
-                <Stack horizontal gap={7} >
-                    <Stack.Item grow>
-                        <Label styles={labelStyles}>Select a Profile</Label>
-                        <Dropdown placeholder="Select a profile" options={Profileoptions} styles={dropdownStyles} selectedKey={selectedItem} onChanged={(e: any) => { this.props.validateFormHandler(e, "onItemChangedHandler") }} />
-                    </Stack.Item>
-                    <Stack.Item grow>
-                        <Label styles={labelStyles}>Select Backend</Label>
-                        <Dropdown placeholder="Select backend" options={Backendoptions} styles={dropdownStyles} selectedKey={selectedBackend} onChanged={(e: any) => this.props.validateFormHandler(e, "onBackendSelectedHandler")} />
-                    </Stack.Item>
-                    <Stack.Item grow>
-                        <Label styles={labelStyles}>Select data format</Label>
-                        <Dropdown placeholder="Select data format" options={DataFormatoptions} styles={dropdownStyles} selectedKey={selectedDataFormat} onChanged={(e: any) => this.props.validateFormHandler(e, "onDataFormatSelectedHandler")} />
-                    </Stack.Item>
-                    <Stack.Item grow>
-                        <Label styles={labelStyles}>Enter count </Label>
-                        <TextField placeholder="Enter number of images you need to test from the selected dataset" value={numberOfImages} onChange={(e: any) => this.props.validateFormHandler(e, "onImageCountChangeHandler")} />
-                    </Stack.Item>
-                </Stack>
-
                 <Stack horizontal gap={5} >
                     <Stack.Item grow>
                         <Label styles={labelStyles}>Enter path to model </Label>
@@ -75,6 +56,25 @@ class ValidateInput extends Component<IValidInputProps, {}> {
                         <PrimaryButton style={{ width: '200px' }} onClick={this.props.pathToDatasetHandler}>Select Path to dataset</PrimaryButton>
                     </Stack.Item>
                 </Stack>
+                <Stack horizontal gap={7} >
+                    <Stack.Item grow>
+                        <Label styles={labelStyles}>Select a Profile</Label>
+                        <Dropdown placeholder="Select a profile" options={Profileoptions} styles={dropdownStyles} selectedKey={selectedItem} onChanged={(e: any) => { this.props.validateFormHandler(e, "onItemChangedHandler") }} />
+                    </Stack.Item>
+                    <Stack.Item grow>
+                        <Label styles={labelStyles}>Select Backend</Label>
+                        <Dropdown placeholder="Select backend" options={Backendoptions} styles={dropdownStyles} selectedKey={selectedBackend} onChanged={(e: any) => this.props.validateFormHandler(e, "onBackendSelectedHandler")} />
+                    </Stack.Item>
+                    <Stack.Item grow>
+                        <Label styles={labelStyles}>Select data format</Label>
+                        <Dropdown placeholder="Select data format" options={DataFormatoptions} styles={dropdownStyles} selectedKey={selectedDataFormat} onChanged={(e: any) => this.props.validateFormHandler(e, "onDataFormatSelectedHandler")} />
+                    </Stack.Item>
+                    <Stack.Item grow>
+                        <Label styles={labelStyles}>Enter count </Label>
+                        <TextField placeholder="Enter number of images you need to test from the selected dataset" value={numberOfImages} onChange={(e: any) => this.props.validateFormHandler(e, "onImageCountChangeHandler")} />
+                    </Stack.Item>
+                </Stack>
+
 
                 <Stack horizontal tokens={tokens.customSpacing} padding="s1 35%">
                     <Stack.Item>

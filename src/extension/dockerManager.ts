@@ -29,7 +29,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
         // if not, get it from docker hub? that part needs to be decided.
 
         const workspaceFolders: vscode.WorkspaceFolder[] = vscode.workspace.workspaceFolders || [];
-        if (workspaceFolders.length != 0 ) {
+        if (workspaceFolders.length != 0) {
             // Check if docker is installed and has the image that we require
             this._workspace = workspaceFolders[0];
 
@@ -55,10 +55,10 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
     }
 
     async executeCommand(command: string, args: string[], options: cp.SpawnOptions = { shell: true }): Promise<string> {
-        return new Promise((resolve: (res: string) => void, reject: (error : string | Buffer) => void): void => {
+        return new Promise((resolve: (res: string) => void, reject: (error: string | Buffer) => void): void => {
             let result: string = "";
 
-            const childProc: cp.ChildProcess = cp.spawn(command, args, { ...options});
+            const childProc: cp.ChildProcess = cp.spawn(command, args, { ...options });
 
             childProc.stdout.on("data", (data: string | Buffer) => {
                 data = data.toString();
@@ -68,7 +68,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
 
             //childProc.stderr.on("data", (data: string | Buffer) => {reject(`Exited with error ${data}`)});
 
-            childProc.on("error", (data: string | Buffer) => {reject(`Exited with error ${data}`)});
+            childProc.on("error", (data: string | Buffer) => { reject(`Exited with error ${data}`) });
 
             childProc.on("close", (code: number) => {
                 if (code !== 0) {
@@ -96,44 +96,42 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
         return result;
     }
 
-    public async getImageId(): Promise<string|undefined> {
+    public async getImageId(): Promise<string | undefined> {
         let imageID: string | undefined;
         if (utils.g_containerType === "linux") {
             imageID = await this.executeCommand("docker", ['images', "chanchala7/mlperf_linux:latest", '--format', '"{{.Repository}}"']);
-            if (!imageID || 0 === imageID.length)
-            { // image doesnt exist
-                await this.executeCommand("docker", ["pull", "chanchala7/my_ubuntu:firsttry"]).then(async()=> {
-                        imageID =  await this.executeCommand("docker", ['images', "chanchala7/my_ubuntu", '--format', '"{{.Repository}}"']);
-                        console.log(`imageID: ${imageID}`);
-                    }, reason => {
-                        console.log("Docker pull failed");
-                    });
-            }   
+            if (!imageID || 0 === imageID.length) { // image doesnt exist
+                await this.executeCommand("docker", ["pull", "chanchala7/my_ubuntu:firsttry"]).then(async () => {
+                    imageID = await this.executeCommand("docker", ['images', "chanchala7/my_ubuntu", '--format', '"{{.Repository}}"']);
+                    console.log(`imageID: ${imageID}`);
+                }, reason => {
+                    console.log("Docker pull failed");
+                });
+            }
         }
         else if (utils.g_containerType === "windows") {
             imageID = await this.executeCommand("docker", ['images', `${docker_images["windows-mlperf"]["name"]}`, '--format', '"{{.Repository}}"']);
-            if (!imageID || 0 === imageID.length)
-            { // image doesnt exist
-                await this.executeCommand("docker", ["pull", `${docker_images["windows-mlperf"]["name"]}`]).then(async()=> {
-                    imageID =  await this.executeCommand("docker", ['images', "chanchala7/my_ubuntu", '--format', '"{{.Repository}}"']);
+            if (!imageID || 0 === imageID.length) { // image doesnt exist
+                await this.executeCommand("docker", ["pull", `${docker_images["windows-mlperf"]["name"]}`]).then(async () => {
+                    imageID = await this.executeCommand("docker", ['images', "chanchala7/my_ubuntu", '--format', '"{{.Repository}}"']);
                     console.log(`imageID: ${imageID}`);
-                    }, reason => {
-                        console.log("Docker pull failed");
-                    });
-            }   
+                }, reason => {
+                    console.log("Docker pull failed");
+                });
+            }
         }
         this._imageId = imageID;
         console.log(`Returning: ${imageID}`);
         return imageID;
     }
 
-    public async runImage(): Promise<string|undefined> {
+    public async runImage(): Promise<string | undefined> {
         let runningContainer: string | undefined;
         if (this._imageId && this._workspace) {
             let userWorkspaceMount: string = `source=${utils.g_hostLocation},target=${utils.g_mountLocation},type=bind`;
             let extensionMount: string = `source=${utils.g_hostOutputLocation},target=${utils.g_mountOutputLocation},type=bind`;
-            let args: string[] = ['run', '-m', '8g','-t', '-d', '--mount', userWorkspaceMount, '--mount', extensionMount, this._imageId];
-            runningContainer =  await this.executeCommandWithProgress("Your development environment is ready!", "Starting your development environment...","docker", args);
+            let args: string[] = ['run', '-m', '8g', '-t', '-d', '--mount', userWorkspaceMount, '--mount', extensionMount, this._imageId];
+            runningContainer = await this.executeCommandWithProgress("Your development environment is ready!", "Starting your development environment...", "docker", args);
             this._containerIds.push(runningContainer.substr(0, 12));
             console.log(`Container id: ${this._containerIds[0]}`);
         }
@@ -142,42 +140,50 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
     }
 
     //TODO: Added default opset value in case user does not enter a value. Default is currently 8, we can add more default value
-    public async convert(inputNode:string,outputNode:string, opset:string='8',fileuri: vscode.Uri, ...args: any[]): Promise<string|undefined> {
-            if (!this._workspace){
-                console.log(`No workspace defined`);
+    public async convert(inputNode: string, outputNode: string, opset: string = '8', fileuri: vscode.Uri, ...args: any[]): Promise<string | undefined> {
+        if (!this._workspace) {
+            console.log(`No workspace defined`);
+            return undefined;
+        }
+        if (this._workspace) {
+            let model: string | undefined;
+
+            if (path.basename(fileuri.fsPath).toLowerCase().includes("resnet")) {
+                model = "resnet50";
+            }
+            else if (path.basename(fileuri.fsPath).toLowerCase().includes("mobilenet")) {
+                model = "mobilenet";
+            }
+            else {
+                console.log("This model is not part of the supported models!");
                 return undefined;
             }
-            if (this._workspace) {
-                let model: string | undefined;
-    
-                if (path.basename(fileuri.fsPath).toLowerCase().includes("resnet")) {
-                    model = "resnet50";
-                }
-                else if (path.basename(fileuri.fsPath).toLowerCase().includes("mobilenet")){
-                    model =  "mobilenet";
-                }
-                else {
-                    console.log("This model is not part of the supported models!");
-                    return undefined;
-                }
-                if (model) {
-                    let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(path.dirname(fileuri.fsPath))}`, `${this._containerIds[0]}`, 'python3', '-m', 'tf2onnx.convert',
-                                          '--fold_const', '--opset', `${opset}` ,'--inputs',`${inputNode}`, '--outputs', `${outputNode}`,
-                                          '--inputs-as-nchw', `${inputNode}` ,'--input' , `${path.basename(fileuri.fsPath)}` , '--output',
-                                          `${path.basename(fileuri.fsPath).replace(".pb", ".onnx")}`];
-                    return await this.executeCommandWithProgress("Finished converting to ONNX!", "Converting to ONNX... ", "docker", args);
-                    // check this out
-    
-                }
-    
+            if (model) {
+                let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(path.dirname(fileuri.fsPath))}`, `${this._containerIds[0]}`, 'python3', '-m', 'tf2onnx.convert',
+                    '--fold_const', '--opset', `${opset}`, '--inputs', `${inputNode}`, '--outputs', `${outputNode}`,
+                    '--inputs-as-nchw', `${inputNode}`, '--input', `${path.basename(fileuri.fsPath)}`, '--output',
+                    `${path.basename(fileuri.fsPath).replace(".pb", ".onnx")}`];
+                return await this.executeCommandWithProgress("Finished converting to ONNX!", "Converting to ONNX... ", "docker", args);
+                // check this out
+
             }
-    
+
         }
 
-    
+    }
 
-    public async quantizeTFModel(fileuri?: vscode.Uri, ...args: any[]): Promise<string|undefined> {
-        if (!this._workspace){
+
+    public async summarizeGraph(fileuri: string) : Promise<string|undefined> {
+        if (!this._workspace) {
+            console.log(`No workspace defined`);
+            return undefined;
+        }
+        let args: string[] = ['exec', `${tensorflow_binaries[utils.g_containerType]["summarize"]}`, '--in_graph', `${utils.getLocationOnContainer(fileuri)}`];
+        return await this.executeCommand("docker", args);
+    }
+
+    public async quantizeTFModel(fileuri?: vscode.Uri, ...args: any[]): Promise<string | undefined> {
+        if (!this._workspace) {
             console.log(`No workspace defined`);
             return undefined;
         }
@@ -188,26 +194,25 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
             if (path.basename(fileuri.fsPath).toLowerCase().includes("resnet")) {
                 model = "resnet50";
             }
-            else if (path.basename(fileuri.fsPath).toLowerCase().includes("mobilenet")){
-                model =  "mobilenet";
+            else if (path.basename(fileuri.fsPath).toLowerCase().includes("mobilenet")) {
+                model = "mobilenet";
             }
             else {
                 console.log("This model is not part of the supported models!");
                 return undefined;
             }
-            if (model) 
-            {
-            let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(path.dirname(fileuri.fsPath))}`, `${this._containerIds[0]}`, `${tensorflow_binaries["linux"]["transform"]}`, 
-                                '--in_graph=', `${path.basename(fileuri.fsPath)}`, '--out_graph=', `${path.basename(fileuri.fsPath).replace(".pb", "_quantized.pb")}`, 
-                                '--inputs=', `${supported_models[model]["inputs"]}`, '--outputs=', `${supported_models[model]["outputs"]}`, '--transforms=', `${tensorflow_quantization_options}` ];
-                                
-            return await this.executeCommandWithProgress("Quantization done", "Quantizing TF FP32 model to TF int8 model... ", "docker", args);
+            if (model) {
+                let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(path.dirname(fileuri.fsPath))}`, `${this._containerIds[0]}`, `${tensorflow_binaries[utils.g_containerType]["transform"]}`,
+                    '--in_graph=', `${path.basename(fileuri.fsPath)}`, '--out_graph=', `${path.basename(fileuri.fsPath).replace(".pb", "_quantized.pb")}`,
+                    '--inputs=', `${supported_models[model]["inputs"]}`, '--outputs=', `${supported_models[model]["outputs"]}`, '--transforms=', `${tensorflow_quantization_options}`];
+
+                return await this.executeCommandWithProgress("Quantization done", "Quantizing TF FP32 model to TF int8 model... ", "docker", args);
             }
         }
 
     }
 
-    dockerDisplay(modeluri : vscode.Uri) {
+    dockerDisplay(modeluri: vscode.Uri) {
         //let netronCP = cp.spawn('C:\\Program Files\\Netron\\Netron.exe', [`${modeluri.fsPath}`], { env: [] });
         let netronCP = cp.spawn('C:\\Program Files\\Netron\\Netron.exe', [`${modeluri.fsPath}`]);
         netronCP.on('error', (err: any) => {
@@ -228,53 +233,53 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
         })
     }
 
-    public async validation(mlperfParams: Map<string, string>): Promise<string|undefined> { // Check this
+    public async validation(mlperfParams: Map<string, string>): Promise<string | undefined> { // Check this
         if (this._workspace) {
             let args: string[] = ['exec', '-w', `${utils.getMLPerfLocation()}`, `${this._containerIds[0]}`, 'python3', `${utils.getMLPerfDriver()}`,];
-           for (var [key, value] of mlperfParams) {
+            for (var [key, value] of mlperfParams) {
                 if (key === 'dataset-path' || key === 'model') {
                     args.push(`--${key}`);
                     args.push(utils.getLocationOnContainer(value));
-                    console.log (`Location on container: ${utils.getLocationOnContainer(value)}`)
+                    console.log(`Location on container: ${utils.getLocationOnContainer(value)}`)
                 }
                 else {
                     args.push(`--${key}`);
                     args.push(value);
                 }
 
-           }
-           args.push("--accuracy");
-           args.push("--output");
+            }
+            args.push("--accuracy");
+            args.push("--output");
 
-           if (utils.g_containerType === 'linux') {
+            if (utils.g_containerType === 'linux') {
                 args.push(`${utils.g_mountOutputLocation}/MLPerf/`);
-           }
-           else {
+            }
+            else {
                 args.push(`${utils.g_mountOutputLocation}\\MLPerf`);
-           }
+            }
 
-           console.log(`MLPerf args ${args}`);
-           return await this.executeCommandWithProgress("Finished Validation", "Validating model with MLPerf... ", "docker", args);
+            console.log(`MLPerf args ${args}`);
+            return await this.executeCommandWithProgress("Finished Validation", "Validating model with MLPerf... ", "docker", args);
         }
 
 
     }
     // This function can be removed.
-    dockerRunMLPerfValidation(model: string, result: string, backend: string ,profile: string, dataFormat: string, count: number, dataset:string, currentPanel: vscode.WebviewPanel | undefined) {
+    dockerRunMLPerfValidation(model: string, result: string, backend: string, profile: string, dataFormat: string, count: number, dataset: string, currentPanel: vscode.WebviewPanel | undefined) {
         if (this._workspace) {
             let temp = this._workspace.uri.fsPath + "\\";
-         //   let containerModelPath = `C:\\${path.basename(this._workspace.uri.fsPath)}\\${model.replace(temp, "")}`;
-           // let containerDatasetPath = `C:\\${path.basename(this._workspace.uri.fsPath)}\\${dataset.replace(temp, "")}`;
+            //   let containerModelPath = `C:\\${path.basename(this._workspace.uri.fsPath)}\\${model.replace(temp, "")}`;
+            // let containerDatasetPath = `C:\\${path.basename(this._workspace.uri.fsPath)}\\${dataset.replace(temp, "")}`;
             //TODO need to handle windows to linux path conversion for model and dataset
 
             // model = '/Vscode/resnet50_v15.pb';
             // dataset = '/Vscode/ILSVRC2012_img_val';
 
             let exec = cp.spawn('docker', ['exec', '-w', `${utils.getMLPerfLocation()}`, `this._containerIds[0]`, 'python3', `${utils.getMLPerfDriver()}`,
-                                '--profile', `${profile}`,'--backend',`${backend}` ,'--model', `${model}`, '--dataset-path', `${dataset}`,
-                                '--output', `/Vscode/${result}`, '--data-format', `${dataFormat}`, '--accuracy',
-                                '--count', `${count}`]);
-           // console.log(containerModelPath);
+                '--profile', `${profile}`, '--backend', `${backend}`, '--model', `${model}`, '--dataset-path', `${dataset}`,
+                '--output', `/Vscode/${result}`, '--data-format', `${dataFormat}`, '--accuracy',
+                '--count', `${count}`]);
+            // console.log(containerModelPath);
             //console.log(containerDatasetPath);
             //console.log(model);
             exec.on('error', (err) => {
@@ -305,10 +310,11 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
                                 let results = JSON.parse(data.toString());
                                 try {
                                     // Be mindful that the new object created in the lambda *has* to be enclosed in brackets
-                                    let forGrid : any = Object.entries(results).map(kv => ({ "input" : kv[0],
-                                                                                            "actual" : (<any>kv[1])["actual"],
-                                                                                            "expected" : (<any>kv[1])["expected"]
-                                                                                        }));
+                                    let forGrid: any = Object.entries(results).map(kv => ({
+                                        "input": kv[0],
+                                        "actual": (<any>kv[1])["actual"],
+                                        "expected": (<any>kv[1])["expected"]
+                                    }));
                                     console.log("Results parsing worked");
                                     if (currentPanel !== undefined) {
                                         currentPanel.webview.postMessage({ command: 'result', payload: forGrid });

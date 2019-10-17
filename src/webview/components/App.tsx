@@ -121,11 +121,25 @@ class App extends Component<{}, IState> {
 
     handleWindowListner(ev: any) {
         let myobj = this.state.validateInputParams;
+        let myobjConvert = this.state.convertInputParams;
+        let myobjQuantize = this.state.quantizeInputParams;
         switch (ev.data.command) {
             case "modelPath": {
                 console.log(`Got a message from the host ${ev.data}`);
                 myobj.modelPath = ev.data.payload;
                 this.setState(state => ({ validateInputParams: myobj }));
+                break;
+            }
+            case "modelPathConvert": {
+                console.log(`Convert: Got a message from the host ${ev.data}`);
+                myobjConvert.modelPath = ev.data.payload;
+                this.setState(state => ({ convertInputParams: myobjConvert }));
+                break;
+            }
+            case "modelPathQuantize": {
+                console.log(`Quantize: Got a message from the host ${ev.data}`);
+                myobjQuantize.modelPath = ev.data.payload;
+                this.setState(state => ({ quantizeInputParams: myobjQuantize }));
                 break;
             }
             case "dataSet": {
@@ -176,6 +190,15 @@ class App extends Component<{}, IState> {
 
     };
 
+    pathToModelQuantize = () => {
+        window.console.log("Select path to model");
+        vscode.postMessage({
+            command: 'setModelPath:quantize',
+            text: 'Select path to model'
+        });
+        window.console.log(`Sent message to host.`);
+    };
+
     startQuantization = () => {
         vscode.postMessage({
              command: 'startQuantization',
@@ -191,6 +214,23 @@ class App extends Component<{}, IState> {
          });
         window.console.log(`Sent message to host.`);
         //TODO: Add code to clear form fields
+    };
+
+    pathToModelConvert = () => {
+        window.console.log("Select path to model");
+        vscode.postMessage({
+            command: 'setModelPath:convert',
+            text: 'Select path to model'
+        });
+        window.console.log(`Sent message to host.`);
+    };
+    summarizeGraph = () => {
+
+        vscode.postMessage({
+           command: 'summarizeGraph',
+           text: 'summarize graph',
+         });
+        window.console.log(`Sent message to host.`);
     };
     startConversion = () => {
 
@@ -263,10 +303,10 @@ class App extends Component<{}, IState> {
         window.console.log(`Sent message to host.`);
     };
 
-    pathToModelHandler = () => {
+    pathToModelValidate = () => {
         window.console.log("Select path to model");
         vscode.postMessage({
-            command: 'setModelPath',
+            command: 'setModelPath:validate',
             text: 'Select path to model'
         });
         window.console.log(`Sent message to host.`);
@@ -302,7 +342,9 @@ class App extends Component<{}, IState> {
                     <PivotItem headerText="Convert">
                         <Label style={{ color: 'white' }}><Convert
                             inputProps={this.state.convertInputParams}
+                            pathToModel={this.pathToModelConvert}
                             formHandler={this.formHandler}
+                            summarizeGraph={this.summarizeGraph}
                             startConversion={this.startConversion}
                             cancelConversion={this.cancelConversion}
                         /></Label>
@@ -310,9 +352,10 @@ class App extends Component<{}, IState> {
                     <PivotItem headerText="Quantize">
                         <Label style={{ color: 'white' }}><Quantize
                             inputProps={this.state.quantizeInputParams}
+                            pathToModel={this.pathToModelQuantize}
                             startQuantization={this.startConversion}
                             cancelQuantization={this.cancelConversion}
-                            PathToRepresentativeData={this.PathToRepresentativeData}
+                            pathToRepresentativeData={this.PathToRepresentativeData}
                         /></Label>
                     </PivotItem>
                     <PivotItem headerText="Validate">
@@ -320,7 +363,7 @@ class App extends Component<{}, IState> {
                             inputProps={this.state.validateInputParams}
                             validateFormHandler={this.validateFormHandler}
                             startValidation={this.startValidation}
-                            pathToModelHandler={this.pathToModelHandler}
+                            pathToModelHandler={this.pathToModelValidate}
                             pathToDatasetHandler={this.pathToDatasetHandler}
                             cancelValidation={this.cancelValidation}
                         />

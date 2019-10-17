@@ -26,7 +26,6 @@ export async function setMountLocations(userMount: string, extMount: string, con
     console.log(`2 Mount locations: ${g_mountLocation}, ${g_mountOutputLocation} , ${g_containerType}`, `${containerType}`);
 }
 
-
 export function isWindows(): boolean {
     return process.platform === "win32";
 }

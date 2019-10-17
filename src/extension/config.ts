@@ -36,7 +36,7 @@ export const docker_images : { [key: string]: {name: string, memory: string, cpu
     },
 }
 
-// Configs for tensorflow binaries
+// Configs for tensorflow binaries based on the docker container
 export const tensorflow_binaries : { [key: string]: {transform: string, summarize: string, benchmark: string}} = {
     "linux" : {
         "transform": "/root/tensorflow/bazel-bin/tensorflow/tools/graph_transforms/transform_graph",

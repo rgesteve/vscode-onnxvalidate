@@ -54,13 +54,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
   
 
-    let DLToolKit = vscode.commands.registerCommand('extension.DLToolKit', (modeluri: vscode.Uri ) => {
-        if (modeluri === undefined) {
-            vscode.window.showErrorMessage("Requires a file argument!!");
-            return;
-        }
-      
-      
+    //let DLToolKit = vscode.commands.registerCommand('extension.DLToolKit', (modeluri: vscode.Uri ) => {
+    let DLToolKit = vscode.commands.registerCommand('extension.DLToolKit', (modeluri?: vscode.Uri ) => {   
         const contentProvider = new ContentProvider();
 
         if (currentPanel) {
@@ -77,13 +72,21 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                 }
             );
             let mlperfParam: Map<string, string> = new Map<string, string>(); // delete?
+            let convertParam: Map<string, string> = new Map<string, string>();
             // refactor this function out.
 
             let inputNode:string;
             let outputNode:string;
             let opset:string;
             currentPanel.webview.onDidReceiveMessage(async msg => {
-                switch (msg.command) {
+                let command : string = msg.command;
+                let subCommand : string = "";
+                if (msg.command.includes(":"))
+                {
+                    command = msg.command.split(":")[0];
+                    subCommand = msg.command.split(":")[1];
+                }
+                switch (command) {
                     case "setModelPath": {
                         vscode.window.showOpenDialog({
                             //modified this as you can select either file or folder not both, set selecting only files as folders wont be helpful here
@@ -97,12 +100,35 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                         }).then((folderUris) => {
                             if (folderUris) {
                                 folderUris.forEach(function (value) {
-                                    mlperfParam.set("model", value.fsPath);
+                                    
+                                    switch(subCommand) {
+                                        case "convert" : {
+                                            convertParam.set("model", value.fsPath);
+                                            if (currentPanel) {
+                                                currentPanel.webview.postMessage({ command: "modelPathConvert", payload: convertParam.get("model") });
+                                            }
+                                            break;
+                                        }
+                                        case "quantize" : {
+                                            if (currentPanel) {
+                                                currentPanel.webview.postMessage({ command: "modelPathQuantize", payload: value.fsPath });
+                                            }
+                                            break;
+                                        }
+                                        case "validate" : {
+                                            mlperfParam.set("model", value.fsPath);
+                                            if (currentPanel) {
+                                                currentPanel.webview.postMessage({ command: "modelPathValidate", payload: mlperfParam.get("model") });
+                                            }
+                                            break;
+                                        }
+                                    }
+                                   
                                 });
                             }
-                            if (currentPanel) {
-                                currentPanel.webview.postMessage({ command: "modelPath", payload: mlperfParam.get("model") });
-                            }
+                            // if (currentPanel) {
+                            //     currentPanel.webview.postMessage({ command: "modelPath", payload: mlperfParam.get("model") });
+                            // }
                             vscode.window.showInformationMessage(`Seems like I should be opening ${folderUris}!`);
                         });
                         break;
@@ -178,36 +204,63 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                         console.log("Canceling verification, cleared mlperfParam");
                         break;
                     }
+                    case "setModel": {
+                        convertParam.set("model", msg.text);
+                        break;
+                    }
                     case "setInputNode": {
-                        inputNode= msg.text;
-                       //debug 
-                       //vscode.window.showInformationMessage(`Input Node is ${inputNode}`);
+                        convertParam.set("inputNode", msg.text);
                         break;
                     }
                     case "setOutputNode": {
-                        outputNode= msg.text;
-                       //debug 
-                        // vscode.window.showInformationMessage(`Output Node is ${outputNode}`);
+                        convertParam.set("outputNode", msg.text);
                         break;
                     }
                     case "setOpsetNode": {
-                        opset= msg.text;
-                       //debug 
-                    //    vscode.window.showInformationMessage(`opset is ${opset}`);
+                        convertParam.set("opset", msg.text);
                         break;
                     }
                     case "startConversion": {
                         
-                        await dockerManager.convert(inputNode, outputNode, opset, modeluri).then(async () => {
-                            vscode.window.showInformationMessage("Conversion Done");
-                            //Read JSON file from stored location here
-                        }, reason => {
-                            vscode.window.showInformationMessage(`Conversion failed. ${reason}`);
+                        // await dockerManager.convert(inputNode, outputNode, opset, modeluri).then(async () => {
+                        //     vscode.window.showInformationMessage("Conversion Done");
+                        //     //Read JSON file from stored location here
+                        // }, reason => {
+                        //     vscode.window.showInformationMessage(`Conversion failed. ${reason}`);
                            
-                        });
-                        break;
+                        // });
+                        // break;
                     }
                     //Need to fix. Add post message to send message to UI to clear input fields.
+
+                    case "summarizeGraph": {
+                        let temp : string | undefined = convertParam.get("model");
+                        if (temp){
+                            await dockerManager.summarizeGraph(temp).then(async ()=> {
+                                vscode.window.showInformationMessage("Summarize Done");
+                                //Read JSON file from stored location here
+    
+                                var summarizeResult: string = path.join(os.tmpdir(), "MLPerf", "results.json");
+                                console.log(`Summarize graph result: ${summarizeResult}`);
+    
+                                if(fs.existsSync(summarizeResult)) {
+    
+                                    let results = JSON.parse(fs.readFileSync(summarizeResult).toString());
+                                    if (currentPanel !== undefined) {
+                                        currentPanel.webview.postMessage({ command: 'result', payload: `DONE ${JSON.stringify(results)}` });
+                                    }
+    
+                                }
+                            }, reason => {
+                                vscode.window.showInformationMessage(`Summarize failed. ${reason}`);
+                                if (currentPanel !== undefined) {
+                                    currentPanel.webview.postMessage({ command: 'result', payload: `FAILED` });
+                                }
+                            });
+                        }
+
+                        break;
+                    }
                     case "cancelConversion": {
                         
                         inputNode=""

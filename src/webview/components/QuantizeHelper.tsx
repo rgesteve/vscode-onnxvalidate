@@ -1,12 +1,12 @@
 export class QuantizeInputParams {
-    "representativeDataPath": string;
-    
+    "datasetPath": string;
+    "modelPath": string;
 
     QuantizeInputParams() {
-      this.representativeDataPath = "";
-   
-     
-    }
-  }
+        this.datasetPath = "";
+        this.modelPath = "";
 
-  
+    }
+}
+
+
