@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Stack, IStackStyles, IStackTokens, PrimaryButton, mergeStyles, mergeStyleSets, DefaultPalette, ScrollablePane } from 'office-ui-fabric-react';
+import { Text,Stack, IStackStyles, IStackTokens, PrimaryButton, mergeStyles, mergeStyleSets, DefaultPalette, ScrollablePane } from 'office-ui-fabric-react';
 import { TooltipHost } from 'office-ui-fabric-react/lib/Tooltip';
 import { getId } from 'office-ui-fabric-react/lib/Utilities';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -10,6 +10,10 @@ import { Result } from './ValidationHelper';
 
 interface IVResultProps {
     resultJSON: Result;
+}
+
+interface ISummarizeResultProps {
+    summarizeResult: string;
 }
 
 class ValidationResult extends Component<IVResultProps, {}> {
@@ -101,6 +105,40 @@ class ValidationResult extends Component<IVResultProps, {}> {
     }
 }
 
+export class SummarizeResult extends Component<ISummarizeResultProps, {}> {
+    constructor(props: ISummarizeResultProps) {
+        super(props);
+    } 
+    render() {
+        let result_instance = this.props.summarizeResult;
+        result_instance = "teststststst"
+        return (
+            <Stack verticalFill gap='15'>
+
+                <Stack tokens={tokens.headingStack}>
+                    <Text variant={'large'} block>
+                        Summarize Result
+                    </Text>
+                    <Text variant={'large'} >
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+                        ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
+                        reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt
+                        in culpa qui officia deserunt mollit anim id est laborum.
+                    </Text>
+                </Stack>
+            </Stack>
+        )
+    }
+}
+
+const tokens = {
+    sectionStack: {
+      childrenGap: 10
+    },
+    headingStack: {
+      childrenGap: 5
+    }
+  };
 function roundFloatValue(num: number) {
     return (Math.round(num * 100) / 100).toFixed(2);
 }
@@ -159,7 +197,7 @@ const classNames = mergeStyleSets({
         border: '1px solid'
     },
     textContent: {
-        padding: '5px 5px'
+        padding: '2px 2px'
     }
 });
 

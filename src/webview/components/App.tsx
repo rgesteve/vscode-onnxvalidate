@@ -6,7 +6,8 @@ import { Label } from 'office-ui-fabric-react/lib/Label';
 import { ConversionInputParams } from './ConversionHelper';
 import { QuantizeInputParams } from './QuantizeHelper';
 import ValidateInput from './ValidateInput';
-import ValidationResult from './ValidationResult'
+import ValidationResult , {SummarizeResult} from './ValidationResult'
+//import SummarizeResult  from './SummarizeResult'
 import { Result, ValidationInputParams } from './ValidationHelper';
 
 declare var acquireVsCodeApi: any;
@@ -14,6 +15,8 @@ const vscode = acquireVsCodeApi();
 
 interface IState {
     convertInputParams: ConversionInputParams,
+    summarizeResult: string,
+    summarizeDisplayResult: Boolean,
     quantizeInputParams: QuantizeInputParams,
     validationResult: Result,
     validationDisplayResult: Boolean,
@@ -28,15 +31,17 @@ class App extends Component<{}, IState> {
         super(props)
         this.state = {
             convertInputParams: new ConversionInputParams(),
+            summarizeResult: "",
+            summarizeDisplayResult: true,
             quantizeInputParams: new QuantizeInputParams(),
             validationResult: new Result(),
             validationDisplayResult: false,
             validateInputParams: new ValidationInputParams()
         }
-        this.handleWindowListner = this.handleWindowListner.bind(this);
+        this.handleWindowListener = this.handleWindowListener.bind(this);
     }
     componentDidMount() {
-        window.addEventListener('message', this.handleWindowListner);
+        window.addEventListener('message', this.handleWindowListener);
 
     }
 
@@ -116,10 +121,10 @@ class App extends Component<{}, IState> {
 
     }
     componentWillUnmount() {
-        window.removeEventListener('message', this.handleWindowListner);
+        window.removeEventListener('message', this.handleWindowListener);
     }
 
-    handleWindowListner(ev: any) {
+    handleWindowListener(ev: any) {
         let myobj = this.state.validateInputParams;
         let myobjConvert = this.state.convertInputParams;
         let myobjQuantize = this.state.quantizeInputParams;
@@ -170,6 +175,22 @@ class App extends Component<{}, IState> {
                         let result_string = ev.data.payload.replace("DONE", "");
                         this.setState(state => ({ validationResult: new Result().deserialize(JSON.parse(result_string)) }));
                         this.setState(state => ({ validationDisplayResult: true }));
+                    }
+                } catch {
+                    console.log("Couldn't display keys to the element");
+                }
+                break;
+            }
+            case "summarizeResult": {
+                window.console.log(`Summarize result ${this.state.summarizeResult} `);
+
+                try {
+                    console.log(`My payload after summarization is ${ev.data.payload}`)
+                    let temp: string = ev.data.payload;
+                    if (temp.startsWith("DONE")) {
+                        let result_string = ev.data.payload.replace("DONE", "");
+                        this.setState(state => ({ summarizeResult: temp }));
+                        this.setState(state => ({ summarizeDisplayResult: true }));
                     }
                 } catch {
                     console.log("Couldn't display keys to the element");
@@ -347,7 +368,9 @@ class App extends Component<{}, IState> {
                             summarizeGraph={this.summarizeGraph}
                             startConversion={this.startConversion}
                             cancelConversion={this.cancelConversion}
-                        /></Label>
+                        />
+                        {this.state.summarizeDisplayResult == true ? <SummarizeResult summarizeResult={this.state.summarizeResult} /> : null}
+                        </Label>
                     </PivotItem>
                     <PivotItem headerText="Quantize">
                         <Label style={{ color: 'white' }}><Quantize
