@@ -209,11 +209,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                         break;
                     }
                     case "setInputNode": {
-                        convertParam.set("inputNode", msg.text);
+                        convertParam.set("inputs", msg.text);
                         break;
                     }
                     case "setOutputNode": {
-                        convertParam.set("outputNode", msg.text);
+                        convertParam.set("outputs", msg.text);
                         break;
                     }
                     case "setOpsetNode": {
@@ -222,14 +222,14 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                     }
                     case "startConversion": {
                         
-                        // await dockerManager.convert(inputNode, outputNode, opset, modeluri).then(async () => {
-                        //     vscode.window.showInformationMessage("Conversion Done");
-                        //     //Read JSON file from stored location here
-                        // }, reason => {
-                        //     vscode.window.showInformationMessage(`Conversion failed. ${reason}`);
+                        await dockerManager.convert(convertParam).then(async () => {
+                            vscode.window.showInformationMessage("Conversion Done");
+                            //Read JSON file from stored location here
+                        }, reason => {
+                            vscode.window.showInformationMessage(`Conversion failed. ${reason}`);
                            
-                        // });
-                        // break;
+                        });
+                        break;
                     }
                     //Need to fix. Add post message to send message to UI to clear input fields.
 

@@ -140,37 +140,69 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
     }
 
     //TODO: Added default opset value in case user does not enter a value. Default is currently 8, we can add more default value
-    public async convert(inputNode: string, outputNode: string, opset: string = '8', fileuri: vscode.Uri, ...args: any[]): Promise<string | undefined> {
+    //public async convert(inputNode: string, outputNode: string, opset: string = '8', fileuri: vscode.Uri, ...args: any[]): Promise<string | undefined> {
+    public async convert(convertParams: Map<string,string>): Promise<string | undefined> {
         if (!this._workspace) {
             console.log(`No workspace defined`);
             return undefined;
         }
-        if (this._workspace) {
-            let model: string | undefined;
+        let modelToConvert : string | undefined = convertParams.get("model");
+        if (!modelToConvert) {
+            console.log(`No input model provided`);
+            return undefined;
+        }
 
-            if (path.basename(fileuri.fsPath).toLowerCase().includes("resnet")) {
-                model = "resnet50";
-            }
-            else if (path.basename(fileuri.fsPath).toLowerCase().includes("mobilenet")) {
-                model = "mobilenet";
+        if (convertParams.get("inputs")===undefined || convertParams.get("outputs")===undefined)
+        {
+
+        }
+        let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(convertParams.get("model"))}`, `${this._containerIds[0]}`, 'python3', '-m', 'tf2onnx.convert',];
+        for (var [key, value] of convertParams) {
+            if (key === 'model') {
+                args.push(`--${key}`);
+                args.push(utils.getLocationOnContainer(value));
+                console.log(`Location on container: ${utils.getLocationOnContainer(value)}`)
             }
             else {
-                console.log("This model is not part of the supported models!");
-                return undefined;
-            }
-            if (model) {
-                let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(path.dirname(fileuri.fsPath))}`, `${this._containerIds[0]}`, 'python3', '-m', 'tf2onnx.convert',
-                    '--fold_const', '--opset', `${opset}`, '--inputs', `${inputNode}`, '--outputs', `${outputNode}`,
-                    '--inputs-as-nchw', `${inputNode}`, '--input', `${path.basename(fileuri.fsPath)}`, '--output',
-                    `${path.basename(fileuri.fsPath).replace(".pb", ".onnx")}`];
-                return await this.executeCommandWithProgress("Finished converting to ONNX!", "Converting to ONNX... ", "docker", args);
-                // check this out
-
+                args.push(`--${key}`);
+                args.push(value);
             }
 
         }
+        args.push("--inputs-as-nchw");
+        args.push("--output");
+        args.push(`${path.basename(modelToConvert).replace(".pb", ".onnx")}`);
 
-    }
+        console.log(`Convert params ${args}`);
+        return await this.executeCommandWithProgress("Finished Validation", "Validating model with MLPerf... ", "docker", args);
+        }
+
+        // if (this._workspace) {
+        //     let model: string | undefined;
+
+        //     if (path.basename(fileuri.fsPath).toLowerCase().includes("resnet")) {
+        //         model = "resnet50";
+        //     }
+        //     else if (path.basename(fileuri.fsPath).toLowerCase().includes("mobilenet")) {
+        //         model = "mobilenet";
+        //     }
+        //     else {
+        //         console.log("This model is not part of the supported models!");
+        //         return undefined;
+        //     }
+        //     if (model) {
+        //         let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(path.dirname(fileuri.fsPath))}`, `${this._containerIds[0]}`, 'python3', '-m', 'tf2onnx.convert',
+        //             '--fold_const', '--opset', `${opset}`, '--inputs', `${inputNode}`, '--outputs', `${outputNode}`,
+        //             '--inputs-as-nchw', `${inputNode}`, '--input', `${path.basename(fileuri.fsPath)}`, '--output',
+        //             `${path.basename(fileuri.fsPath).replace(".pb", ".onnx")}`];
+        //         return await this.executeCommandWithProgress("Finished converting to ONNX!", "Converting to ONNX... ", "docker", args);
+        //         // check this out
+
+        //     }
+
+        // }
+
+    //}
 
 
     public async summarizeGraph(fileuri: string) : Promise<string|undefined> {

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text,Stack, IStackStyles, IStackTokens, PrimaryButton, mergeStyles, mergeStyleSets, DefaultPalette, ScrollablePane } from 'office-ui-fabric-react';
+import { Text,Stack, IStackStyles, IStackItemStyles, IStackTokens, PrimaryButton, mergeStyles, mergeStyleSets, DefaultPalette, ScrollablePane } from 'office-ui-fabric-react';
 import { TooltipHost } from 'office-ui-fabric-react/lib/Tooltip';
 import { getId } from 'office-ui-fabric-react/lib/Utilities';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -103,7 +103,7 @@ class ValidationResult extends Component<IVResultProps, {}> {
             </Stack>
         );
     }
-}
+};
 
 export class SummarizeResult extends Component<ISummarizeResultProps, {}> {
     constructor(props: ISummarizeResultProps) {
@@ -113,24 +113,52 @@ export class SummarizeResult extends Component<ISummarizeResultProps, {}> {
         let result_instance = this.props.summarizeResult;
         result_instance = "teststststst"
         return (
-            <Stack verticalFill gap='15'>
+            <Stack tokens={containerStackTokens}>
 
-                <Stack tokens={tokens.headingStack}>
-                    <Text variant={'large'} block>
-                        Summarize Result
-                    </Text>
-                    <Text variant={'large'} >
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-                        ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
-                        reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt
-                        in culpa qui officia deserunt mollit anim id est laborum.
-                    </Text>
-                </Stack>
+                <Stack.Item grow styles={stackItemStyles}>
+
+                        <Text variant={'xLarge'} block>
+                            Summarize Result
+                        </Text>
+                        <Text variant={'large'} >
+                            {result_instance}
+                        </Text>
+
+
+
+                </Stack.Item>
             </Stack>
-        )
+        );
+
     }
 }
+// Styles definition
+const stackStyles: IStackStyles = {
+    root: {
+        background: DefaultPalette.themeTertiary
+    }
+};
+const stackItemStyles: IStackItemStyles = {
+    root: {
+        background: DefaultPalette.themePrimary,
+        color: DefaultPalette.white,
+        padding: 5
+    }
+};
 
+// Tokens definition
+const containerStackTokens: IStackTokens = { childrenGap: 5 };
+const verticalGapStackTokens: IStackTokens = {
+    childrenGap: 10,
+    padding: 10
+};
+const itemAlignmentsStackTokens: IStackTokens = {
+    childrenGap: 5,
+    padding: 10
+};
+const clickableStackTokens: IStackTokens = {
+    padding: 10
+};
 const tokens = {
     sectionStack: {
       childrenGap: 10
@@ -159,13 +187,13 @@ const customScrollStack: IStackStyles = {
     }
 }
 
-const stackStyles: IStackStyles = {
-    root: {
-        background: DefaultPalette.neutralLight,
-        width: 'auto',
-        padding: '5px'
-    }
-};
+// const stackStyles: IStackStyles = {
+//     root: {
+//         background: DefaultPalette.neutralLight,
+//         width: 'auto',
+//         padding: '5px'
+//     }
+// };
 const stackItemLabelStyles = mergeStyles({
     alignItems: 'center',
     background: DefaultPalette.themeDarker,

@@ -7,7 +7,6 @@ import { ConversionInputParams } from './ConversionHelper';
 import { QuantizeInputParams } from './QuantizeHelper';
 import ValidateInput from './ValidateInput';
 import ValidationResult , {SummarizeResult} from './ValidationResult'
-//import SummarizeResult  from './SummarizeResult'
 import { Result, ValidationInputParams } from './ValidationHelper';
 
 declare var acquireVsCodeApi: any;
@@ -21,9 +20,8 @@ interface IState {
     validationResult: Result,
     validationDisplayResult: Boolean,
     validateInputParams: ValidationInputParams
-
-
 }
+
 class App extends Component<{}, IState> {
 
     state: IState;
@@ -32,7 +30,7 @@ class App extends Component<{}, IState> {
         this.state = {
             convertInputParams: new ConversionInputParams(),
             summarizeResult: "",
-            summarizeDisplayResult: true,
+            summarizeDisplayResult: false,
             quantizeInputParams: new QuantizeInputParams(),
             validationResult: new Result(),
             validationDisplayResult: false,
