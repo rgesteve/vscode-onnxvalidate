@@ -127,7 +127,7 @@ class App extends Component<{}, IState> {
         let myobjConvert = this.state.convertInputParams;
         let myobjQuantize = this.state.quantizeInputParams;
         switch (ev.data.command) {
-            case "modelPath": {
+            case "modelPathValidate": {
                 console.log(`Got a message from the host ${ev.data}`);
                 myobj.modelPath = ev.data.payload;
                 this.setState(state => ({ validateInputParams: myobj }));
@@ -145,10 +145,16 @@ class App extends Component<{}, IState> {
                 this.setState(state => ({ quantizeInputParams: myobjQuantize }));
                 break;
             }
-            case "dataSet": {
+            case "datasetValidate": {
                 console.log(`Got a message from the host ${ev.data}`);
-                myobj.dataSet = ev.data.payload;
+                myobj.datasetPath = ev.data.payload;
                 this.setState(state => ({ validateInputParams: myobj }));
+                break;
+            }
+            case "datasetQuantize": {
+                console.log(`Got a message from the host ${ev.data}`);
+                myobjQuantize.datasetPath = ev.data.payload;
+                this.setState(state => ({ quantizeInputParams: myobjQuantize }));
                 break;
             }
             case "count": {
@@ -202,7 +208,7 @@ class App extends Component<{}, IState> {
         console.log("inside select path to representative data");
         window.console.log("Select path to representative data");
         vscode.postMessage({
-            command: 'setRepresentativeDataPath',
+            command: 'setDataset:quantize',
              text: 'Select path to representative data'
           });
         window.console.log(`Sent message to host.`);
@@ -334,7 +340,7 @@ class App extends Component<{}, IState> {
     pathToDatasetHandler = () => {
         window.console.log("Select path to data set");
         vscode.postMessage({
-            command: 'setDataset',
+            command: 'setDataset:validate',
             text: 'Select path to dataset'
         });
         window.console.log(`Sent message to host.`);
@@ -374,7 +380,7 @@ class App extends Component<{}, IState> {
                         <Label style={{ color: 'white' }}><Quantize
                             inputProps={this.state.quantizeInputParams}
                             pathToModel={this.pathToModelQuantize}
-                            startQuantization={this.startConversion}
+                            startQuantization={this.startQuantization}
                             cancelQuantization={this.cancelConversion}
                             pathToRepresentativeData={this.PathToRepresentativeData}
                         /></Label>

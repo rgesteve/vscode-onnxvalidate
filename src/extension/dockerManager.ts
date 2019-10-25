@@ -146,64 +146,60 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
             console.log(`No workspace defined`);
             return undefined;
         }
-        let modelToConvert : string | undefined = convertParams.get("model");
+        let modelToConvert : string | undefined = convertParams.get("input");
         if (!modelToConvert) {
             console.log(`No input model provided`);
             return undefined;
         }
 
-        if (convertParams.get("inputs")===undefined || convertParams.get("outputs")===undefined)
-        {
-
-        }
-        let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(convertParams.get("model"))}`, `${this._containerIds[0]}`, 'python3', '-m', 'tf2onnx.convert',];
+        let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(path.dirname(modelToConvert))}`, `${this._containerIds[0]}`, 'python3', '-m', 'tf2onnx.convert',];
         for (var [key, value] of convertParams) {
-            if (key === 'model') {
-                args.push(`--${key}`);
-                args.push(utils.getLocationOnContainer(value));
-                console.log(`Location on container: ${utils.getLocationOnContainer(value)}`)
+            if (value) { // value is not undefined
+                if (key === 'input') {
+                    args.push(`--${key}`);
+                    args.push(utils.getLocationOnContainer(value));
+                    console.log(`Location on container: ${utils.getLocationOnContainer(value)}`)
+                }
+                else {
+                    args.push(`--${key}`);
+                    args.push(value);
+                }
             }
-            else {
-                args.push(`--${key}`);
-                args.push(value);
-            }
-
         }
-        args.push("--inputs-as-nchw");
+
         args.push("--output");
         args.push(`${path.basename(modelToConvert).replace(".pb", ".onnx")}`);
 
-        console.log(`Convert params ${args}`);
-        return await this.executeCommandWithProgress("Finished Validation", "Validating model with MLPerf... ", "docker", args);
+        // if no inputs/outputs/opsets are defined, look up the supported models' inputs/outputs and default to opset 8
+        if (convertParams.get("inputs") === undefined || convertParams.get("outputs") === undefined || convertParams.get("opset") === undefined)
+        { // if only one is defined?
+            args.push("--opset");
+            args.push("8");
+            if (path.basename(modelToConvert).toLowerCase().includes("resnet")) {
+                args.push("--inputs");
+                args.push(`${supported_models["resnet50"]["inputs"]}`);
+                args.push("--outputs");
+                args.push(`${supported_models["resnet50"]["outputs"]}`);
+                args.push("--inputs-as-nchw");
+                args.push(`${supported_models["resnet50"]["inputs"]}`);
+            }
+            else if (path.basename(modelToConvert).toLowerCase().includes("mobilenet")) {
+                args.push("--inputs");
+                args.push(`${supported_models["mobilenet"]["inputs"]}`);
+                args.push("--outputs");
+                args.push(`${supported_models["mobilenet"]["outputs"]}`);
+                args.push("--inputs-as-nchw");
+                args.push(`${supported_models["mobilenet"]["inputs"]}`);
+            }
+            else {
+                console.log("This model is not part of the supported models!");
+                return undefined;
+            }
         }
 
-        // if (this._workspace) {
-        //     let model: string | undefined;
-
-        //     if (path.basename(fileuri.fsPath).toLowerCase().includes("resnet")) {
-        //         model = "resnet50";
-        //     }
-        //     else if (path.basename(fileuri.fsPath).toLowerCase().includes("mobilenet")) {
-        //         model = "mobilenet";
-        //     }
-        //     else {
-        //         console.log("This model is not part of the supported models!");
-        //         return undefined;
-        //     }
-        //     if (model) {
-        //         let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(path.dirname(fileuri.fsPath))}`, `${this._containerIds[0]}`, 'python3', '-m', 'tf2onnx.convert',
-        //             '--fold_const', '--opset', `${opset}`, '--inputs', `${inputNode}`, '--outputs', `${outputNode}`,
-        //             '--inputs-as-nchw', `${inputNode}`, '--input', `${path.basename(fileuri.fsPath)}`, '--output',
-        //             `${path.basename(fileuri.fsPath).replace(".pb", ".onnx")}`];
-        //         return await this.executeCommandWithProgress("Finished converting to ONNX!", "Converting to ONNX... ", "docker", args);
-        //         // check this out
-
-        //     }
-
-        // }
-
-    //}
-
+        console.log(`Convert params ${args}`);
+        return await this.executeCommandWithProgress("Finished converting", "Converting to ONNX...", "docker", args);
+        }
 
     public async summarizeGraph(fileuri: string) : Promise<string|undefined> {
         if (!this._workspace) {
@@ -214,11 +210,19 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
         return await this.executeCommand("docker", args);
     }
 
+
+    // public async quantizeModel(fileuri?: vscode.Uri, ...args: any[]): Promise<string | undefined> {
+    //     if (!this._workspace) {
+    //         console.log(`No workspace defined`);
+    //         return undefined;
+    //     }
+    //     if (this._workspace && fileuri) { 
+    //         let model: string | undefined;
+    //         let fileExt = path.basename(fileuri.fsPath).toLowerCase().split('.').pop();
+    //         if (file)
+    // }
+
     public async quantizeTFModel(fileuri?: vscode.Uri, ...args: any[]): Promise<string | undefined> {
-        if (!this._workspace) {
-            console.log(`No workspace defined`);
-            return undefined;
-        }
 
         if (this._workspace && fileuri) { // this is for the time being, need a good way to get the details of model, summarize_graph?
             let model: string | undefined;

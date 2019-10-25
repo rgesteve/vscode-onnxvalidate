@@ -103,9 +103,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                                     
                                     switch(subCommand) {
                                         case "convert" : {
-                                            convertParam.set("model", value.fsPath);
+                                            convertParam.set("input", value.fsPath);
                                             if (currentPanel) {
-                                                currentPanel.webview.postMessage({ command: "modelPathConvert", payload: convertParam.get("model") });
+                                                currentPanel.webview.postMessage({ command: "modelPathConvert", payload: convertParam.get("input") });
                                             }
                                             break;
                                         }
@@ -140,12 +140,27 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                         }).then((folderUris) => {
                             if (folderUris) {
                                 folderUris.forEach(function (value) {
+                                    switch(subCommand) {
+                                        case "quantize" : {
+                                            if (currentPanel) {
+                                                currentPanel.webview.postMessage({ command: "datasetQuantize", payload: value.fsPath });
+                                            }
+                                            break;
+                                        }
+                                        case "validate" : {
+                                            mlperfParam.set("dataset-path", value.fsPath);
+                                            if (currentPanel) {
+                                                currentPanel.webview.postMessage({ command: "datasetValidate", payload: mlperfParam.get("dataset-path") });
+                                            }
+                                            break;
+                                        }
+                                    }
                                     mlperfParam.set("dataset-path", value.fsPath);
                                 });
                             }
-                            if (currentPanel) {
-                                currentPanel.webview.postMessage({ command: "dataSet", payload: mlperfParam.get("dataset-path") });
-                            }
+                            //if (currentPanel) {
+                            //    currentPanel.webview.postMessage({ command: "dataSet", payload: mlperfParam.get("dataset-path") });
+                            //}
                             vscode.window.showInformationMessage(`Seems like I should be opening ${folderUris}!`);
                         });
                         break;
@@ -205,7 +220,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                         break;
                     }
                     case "setModel": {
-                        convertParam.set("model", msg.text);
+                        convertParam.set("input", msg.text);
                         break;
                     }
                     case "setInputNode": {
@@ -269,7 +284,17 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                         break;
                     }
 
-
+                    case "startQuantization": {
+                        
+                        await dockerManager.convert(convertParam).then(async () => {
+                            vscode.window.showInformationMessage("Conversion Done");
+                            //Read JSON file from stored location here
+                        }, reason => {
+                            vscode.window.showInformationMessage(`Conversion failed. ${reason}`);
+                           
+                        });
+                        break;
+                    }
 
                 }
 

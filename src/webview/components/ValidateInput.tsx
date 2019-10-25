@@ -24,7 +24,7 @@ class ValidateInput extends Component<IValidInputProps, {}> {
     }
 
     render() {
-        let { selectedItem, selectedBackend, selectedDataFormat, numberOfImages, modelPath, dataSet } = this.props.inputProps;
+        let { selectedItem, selectedBackend, selectedDataFormat, numberOfImages, modelPath, datasetPath } = this.props.inputProps;
         return (
             // TODO: Add different modes accurancy modes. perf mode etc
             //               Add different streams: single stream, multi stream etc
@@ -50,7 +50,7 @@ class ValidateInput extends Component<IValidInputProps, {}> {
                 <Stack horizontal gap={5} >
                     <Stack.Item grow>
                         <Label styles={labelStyles}>Enter path to data set </Label>
-                        <TextField placeholder="Enter path to data set" value={dataSet} />
+                        <TextField placeholder="Enter path to data set" value={datasetPath} />
                     </Stack.Item>
                     <Stack.Item align="end" >
                         <PrimaryButton style={{ width: '200px' }} onClick={this.props.pathToDatasetHandler}>Select Path to dataset</PrimaryButton>

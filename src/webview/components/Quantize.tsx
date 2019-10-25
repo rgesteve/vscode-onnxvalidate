@@ -25,9 +25,6 @@ class Quantize extends Component<IQuantizeProps, IState>  {
         super(props)
     }
 
-
-
-
     render() {
 
         let { datasetPath, modelPath } = this.props.inputProps;
