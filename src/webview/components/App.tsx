@@ -6,7 +6,7 @@ import { Label } from 'office-ui-fabric-react/lib/Label';
 import { ConversionInputParams } from './ConversionHelper';
 import { QuantizeInputParams } from './QuantizeHelper';
 import ValidateInput from './ValidateInput';
-import ValidationResult from './ValidationResult'
+import ValidationResult , {SummarizeResult} from './ValidationResult'
 import { Result, ValidationInputParams } from './ValidationHelper';
 
 declare var acquireVsCodeApi: any;
@@ -14,13 +14,14 @@ const vscode = acquireVsCodeApi();
 
 interface IState {
     convertInputParams: ConversionInputParams,
+    summarizeResult: string,
+    summarizeDisplayResult: Boolean,
     quantizeInputParams: QuantizeInputParams,
     validationResult: Result,
     validationDisplayResult: Boolean,
     validateInputParams: ValidationInputParams
-
-
 }
+
 class App extends Component<{}, IState> {
 
     state: IState;
@@ -28,15 +29,17 @@ class App extends Component<{}, IState> {
         super(props)
         this.state = {
             convertInputParams: new ConversionInputParams(),
+            summarizeResult: "",
+            summarizeDisplayResult: false,
             quantizeInputParams: new QuantizeInputParams(),
             validationResult: new Result(),
             validationDisplayResult: false,
             validateInputParams: new ValidationInputParams()
         }
-        this.handleWindowListner = this.handleWindowListner.bind(this);
+        this.handleWindowListener = this.handleWindowListener.bind(this);
     }
     componentDidMount() {
-        window.addEventListener('message', this.handleWindowListner);
+        window.addEventListener('message', this.handleWindowListener);
 
     }
 
@@ -116,22 +119,42 @@ class App extends Component<{}, IState> {
 
     }
     componentWillUnmount() {
-        window.removeEventListener('message', this.handleWindowListner);
+        window.removeEventListener('message', this.handleWindowListener);
     }
 
-    handleWindowListner(ev: any) {
+    handleWindowListener(ev: any) {
         let myobj = this.state.validateInputParams;
+        let myobjConvert = this.state.convertInputParams;
+        let myobjQuantize = this.state.quantizeInputParams;
         switch (ev.data.command) {
-            case "modelPath": {
+            case "modelPathValidate": {
                 console.log(`Got a message from the host ${ev.data}`);
                 myobj.modelPath = ev.data.payload;
                 this.setState(state => ({ validateInputParams: myobj }));
                 break;
             }
-            case "dataSet": {
+            case "modelPathConvert": {
+                console.log(`Convert: Got a message from the host ${ev.data}`);
+                myobjConvert.modelPath = ev.data.payload;
+                this.setState(state => ({ convertInputParams: myobjConvert }));
+                break;
+            }
+            case "modelPathQuantize": {
+                console.log(`Quantize: Got a message from the host ${ev.data}`);
+                myobjQuantize.modelPath = ev.data.payload;
+                this.setState(state => ({ quantizeInputParams: myobjQuantize }));
+                break;
+            }
+            case "datasetValidate": {
                 console.log(`Got a message from the host ${ev.data}`);
-                myobj.dataSet = ev.data.payload;
+                myobj.datasetPath = ev.data.payload;
                 this.setState(state => ({ validateInputParams: myobj }));
+                break;
+            }
+            case "datasetQuantize": {
+                console.log(`Got a message from the host ${ev.data}`);
+                myobjQuantize.datasetPath = ev.data.payload;
+                this.setState(state => ({ quantizeInputParams: myobjQuantize }));
                 break;
             }
             case "count": {
@@ -162,6 +185,22 @@ class App extends Component<{}, IState> {
                 }
                 break;
             }
+            case "summarizeResult": {
+                window.console.log(`Summarize result ${this.state.summarizeResult} `);
+
+                try {
+                    console.log(`My payload after summarization is ${ev.data.payload}`)
+                    let temp: string = ev.data.payload;
+                    if (temp.startsWith("DONE")) {
+                        let result_string = ev.data.payload.replace("DONE", "");
+                        this.setState(state => ({ summarizeResult: temp }));
+                        this.setState(state => ({ summarizeDisplayResult: true }));
+                    }
+                } catch {
+                    console.log("Couldn't display keys to the element");
+                }
+                break;
+            }
         }
     }
 
@@ -169,11 +208,20 @@ class App extends Component<{}, IState> {
         console.log("inside select path to representative data");
         window.console.log("Select path to representative data");
         vscode.postMessage({
-            command: 'setRepresentativeDataPath',
+            command: 'setDataset:quantize',
              text: 'Select path to representative data'
           });
         window.console.log(`Sent message to host.`);
 
+    };
+
+    pathToModelQuantize = () => {
+        window.console.log("Select path to model");
+        vscode.postMessage({
+            command: 'setModelPath:quantize',
+            text: 'Select path to model'
+        });
+        window.console.log(`Sent message to host.`);
     };
 
     startQuantization = () => {
@@ -191,6 +239,23 @@ class App extends Component<{}, IState> {
          });
         window.console.log(`Sent message to host.`);
         //TODO: Add code to clear form fields
+    };
+
+    pathToModelConvert = () => {
+        window.console.log("Select path to model");
+        vscode.postMessage({
+            command: 'setModelPath:convert',
+            text: 'Select path to model'
+        });
+        window.console.log(`Sent message to host.`);
+    };
+    summarizeGraph = () => {
+
+        vscode.postMessage({
+           command: 'summarizeGraph',
+           text: 'summarize graph',
+         });
+        window.console.log(`Sent message to host.`);
     };
     startConversion = () => {
 
@@ -263,10 +328,10 @@ class App extends Component<{}, IState> {
         window.console.log(`Sent message to host.`);
     };
 
-    pathToModelHandler = () => {
+    pathToModelValidate = () => {
         window.console.log("Select path to model");
         vscode.postMessage({
-            command: 'setModelPath',
+            command: 'setModelPath:validate',
             text: 'Select path to model'
         });
         window.console.log(`Sent message to host.`);
@@ -275,7 +340,7 @@ class App extends Component<{}, IState> {
     pathToDatasetHandler = () => {
         window.console.log("Select path to data set");
         vscode.postMessage({
-            command: 'setDataset',
+            command: 'setDataset:validate',
             text: 'Select path to dataset'
         });
         window.console.log(`Sent message to host.`);
@@ -302,17 +367,22 @@ class App extends Component<{}, IState> {
                     <PivotItem headerText="Convert">
                         <Label style={{ color: 'white' }}><Convert
                             inputProps={this.state.convertInputParams}
+                            pathToModel={this.pathToModelConvert}
                             formHandler={this.formHandler}
+                            summarizeGraph={this.summarizeGraph}
                             startConversion={this.startConversion}
                             cancelConversion={this.cancelConversion}
-                        /></Label>
+                        />
+                        {this.state.summarizeDisplayResult == true ? <SummarizeResult summarizeResult={this.state.summarizeResult} /> : null}
+                        </Label>
                     </PivotItem>
                     <PivotItem headerText="Quantize">
                         <Label style={{ color: 'white' }}><Quantize
                             inputProps={this.state.quantizeInputParams}
-                            startQuantization={this.startConversion}
+                            pathToModel={this.pathToModelQuantize}
+                            startQuantization={this.startQuantization}
                             cancelQuantization={this.cancelConversion}
-                            PathToRepresentativeData={this.PathToRepresentativeData}
+                            pathToRepresentativeData={this.PathToRepresentativeData}
                         /></Label>
                     </PivotItem>
                     <PivotItem headerText="Validate">
@@ -320,7 +390,7 @@ class App extends Component<{}, IState> {
                             inputProps={this.state.validateInputParams}
                             validateFormHandler={this.validateFormHandler}
                             startValidation={this.startValidation}
-                            pathToModelHandler={this.pathToModelHandler}
+                            pathToModelHandler={this.pathToModelValidate}
                             pathToDatasetHandler={this.pathToDatasetHandler}
                             cancelValidation={this.cancelValidation}
                         />

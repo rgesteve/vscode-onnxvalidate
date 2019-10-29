@@ -1,37 +1,34 @@
 import React, { Component } from 'react';
 import Header from './Header';
-import { Stack, TextField, PrimaryButton, Label, Toggle, ILabelStyles,IToggleStyles } from "office-ui-fabric-react";
+import { Stack, TextField, PrimaryButton, Label, Toggle, ILabelStyles, IToggleStyles } from "office-ui-fabric-react";
 import { QuantizeInputParams } from './QuantizeHelper';
 
 interface IState {
-  
-    showFields:boolean |undefined
+
+    showFields: boolean | undefined
 }
 
 interface IQuantizeProps {
-    inputProps:QuantizeInputParams;
-
-    PathToRepresentativeData:(event: React.MouseEvent<HTMLButtonElement>)=>void
+    inputProps: QuantizeInputParams;
+    pathToModel: (event: React.MouseEvent<HTMLButtonElement>) => void
+    pathToRepresentativeData: (event: React.MouseEvent<HTMLButtonElement>) => void
     startQuantization: (event: React.MouseEvent<HTMLButtonElement>) => void
     cancelQuantization: (event: React.MouseEvent<HTMLButtonElement>) => void
 }
 
 
-class Quantize extends Component<IQuantizeProps,IState>  {
- state:IState={
-   showFields:false
-  };
+class Quantize extends Component<IQuantizeProps, IState>  {
+    state: IState = {
+        showFields: false
+    };
     constructor(props: IQuantizeProps) {
-        super(props)          
+        super(props)
     }
-    
-    
-  
 
     render() {
-      
-        let { representativeDataPath } = this.props.inputProps;
-        let {showFields}=this.state;
+
+        let { datasetPath, modelPath } = this.props.inputProps;
+        let { showFields } = this.state;
         return (
             <div>
                 <Stack>
@@ -40,19 +37,26 @@ class Quantize extends Component<IQuantizeProps,IState>  {
                     </Stack.Item>
                 </Stack>
                 <Stack tokens={tokens.numericalSpacing}>
-                 
-                   
-                       <Toggle styles={tStyles} label="Quantize with representative data?" inlineLabel checked={showFields} onChange={this._toggleShowFields} />  
+                    <Stack horizontal gap={7}>
+                        <Stack.Item grow>
+                            <Label styles={labelStyles}>Enter path to model </Label>
+                            <TextField placeholder="Enter path to model" value={modelPath} />
+                        </Stack.Item>
+                        <Stack.Item align="end" >
+                            <PrimaryButton style={{ width: '200px' }} onClick={this.props.pathToModel}>Select Path to model</PrimaryButton>
+                        </Stack.Item>
+                    </Stack>
+                    <Toggle styles={tStyles} label="Quantize with representative data?" inlineLabel checked={showFields} onChange={this._toggleShowFields} />
                     {showFields && (
                         <>
                             <Stack horizontal gap={7}>
 
                                 <Stack.Item grow>
                                     <Label styles={labelStyles}>Path To Representative Data </Label>
-                                    <TextField placeholder="Enter path to data" value={representativeDataPath} />
+                                    <TextField placeholder="Enter path to data" value={datasetPath} />
                                 </Stack.Item>
                                 <Stack.Item align="end" >
-                                    <PrimaryButton style={{ width: '200px' }} onClick={this.props.PathToRepresentativeData} >Select Path to data</PrimaryButton>
+                                    <PrimaryButton style={{ width: '200px' }} onClick={this.props.pathToRepresentativeData} >Select Path to data</PrimaryButton>
                                 </Stack.Item>
 
                             </Stack>
@@ -72,14 +76,14 @@ class Quantize extends Component<IQuantizeProps,IState>  {
             </div>
         );
     }
-     _toggleShowFields = (ev: React.MouseEvent<HTMLElement>,checked:boolean| undefined) => {
-        
+    _toggleShowFields = (ev: React.MouseEvent<HTMLElement>, checked: boolean | undefined) => {
+
         console.log(checked);
-        this.setState({showFields:checked});
-      
+        this.setState({ showFields: checked });
+
         console.log(this.state.showFields);
         console.log('toggle is ' + (checked ? 'checked' : 'not checked'));
-     };
+    };
 }
 const tokens = {
     numericalSpacing: {
@@ -90,20 +94,20 @@ const tokens = {
     },
 };
 
-const labelStyles: Partial<ILabelStyles > = {
-    
+const labelStyles: Partial<ILabelStyles> = {
+
     root: {
-        textAlign:'start',
-        color:'white'
+        textAlign: 'start',
+        color: 'white'
 
 
     }
 };
-    const tStyles : Partial<IToggleStyles > = {
-      label:{
-          color:'white'
-      }
-       
+const tStyles: Partial<IToggleStyles> = {
+    label: {
+        color: 'white'
+    }
+
 };
 
 

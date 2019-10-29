@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Stack, IStackStyles, IStackTokens, PrimaryButton, mergeStyles, mergeStyleSets, DefaultPalette, ScrollablePane } from 'office-ui-fabric-react';
+import { Text,Stack, IStackStyles, IStackItemStyles, IStackTokens, PrimaryButton, mergeStyles, mergeStyleSets, DefaultPalette, ScrollablePane } from 'office-ui-fabric-react';
 import { TooltipHost } from 'office-ui-fabric-react/lib/Tooltip';
 import { getId } from 'office-ui-fabric-react/lib/Utilities';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -10,6 +10,10 @@ import { Result } from './ValidationHelper';
 
 interface IVResultProps {
     resultJSON: Result;
+}
+
+interface ISummarizeResultProps {
+    summarizeResult: string;
 }
 
 class ValidationResult extends Component<IVResultProps, {}> {
@@ -99,8 +103,70 @@ class ValidationResult extends Component<IVResultProps, {}> {
             </Stack>
         );
     }
-}
+};
 
+export class SummarizeResult extends Component<ISummarizeResultProps, {}> {
+    constructor(props: ISummarizeResultProps) {
+        super(props);
+    } 
+    render() {
+        let result_instance = this.props.summarizeResult;
+        result_instance = "teststststst"
+        return (
+            <Stack tokens={containerStackTokens}>
+
+                <Stack.Item grow styles={stackItemStyles}>
+
+                        <Text variant={'xLarge'} block>
+                            Summarize Result
+                        </Text>
+                        <Text variant={'large'} >
+                            {result_instance}
+                        </Text>
+
+
+
+                </Stack.Item>
+            </Stack>
+        );
+
+    }
+}
+// Styles definition
+const stackStyles: IStackStyles = {
+    root: {
+        background: DefaultPalette.themeTertiary
+    }
+};
+const stackItemStyles: IStackItemStyles = {
+    root: {
+        background: DefaultPalette.themePrimary,
+        color: DefaultPalette.white,
+        padding: 5
+    }
+};
+
+// Tokens definition
+const containerStackTokens: IStackTokens = { childrenGap: 5 };
+const verticalGapStackTokens: IStackTokens = {
+    childrenGap: 10,
+    padding: 10
+};
+const itemAlignmentsStackTokens: IStackTokens = {
+    childrenGap: 5,
+    padding: 10
+};
+const clickableStackTokens: IStackTokens = {
+    padding: 10
+};
+const tokens = {
+    sectionStack: {
+      childrenGap: 10
+    },
+    headingStack: {
+      childrenGap: 5
+    }
+  };
 function roundFloatValue(num: number) {
     return (Math.round(num * 100) / 100).toFixed(2);
 }
@@ -121,13 +187,13 @@ const customScrollStack: IStackStyles = {
     }
 }
 
-const stackStyles: IStackStyles = {
-    root: {
-        background: DefaultPalette.neutralLight,
-        width: 'auto',
-        padding: '5px'
-    }
-};
+// const stackStyles: IStackStyles = {
+//     root: {
+//         background: DefaultPalette.neutralLight,
+//         width: 'auto',
+//         padding: '5px'
+//     }
+// };
 const stackItemLabelStyles = mergeStyles({
     alignItems: 'center',
     background: DefaultPalette.themeDarker,
@@ -159,7 +225,7 @@ const classNames = mergeStyleSets({
         border: '1px solid'
     },
     textContent: {
-        padding: '5px 5px'
+        padding: '2px 2px'
     }
 });
 

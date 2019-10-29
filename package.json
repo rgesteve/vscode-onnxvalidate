@@ -15,7 +15,8 @@
         "onCommand:firstextension.addCountToPanel",
         "onCommand:firstextension.tryResults",
         "onCommand:extension.Validate",
-        "onCommand:extension.Display"
+        "onCommand:extension.Display",
+        "onCommand:extension.DLToolKit"
     ],
     "main": "./out/extension/extension.js",
     "contributes": {

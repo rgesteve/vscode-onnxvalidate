@@ -6,8 +6,9 @@ import { ConversionInputParams } from './ConversionHelper';
 interface IConvertProps {
     //variables
     inputProps: ConversionInputParams
-
+    pathToModel: (event: React.MouseEvent<HTMLButtonElement>) => void
     formHandler: (e: any, task: String) => void;
+    summarizeGraph: (event: React.MouseEvent<HTMLButtonElement>) => void
     startConversion: (event: React.MouseEvent<HTMLButtonElement>) => void
     cancelConversion: (event: React.MouseEvent<HTMLButtonElement>) => void
 }
@@ -21,7 +22,7 @@ class Convert extends Component<IConvertProps, {}>{
 
 
     render() {
-        let { inputNode, outputNode, opset } = this.props.inputProps;
+        let { inputNode, outputNode, opset, modelPath } = this.props.inputProps;
         return (
             <div>
                 <Stack>
@@ -30,6 +31,15 @@ class Convert extends Component<IConvertProps, {}>{
                     </Stack.Item>
                 </Stack>
                 <Stack tokens={tokens.numericalSpacing}>
+                <Stack horizontal gap={7}>
+                        <Stack.Item grow>
+                            <Label styles={labelStyles}>Enter path to model </Label>
+                            <TextField placeholder="Enter path to model" value={modelPath} />
+                        </Stack.Item>
+                        <Stack.Item align="end" >
+                            <PrimaryButton style={{ width: '200px' }} onClick={this.props.pathToModel}>Select Path to model</PrimaryButton>
+                        </Stack.Item>
+                    </Stack>
                     <Stack horizontal gap={7}>
                         <Stack.Item grow>
                             <Label styles={labelStyles} >Enter Input node </Label>
@@ -46,6 +56,10 @@ class Convert extends Component<IConvertProps, {}>{
                     </Stack>
 
                     <Stack horizontal tokens={tokens.customSpacing} padding="s1 35%">
+                        <Stack.Item>
+                            <PrimaryButton style={{ width: '200px' }} onClick={this.props.summarizeGraph}>Summarize Graph</PrimaryButton>
+
+                        </Stack.Item>
                         <Stack.Item>
                             <PrimaryButton style={{ width: '200px' }} onClick={this.props.startConversion}>Start Conversion</PrimaryButton>
 

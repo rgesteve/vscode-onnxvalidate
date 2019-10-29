@@ -1,31 +1,21 @@
-This is the README for your extension "first-extension". After writing up a brief description, we recommend including the following sections.
-
+This is the README for the DL Toolkit extension. 
 ## Features
-
-TODO
+This extension enables you to 
+1. Convert (Tensorflow models to ONNX models
+2. Quantize (Tensoflow and ONNX FP32 models to Int8 models)
+3. Validate the models using MLPerf.
 
 ## Requirements
-
-TODO
+1. Requires docker cli 
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
 
 ## Release Notes
 
 ### 0.0.1
-
-Initial import
+Version 0.1
 
