@@ -61,3 +61,10 @@ export function getLocationOnContainer (pathOnHost: string | undefined): string 
 
     return retString;
 }
+
+export function getScriptsLocationOnContainer() : string {
+    if (g_containerType === 'windows')
+        return "C:\\scripts";
+    else
+        return "/scripts";
+}

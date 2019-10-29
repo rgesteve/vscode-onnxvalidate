@@ -73,6 +73,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             );
             let mlperfParam: Map<string, string> = new Map<string, string>(); // delete?
             let convertParam: Map<string, string> = new Map<string, string>();
+            let quantizeParam: Map<string, string> = new Map<string, string>();
             // refactor this function out.
 
             let inputNode:string;
@@ -110,6 +111,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                                             break;
                                         }
                                         case "quantize" : {
+                                            quantizeParam.set("model", value.fsPath);
                                             if (currentPanel) {
                                                 currentPanel.webview.postMessage({ command: "modelPathQuantize", payload: value.fsPath });
                                             }
@@ -129,7 +131,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                             // if (currentPanel) {
                             //     currentPanel.webview.postMessage({ command: "modelPath", payload: mlperfParam.get("model") });
                             // }
-                            vscode.window.showInformationMessage(`Seems like I should be opening ${folderUris}!`);
+                            //vscode.window.showInformationMessage(`Seems like I should be opening ${folderUris}!`);
                         });
                         break;
                     }
@@ -142,6 +144,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                                 folderUris.forEach(function (value) {
                                     switch(subCommand) {
                                         case "quantize" : {
+                                            quantizeParam.set("dataset", value.fsPath);
                                             if (currentPanel) {
                                                 currentPanel.webview.postMessage({ command: "datasetQuantize", payload: value.fsPath });
                                             }
@@ -161,7 +164,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                             //if (currentPanel) {
                             //    currentPanel.webview.postMessage({ command: "dataSet", payload: mlperfParam.get("dataset-path") });
                             //}
-                            vscode.window.showInformationMessage(`Seems like I should be opening ${folderUris}!`);
+                            //vscode.window.showInformationMessage(`Seems like I should be opening ${folderUris}!`);
                         });
                         break;
                     }
@@ -184,12 +187,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                     }
                    
                     case "startVerification": {
-                        await dockerManager.quantizeTFModel().then(async()=>{
-                            vscode.window.showInformationMessage("Quantization Done");
-                        });
-                        if (currentPanel !== undefined) {
-                            currentPanel.webview.postMessage({ command: 'result', payload: 'IN_PROGRESS' });
-                        }
+                        // await dockerManager.quantizeTFModel(quantizeParam).then(async()=>{
+                        //     vscode.window.showInformationMessage("Quantization Done");
+                        // });
+                        // if (currentPanel !== undefined) {
+                        //     currentPanel.webview.postMessage({ command: 'result', payload: 'IN_PROGRESS' });
+                        // }
                         await dockerManager.validation(mlperfParam).then(async () => {
                             vscode.window.showInformationMessage("Validation Done");
                             //Read JSON file from stored location here
@@ -249,7 +252,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                     //Need to fix. Add post message to send message to UI to clear input fields.
 
                     case "summarizeGraph": {
-                        let temp : string | undefined = convertParam.get("model");
+                        let temp : string | undefined = convertParam.get("input");
                         if (temp){
                             await dockerManager.summarizeGraph(temp).then(async ()=> {
                                 vscode.window.showInformationMessage("Summarize Done");
@@ -286,11 +289,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
                     case "startQuantization": {
                         
-                        await dockerManager.convert(convertParam).then(async () => {
-                            vscode.window.showInformationMessage("Conversion Done");
-                            //Read JSON file from stored location here
+                        await dockerManager.quantizeModel(quantizeParam).then(async () => {
+                            vscode.window.showInformationMessage("Quantization Done");
                         }, reason => {
-                            vscode.window.showInformationMessage(`Conversion failed. ${reason}`);
+                            vscode.window.showInformationMessage(`Quantization failed. ${reason}`);
                            
                         });
                         break;

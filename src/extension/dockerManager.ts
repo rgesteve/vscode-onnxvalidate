@@ -99,7 +99,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
     public async getImageId(): Promise<string | undefined> {
         let imageID: string | undefined;
         if (utils.g_containerType === "linux") {
-            imageID = await this.executeCommand("docker", ['images', "chanchala7/mlperf_linux:latest", '--format', '"{{.Repository}}"']);
+            imageID = await this.executeCommand("docker", ['images', "chanchala7/mlperf_linux1:latest", '--format', '"{{.Repository}}"']);
             if (!imageID || 0 === imageID.length) { // image doesnt exist
                 await this.executeCommand("docker", ["pull", "chanchala7/my_ubuntu:firsttry"]).then(async () => {
                     imageID = await this.executeCommand("docker", ['images', "chanchala7/my_ubuntu", '--format', '"{{.Repository}}"']);
@@ -211,41 +211,82 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
     }
 
 
-    // public async quantizeModel(fileuri?: vscode.Uri, ...args: any[]): Promise<string | undefined> {
-    //     if (!this._workspace) {
-    //         console.log(`No workspace defined`);
-    //         return undefined;
-    //     }
-    //     if (this._workspace && fileuri) { 
-    //         let model: string | undefined;
-    //         let fileExt = path.basename(fileuri.fsPath).toLowerCase().split('.').pop();
-    //         if (file)
-    // }
+    public async quantizeModel(quantizeParam: Map<string, string>): Promise<string | undefined> {
+        if (!this._workspace) {
+            console.log(`No workspace defined`);
+            return undefined;
+        }
+        let model: string | undefined = quantizeParam.get("model");
+        if (model)
+        {
+            let fileExt = model.split('.').pop();
+            if (fileExt === 'pb') // tensorflow quantization to follow
+            {
+                return this.quantizeTFModel(quantizeParam);
+            }
+            else if (fileExt === 'onnx') // onnx quantization to follow
+            {
+                return this.quantizeONNXModel(quantizeParam);
+            }
+            else
+            {
+                console.log("This model is not supported for quantization!");
+                return "This model is not supported for quantization!";
+            }
+        }
+        else {
+            console.log("Model not found!");
+            return "Model not found!";
+        }
 
-    public async quantizeTFModel(fileuri?: vscode.Uri, ...args: any[]): Promise<string | undefined> {
+    }
 
-        if (this._workspace && fileuri) { // this is for the time being, need a good way to get the details of model, summarize_graph?
-            let model: string | undefined;
-
-            if (path.basename(fileuri.fsPath).toLowerCase().includes("resnet")) {
+    public async quantizeONNXModel(quantizeParam: Map<string, string>): Promise<string | undefined> {
+        if (!this._workspace) {
+            console.log(`No workspace defined`);
+            return undefined;
+        }
+        let model: string | undefined = quantizeParam.get("model");
+        if (model){
+            let args: string[] = ['exec', '-w', `${utils.getScriptsLocationOnContainer()}`, `${this._containerIds[0]}`, 'python3', 'calibrate.py', 
+                                  '--model_path='+`${utils.getLocationOnContainer(quantizeParam.get("model"))}`, 
+                                  '--dataset_path='+`${utils.getLocationOnContainer(quantizeParam.get("dataset"))}` ];
+                console.log(`Quantize params ${args}`);
+                return await this.executeCommandWithProgress("Quantization done", "Quantizing ONNX FP32 model to ONNX int8 model... ", "docker", args);
+        }
+        else {
+            console.log("Model not found!");
+            return "Model not found!";
+        }
+    }
+    
+    public async quantizeTFModel(quantizeParam: Map<string, string>): Promise<string | undefined> {
+        if (!this._workspace) {
+            console.log(`No workspace defined`);
+            return undefined;
+        }
+        let model: string | undefined = quantizeParam.get("model");
+        if (model){
+            if (model.toLowerCase().includes("resnet")) {
                 model = "resnet50";
             }
-            else if (path.basename(fileuri.fsPath).toLowerCase().includes("mobilenet")) {
+            else if (model.toLowerCase().includes("mobilenet")) {
                 model = "mobilenet";
             }
             else {
                 console.log("This model is not part of the supported models!");
                 return undefined;
             }
-            if (model) {
-                let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(path.dirname(fileuri.fsPath))}`, `${this._containerIds[0]}`, `${tensorflow_binaries[utils.g_containerType]["transform"]}`,
-                    '--in_graph=', `${path.basename(fileuri.fsPath)}`, '--out_graph=', `${path.basename(fileuri.fsPath).replace(".pb", "_quantized.pb")}`,
+            let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(path.dirname(model))}`, `${this._containerIds[0]}`, `${tensorflow_binaries[utils.g_containerType]["transform"]}`,
+                    '--in_graph=', `${path.basename(model)}`, '--out_graph=', `${path.basename(model).replace(".pb", "_quantized.pb")}`,
                     '--inputs=', `${supported_models[model]["inputs"]}`, '--outputs=', `${supported_models[model]["outputs"]}`, '--transforms=', `${tensorflow_quantization_options}`];
-
+            console.log(`Quantize params ${args}`);
                 return await this.executeCommandWithProgress("Quantization done", "Quantizing TF FP32 model to TF int8 model... ", "docker", args);
-            }
         }
-
+        else {
+            console.log("Model not found!");
+            return "Model not found!";
+        }
     }
 
     dockerDisplay(modeluri: vscode.Uri) {
