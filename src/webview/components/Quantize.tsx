@@ -77,12 +77,7 @@ class Quantize extends Component<IQuantizeProps, IState>  {
         );
     }
     _toggleShowFields = (ev: React.MouseEvent<HTMLElement>, checked: boolean | undefined) => {
-
-        console.log(checked);
         this.setState({ showFields: checked });
-
-        console.log(this.state.showFields);
-        console.log('toggle is ' + (checked ? 'checked' : 'not checked'));
     };
 }
 const tokens = {
