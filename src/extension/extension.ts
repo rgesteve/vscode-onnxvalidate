@@ -6,7 +6,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import { spawn } from 'child_process';
-import { rejects } from 'assert';
 import { dlToolkitChannel} from "./dlToolkitChannel";
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {

@@ -7,8 +7,6 @@ import * as os from 'os';
 import ContentProvider from './ContentProvider';
 import * as utils from './osUtils';
 import { supported_models, docker_images, tensorflow_binaries, tensorflow_quantization_options } from './config';
-import { resolve } from 'url';
-import { rejects } from 'assert';
 import { dlToolkitChannel} from "./dlToolkitChannel";
 
 export class DockerManager implements vscode.Disposable { // can dispose the vscode context?
