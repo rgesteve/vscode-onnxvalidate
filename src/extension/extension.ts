@@ -7,11 +7,12 @@ import * as path from 'path';
 import * as os from 'os';
 import { spawn } from 'child_process';
 import { rejects } from 'assert';
+import { dlToolkitChannel} from "./dlToolkitChannel";
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
     let extensionStatusBar: vscode.StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 25);
 
-    console.log(`Extension "vscode-onnxvalidate" is now active from path ${context.extensionPath}!!`);
+    dlToolkitChannel.appendLine(`Extension "vscode-onnxvalidate" is now active from path ${context.extensionPath}!!`);
 
     let currentPanel: vscode.WebviewPanel | undefined = undefined;
 
@@ -45,16 +46,15 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         //dockerManager.dockerDisplay(modeluri);
         vscode.window.showInformationMessage(`Display ${basename(modeluri.fsPath)} using ${pathToChrome}...`);
         spawn(pathToChrome, [vizModelPath]); // TODO -- replace this with an in-vscode viewer
-        console.log(`Displaying....${basename(modeluri.fsPath)} in Chrome`);
+        dlToolkitChannel.appendLine(`Displaying....${basename(modeluri.fsPath)} in Chrome`);
     });
 
     let quantize = vscode.commands.registerCommand('extension.Quantize', () => {
-        console.log("Quantize....");
+        dlToolkitChannel.appendLine("Quantize....");
     });
 
   
 
-    //let DLToolKit = vscode.commands.registerCommand('extension.DLToolKit', (modeluri: vscode.Uri ) => {
     let DLToolKit = vscode.commands.registerCommand('extension.DLToolKit', (modeluri?: vscode.Uri ) => {   
         const contentProvider = new ContentProvider();
 
@@ -71,7 +71,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                     retainContextWhenHidden: true
                 }
             );
-            let mlperfParam: Map<string, string> = new Map<string, string>(); // delete?
+            let mlperfParam: Map<string, string> = new Map<string, string>(); 
             let convertParam: Map<string, string> = new Map<string, string>();
             let quantizeParam: Map<string, string> = new Map<string, string>();
             // refactor this function out.
@@ -128,10 +128,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                                    
                                 });
                             }
-                            // if (currentPanel) {
-                            //     currentPanel.webview.postMessage({ command: "modelPath", payload: mlperfParam.get("model") });
-                            // }
-                            //vscode.window.showInformationMessage(`Seems like I should be opening ${folderUris}!`);
                         });
                         break;
                     }
@@ -161,10 +157,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                                     mlperfParam.set("dataset-path", value.fsPath);
                                 });
                             }
-                            //if (currentPanel) {
-                            //    currentPanel.webview.postMessage({ command: "dataSet", payload: mlperfParam.get("dataset-path") });
-                            //}
-                            //vscode.window.showInformationMessage(`Seems like I should be opening ${folderUris}!`);
                         });
                         break;
                     }
@@ -187,18 +179,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                     }
                    
                     case "startVerification": {
-                        // await dockerManager.quantizeTFModel(quantizeParam).then(async()=>{
-                        //     vscode.window.showInformationMessage("Quantization Done");
-                        // });
-                        // if (currentPanel !== undefined) {
-                        //     currentPanel.webview.postMessage({ command: 'result', payload: 'IN_PROGRESS' });
-                        // }
                         await dockerManager.validation(mlperfParam).then(async () => {
                             vscode.window.showInformationMessage("Validation Done");
                             //Read JSON file from stored location here
 
                             var result_file: string = path.join(os.tmpdir(), "MLPerf", "results.json");
-                            console.log(`I got result path: ${result_file}`);
+                            dlToolkitChannel.appendLine(`I got result path: ${result_file}`);
 
                             if(fs.existsSync(result_file)) {
 
@@ -219,7 +205,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                        //Need to fix. Add post message to send message to UI to clear input fields.
                     case "cancel": {
                         mlperfParam.clear();
-                        console.log("Canceling verification, cleared mlperfParam");
+                        dlToolkitChannel.appendLine("Canceling verification, cleared mlperfParam");
                         break;
                     }
                     case "setModel": {
@@ -259,7 +245,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                                 //Read JSON file from stored location here
     
                                 var summarizeResult: string = path.join(os.tmpdir(), "MLPerf", "results.json");
-                                console.log(`Summarize graph result: ${summarizeResult}`);
+                                dlToolkitChannel.appendLine(`Summarize graph result: ${summarizeResult}`);
     
                                 if(fs.existsSync(summarizeResult)) {
     
@@ -271,6 +257,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                                 }
                             }, reason => {
                                 vscode.window.showInformationMessage(`Summarize failed. ${reason}`);
+                                dlToolkitChannel.appendLine(`Summarize graph result: ${reason}`);
                                 if (currentPanel !== undefined) {
                                     currentPanel.webview.postMessage({ command: 'result', payload: `FAILED` });
                                 }
@@ -293,6 +280,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                             vscode.window.showInformationMessage("Quantization Done");
                         }, reason => {
                             vscode.window.showInformationMessage(`Quantization failed. ${reason}`);
+                            dlToolkitChannel.appendLine(`Quantization failed. ${reason}`);
                            
                         });
                         break;
@@ -303,9 +291,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             }, undefined, context.subscriptions);
         }
         currentPanel.webview.html = contentProvider.getProdContent(context);
-
-        vscode.window.showInformationMessage('Panel should be displayed');
-        console.log("Validate....");
+        dlToolkitChannel.appendLine("Panel should be displayed...");
 
     });
 
@@ -316,7 +302,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         if (fs.existsSync(testDataPath)) {
             fs.readFile(testDataPath, (err, data) => {
                 if (err || data === undefined) {
-                    console.log('Error reading data file.');
+                    dlToolkitChannel.appendLine('Error reading data file.');
                 } else {
                     let results = JSON.parse(data.toString());
                     try {
@@ -325,29 +311,29 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                                                                                 "actual" : (<any>kv[1])["actual"],
                                                                                 "expected" : (<any>kv[1])["expected"]
                                                                             }));
-                        console.log("Results parsing worked");
+                        dlToolkitChannel.appendLine("Results parsing worked");
                         if (currentPanel !== undefined) {
                             currentPanel.webview.postMessage({ command: 'result', payload: forGrid });
                         }
                     } catch {
-                        console.log("Likely pulling from array didn't work.");
+                        dlToolkitChannel.appendLine("Likely pulling from array didn't work.");
                     }
                 }
             });
         } else {
-            console.log(`Couldn't find: ${testDataPath} on disk.`);
+            dlToolkitChannel.appendLine(`Couldn't find: ${testDataPath} on disk.`);
         }
 
         vscode.window.showInformationMessage("Should be reading results");
     };
 
     let testPerformanceHandler = () => {
-        console.log('In testperformanceHandler');
+        dlToolkitChannel.appendLine('In testperformanceHandler');
         const perfDataPath: string = join(context.extensionPath, 'src', 'test', 'data', 'onnxruntime_profile__2019-06-28_04-56-43.json');
         if (fs.existsSync(perfDataPath)) {
             fs.readFile(perfDataPath, (err, data) => {
                 if (err || data === undefined) {
-                    console.log('Error reading data file.');
+                    dlToolkitChannel.appendLine('Error reading data file.');
                 } else {
                     let perfData = JSON.parse(data.toString());
                     try {
@@ -355,18 +341,18 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                                                                  .map(rec => ({ "name" : `${(<any>rec)["name"]/(<any>rec)["args"]["op_name"]}`,
                                                                                 "dur" : (<any>rec)["dur"]
                                                                             }));
-                        console.log('Should be sending perfdata');
+                        dlToolkitChannel.appendLine('Should be sending perfdata');
                         if (currentPanel !== undefined) {
                             currentPanel.webview.postMessage({ command: 'perfData', payload: forChart });
                         }
                         vscode.window.showInformationMessage("Apparently parsed the data!");
                     } catch {
-                        console.log("Likely couldn't pull the result.");
+                        dlToolkitChannel.appendLine("Likely couldn't pull the result.");
                     }
                 }
             });
         } else {
-            console.log(`Couldn't find: ${perfDataPath} on disk.`);
+            dlToolkitChannel.appendLine(`Couldn't find: ${perfDataPath} on disk.`);
         }
 
         vscode.window.showInformationMessage("Should be sending perf data for graph");
