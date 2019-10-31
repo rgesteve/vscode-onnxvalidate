@@ -30,8 +30,8 @@
                 "title": "DL Toolkit: Start ecosystem"
             },
             {
-                "command": "firstextension.addCountToPanel",
-                "title": "DL Toolkit: Test count"
+                "command": "extension.reinitializeEcosystem",
+                "title": "DL Toolkit: Reinitialize ecosystem"
             },
             {
                 "command": "extension.DLToolkit",

@@ -47,9 +47,15 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
 
             containerTypeCP.on("exit", (data: string | Buffer): void => {
                 if (this._workspace) {
-                    dlToolkitChannel.appendLine(`${this._workspace.uri.fsPath}, ${os.tmpdir()}, ${containerType.trim().replace(/\"/g, "")}`);
-                    utils.setMountLocations(this._workspace.uri.fsPath, os.tmpdir(), containerType.trim().replace(/\"/g, ""));
-                    dlToolkitChannel.appendLine('Mount locations set!');
+                    containerType = containerType.trim().replace(/\"/g, "");
+                    if (containerType === 'linux' || containerType === 'windows') {
+                        utils.setMountLocations(this._workspace.uri.fsPath, os.tmpdir(), containerType);
+                        dlToolkitChannel.appendLine(`Mount locations set! ${this._workspace.uri.fsPath}, ${os.tmpdir()}`);
+                    }
+                    else {
+                        dlToolkitChannel.appendLine("Docker doesnt seem to be running! Please make sure that docker is running and run \
+                                                     `DL Toolkit: Check container type" );
+                    }
                 }
             });
         }
@@ -57,6 +63,27 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
             dlToolkitChannel.appendLine("No workspace open! Please open your development folder(workspace)");
         }
     }
+
+    public async getContainerType() : Promise<string|undefined> {
+        let containerType : string | undefined = await this.executeCommand("docker", ['info', '-f', `{{.OSType}}`]);
+        if (!containerType){
+            return undefined;
+        }
+        else {
+            containerType = containerType.trim().replace(/\"/g, "");
+            if (this._workspace) {
+                if (containerType === "linux" || containerType === "windows"){
+                    utils.setMountLocations(this._workspace.uri.fsPath, os.tmpdir(), containerType);
+                    dlToolkitChannel.appendLine(`Mount locations set! ${this._workspace.uri.fsPath}, ${os.tmpdir()}`);
+                }
+            }
+            else {
+                dlToolkitChannel.appendLine("No open workspace found! Please open your workspace");
+            }
+            return containerType;
+        }
+    }
+
 
     async executeCommand(command: string, args: string[], options: cp.SpawnOptions = { shell: true }): Promise<string> {
         return new Promise((resolve: (res: string) => void, reject: (error: string | Buffer) => void): void => {
@@ -68,7 +95,6 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
                 data = data.toString();
                 dlToolkitChannel.append(data);
                 result = result.concat(data);
-                dlToolkitChannel.appendLine(`${result}`);
             });
 
             childProc.stderr.on("data", (data: string | Buffer) => {
@@ -129,6 +155,12 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
                 });
             }
         }
+        else { // containerType was not set correctly
+            dlToolkitChannel.appendLine("There is some issue with docker. Please make sure that docker is running and run \
+                                        `DL Toolkit: Check container type" );
+            return imageID;
+        }
+
         this._imageId = imageID;
         dlToolkitChannel.appendLine(`ImageID : ${imageID}`);
         return imageID;
