@@ -8,6 +8,7 @@ import { QuantizeInputParams } from './QuantizeHelper';
 import ValidateInput from './ValidateInput';
 import ValidationResult , {SummarizeResult} from './ValidationResult'
 import { Result, ValidationInputParams } from './ValidationHelper';
+import { Fabric } from 'office-ui-fabric-react';
 
 declare var acquireVsCodeApi: any;
 const vscode = acquireVsCodeApi();
@@ -367,7 +368,7 @@ class App extends Component<{}, IState> {
     render() {
 
         return (
-            <div className="container-header">
+            <Fabric className="container-header">
                
                 <Pivot styles={pivotStyles} linkFormat={PivotLinkFormat.tabs} linkSize={PivotLinkSize.large}>
                     <PivotItem headerText="Convert">
@@ -404,19 +405,40 @@ class App extends Component<{}, IState> {
                         </Label>
                     </PivotItem>
                 </Pivot>
-            </div>
+            </Fabric>
         );
     }
 }
 
-const pivotStyles: Partial<IPivotStyles> = {
-    linkContent: {
-        fontSize: "20px",
-        width: "525px",
-    },
-    root: {
-        lineHeight: "100px"
 
-    }
-};
+  const pivotStyles: Partial<IPivotStyles> = {
+    root: [
+      {
+        backgroundColor: 'blue'
+      }
+    ],
+    link: [
+      {
+        color: 'red'
+      }
+    ],
+    linkIsSelected: [
+      {
+        color: 'white',
+        backgroundColor: 'red',
+        fontWeight: 800
+      },
+    ]
+  };
+  
+// const pivotStyles: Partial<IPivotStyles> = {
+//     linkContent: {
+//         fontSize: "20px",
+//         width: "525px",
+//     },
+//     root: {
+//         lineHeight: "100px"
+
+//     }
+// };
 export default App;
