@@ -1,14 +1,15 @@
 import * as vscode from 'vscode';
+import timestamp from 'time-stamp';
 
-class DLToolKitChannel implements vscode.Disposable {
-    private readonly channel: vscode.OutputChannel = vscode.window.createOutputChannel("DLToolKitChannel");
+class DLToolkitChannel implements vscode.Disposable {
+    private readonly channel: vscode.OutputChannel = vscode.window.createOutputChannel("DLToolkitChannel");
 
     public appendLine(message: string): void {
-        this.channel.appendLine(message);
+        this.channel.appendLine(timestamp('YYYY/MM/DD: HH:mm:ss:ms ') + message);
     }
 
     public append(message: string): void {
-        this.channel.append(message);
+        this.channel.append(timestamp('YYYY/MM/DD: HH:mm:ss:ms ') + message);
     }
 
     public show(): void {
@@ -20,4 +21,4 @@ class DLToolKitChannel implements vscode.Disposable {
     }
 }
 
-export const dlToolkitChannel : DLToolKitChannel = new DLToolKitChannel();
+export const dlToolkitChannel : DLToolkitChannel = new DLToolkitChannel();

@@ -10,6 +10,7 @@ import { Result } from './ValidationHelper';
 
 interface IVResultProps {
     resultJSON: Result;
+    downloadHandler: (event: React.MouseEvent<HTMLButtonElement>) => void
 }
 
 interface ISummarizeResultProps {
@@ -97,7 +98,7 @@ class ValidationResult extends Component<IVResultProps, {}> {
                 </Stack.Item>
 
                 <Stack.Item>
-                    <PrimaryButton style={{ width: '200px', display: 'flex' }}>Download Test Result</PrimaryButton>
+                    <PrimaryButton style={{ width: '200px', display: 'flex' }} onClick={this.props.downloadHandler}>Download Test Result</PrimaryButton>
                 </Stack.Item>
 
             </Stack>
