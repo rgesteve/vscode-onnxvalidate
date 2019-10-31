@@ -1,9 +1,9 @@
 {
-    "name": "first-extension",
+    "name": "dl-toolkit",
     "publisher": "rgesteve",
-    "displayName": "first-extension",
+    "displayName": "DL Toolkit",
     "description": "",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "engines": {
         "vscode": "^1.35.0"
     },
@@ -16,7 +16,7 @@
         "onCommand:firstextension.tryResults",
         "onCommand:extension.Validate",
         "onCommand:extension.Display",
-        "onCommand:extension.DLToolKit"
+        "onCommand:extension.DLToolkit"
     ],
     "main": "./out/extension/extension.js",
     "contributes": {
@@ -33,9 +33,8 @@
                 "command": "firstextension.addCountToPanel",
                 "title": "DL Toolkit: Test count"
             },
-           
             {
-                "command": "extension.DLToolKit",
+                "command": "extension.DLToolkit",
                 "title": "DL Toolkit: Convert, Quantize, Validate"
             },
             {
@@ -53,9 +52,8 @@
         ],
         "menus": {
             "explorer/context": [
-               
                 {
-                    "command": "extension.DLToolKit",
+                    "command": "extension.DLToolkit",
                     "when": "resourceExtname =~ /.pb|.onnx/"
                 },
                 {
@@ -103,6 +101,7 @@
         "@fortawesome/react-fontawesome": "^0.1.4",
         "react": "^16.8.6",
         "react-dom": "^16.8.6",
-        "recharts": "^1.6.2"
+        "recharts": "^1.6.2",
+        "time-stamp": "^2.2.0"
     }
 }

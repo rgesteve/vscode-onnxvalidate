@@ -357,7 +357,13 @@ class App extends Component<{}, IState> {
     };
 
 
-
+    downloadResult = () => {
+        vscode.postMessage({
+            command: 'downloadResult',
+            text: 'Download Result',
+        });
+        window.console.log(`Sent message to host.`);
+    };
     render() {
 
         return (
@@ -392,9 +398,9 @@ class App extends Component<{}, IState> {
                             startValidation={this.startValidation}
                             pathToModelHandler={this.pathToModelValidate}
                             pathToDatasetHandler={this.pathToDatasetHandler}
-                            cancelValidation={this.cancelValidation}
-                        />
-                            {this.state.validationDisplayResult == true ? <ValidationResult resultJSON={this.state.validationResult} /> : null}
+                            cancelValidation={this.cancelValidation} />
+                            {this.state.validationDisplayResult == true ? 
+                            <ValidationResult resultJSON={this.state.validationResult} downloadHandler={this.downloadResult} /> : null}
                         </Label>
                     </PivotItem>
                 </Pivot>

@@ -4,10 +4,10 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
-import ContentProvider from './ContentProvider';
 import * as utils from './osUtils';
 import { supported_models, docker_images, tensorflow_binaries, tensorflow_quantization_options } from './config';
 import { dlToolkitChannel} from "./dlToolkitChannel";
+
 
 export class DockerManager implements vscode.Disposable { // can dispose the vscode context?
     private _imageId: string | undefined; // declare an array of image ids, that exists on the system, conversionContainerImage, QuantizationImage
@@ -41,6 +41,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
 
             containerTypeCP.on('error', (err) => {
                 dlToolkitChannel.appendLine('Docker client is either not installed or not running!');
+                dlToolkitChannel.appendLine(`Got error ${err}`);
 
             });
 
@@ -51,6 +52,9 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
                     dlToolkitChannel.appendLine('Mount locations set!');
                 }
             });
+        }
+        else {
+            dlToolkitChannel.appendLine("No workspace open! Please open your development folder(workspace)");
         }
     }
 
@@ -64,10 +68,13 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
                 data = data.toString();
                 dlToolkitChannel.append(data);
                 result = result.concat(data);
-                dlToolkitChannel.appendLine(`childProc.stdout.on ${result}`);
+                dlToolkitChannel.appendLine(`${result}`);
             });
 
-            //childProc.stderr.on("data", (data: string | Buffer) => {reject(`Exited with error ${data}`)});
+            childProc.stderr.on("data", (data: string | Buffer) => {
+                dlToolkitChannel.appendLine(data.toString());
+                //reject(`exited with error ${data}`)
+            });
 
             childProc.on("error", (data: string | Buffer) => { reject(`Exited with error ${data}`) });
 
@@ -90,6 +97,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
                     p.report({ increment: 100, doneMessage }); // havent figured out how to show the final message yet 
                     resolve(result);
                 } catch (e) {
+                    dlToolkitChannel.appendLine(`Reject ${e}`);
                     reject(e);
                 }
             });
@@ -100,10 +108,10 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
     public async getImageId(): Promise<string | undefined> {
         let imageID: string | undefined;
         if (utils.g_containerType === "linux") {
-            imageID = await this.executeCommand("docker", ['images', "chanchala7/mlperf_linux1:latest", '--format', '"{{.Repository}}"']);
+            imageID = await this.executeCommand("docker", ['images', "chanchala7/mlperf_linux:latest", '--format', '"{{.Repository}}"']);
             if (!imageID || 0 === imageID.length) { // image doesnt exist
-                await this.executeCommand("docker", ["pull", "chanchala7/my_ubuntu:firsttry"]).then(async () => {
-                    imageID = await this.executeCommand("docker", ['images', "chanchala7/my_ubuntu", '--format', '"{{.Repository}}"']);
+                await this.executeCommand("docker", ["pull", "chanchala7/mlperf_linux:latest"]).then(async () => {
+                    imageID = await this.executeCommand("docker", ['images', "chanchala7/mlperf_linux:latest", '--format', '"{{.Repository}}"']);
                     dlToolkitChannel.appendLine(`imageID: ${imageID}`);
                 }, reason => {
                     dlToolkitChannel.appendLine("Docker pull failed");
@@ -122,7 +130,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
             }
         }
         this._imageId = imageID;
-        dlToolkitChannel.appendLine(`Returning: ${imageID}`);
+        dlToolkitChannel.appendLine(`ImageID : ${imageID}`);
         return imageID;
     }
 
@@ -131,10 +139,10 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
         if (this._imageId && this._workspace) {
             let userWorkspaceMount: string = `source=${utils.g_hostLocation},target=${utils.g_mountLocation},type=bind`;
             let extensionMount: string = `source=${utils.g_hostOutputLocation},target=${utils.g_mountOutputLocation},type=bind`;
-            let args: string[] = ['run', '-m', '8g', '-t', '-d', '--mount', userWorkspaceMount, '--mount', extensionMount, this._imageId];
+            let args: string[] = ['run', '-m', '4g', '-t', '-d', '--mount', userWorkspaceMount, '--mount', extensionMount, this._imageId];
             runningContainer = await this.executeCommandWithProgress("Your development environment is ready!", "Starting your development environment...", "docker", args);
             this._containerIds.push(runningContainer.substr(0, 12));
-            dlToolkitChannel.appendLine(`Container id: ${this._containerIds[0]}`);
+            dlToolkitChannel.appendLine(`ContainerId: ${this._containerIds[0]}`);
         }
         return runningContainer;
 
@@ -154,41 +162,17 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
         }
 
         let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(path.dirname(modelToConvert))}`, `${this._containerIds[0]}`, 'python3', '-m', 'tf2onnx.convert',];
-        for (var [key, value] of convertParams) {
-            if (value) { // value is not undefined
-                if (key === 'input') {
-                    args.push(`--${key}`);
-                    args.push(utils.getLocationOnContainer(value));
-                    dlToolkitChannel.appendLine(`Location on container: ${utils.getLocationOnContainer(value)}`)
-                }
-                else {
-                    args.push(`--${key}`);
-                    args.push(value);
-                }
-            }
-        }
-
-        args.push("--output");
-        args.push(`${path.basename(modelToConvert).replace(".pb", ".onnx")}`);
-
-        // if no inputs/outputs/opsets are defined, look up the supported models' inputs/outputs and default to opset 8
-        if (convertParams.get("inputs") === undefined || convertParams.get("outputs") === undefined || convertParams.get("opset") === undefined)
-        { // if only one is defined?
-            args.push("--opset");
-            args.push("8");
+        if (convertParams.get("inputs") === undefined) 
+        { 
             if (path.basename(modelToConvert).toLowerCase().includes("resnet")) {
                 args.push("--inputs");
                 args.push(`${supported_models["resnet50"]["inputs"]}`);
-                args.push("--outputs");
-                args.push(`${supported_models["resnet50"]["outputs"]}`);
                 args.push("--inputs-as-nchw");
                 args.push(`${supported_models["resnet50"]["inputs"]}`);
             }
             else if (path.basename(modelToConvert).toLowerCase().includes("mobilenet")) {
                 args.push("--inputs");
                 args.push(`${supported_models["mobilenet"]["inputs"]}`);
-                args.push("--outputs");
-                args.push(`${supported_models["mobilenet"]["outputs"]}`);
                 args.push("--inputs-as-nchw");
                 args.push(`${supported_models["mobilenet"]["inputs"]}`);
             }
@@ -197,6 +181,46 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
                 return undefined;
             }
         }
+
+        if (convertParams.get("outputs") === undefined) {
+            if (path.basename(modelToConvert).toLowerCase().includes("resnet")) {
+                args.push("--outputs");
+                args.push(`${supported_models["resnet50"]["outputs"]}`);
+            }
+            else if (path.basename(modelToConvert).toLowerCase().includes("mobilenet")) {
+                args.push("--outputs");
+                args.push(`${supported_models["mobilenet"]["outputs"]}`);
+            }
+            else {
+                dlToolkitChannel.appendLine("This model is not part of the supported models!");
+                return undefined;
+            }
+        }
+        
+        if (convertParams.get("opset") === undefined) {
+            args.push("--opset");
+            args.push("8");
+        }
+        for (var [key, value] of convertParams) {
+            if (value) { 
+                if (key === 'input') {
+                    args.push(`--${key}`);
+                    args.push(utils.getLocationOnContainer(value));
+                    dlToolkitChannel.appendLine(`Location on container: ${utils.getLocationOnContainer(value)}`)
+                }
+                else {
+                    args.push(`--${key}`);
+                    args.push(value);
+                    if (key === 'inputs') { // need to set the input format
+                        args.push("--inputs-as-nchw");
+                        args.push(value);
+                    }
+                }
+            }
+        }
+
+        args.push("--output");
+        args.push(`${path.basename(modelToConvert).replace(".pb", ".onnx")}`);
 
         dlToolkitChannel.appendLine(`Convert params ${args}`);
         return await this.executeCommandWithProgress("Finished converting", "Converting to ONNX...", "docker", args);

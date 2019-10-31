@@ -11,7 +11,7 @@ import { dlToolkitChannel} from "./dlToolkitChannel";
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
     let extensionStatusBar: vscode.StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 25);
 
-    dlToolkitChannel.appendLine(`Extension "vscode-onnxvalidate" is now active from path ${context.extensionPath}!!`);
+    dlToolkitChannel.appendLine(`Extension "dl-toolkit" is now active from path ${context.extensionPath}!!`);
 
     let currentPanel: vscode.WebviewPanel | undefined = undefined;
 
@@ -27,10 +27,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         if (imageID) {
             let containerId = await dockerManager.runImage();
             if (containerId) {
+                dlToolkitChannel.appendLine(`Successful in running the image. Container id: ${containerId}`)
                 vscode.window.showInformationMessage("Your development environment is ready");
             }
             else{
                 vscode.window.showInformationMessage("Could not run your development environment");
+                dlToolkitChannel.appendLine(`Successful in running the image. Container id: ${containerId}`)
             }
         }
         else {
@@ -54,7 +56,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
   
 
-    let DLToolKit = vscode.commands.registerCommand('extension.DLToolKit', (modeluri?: vscode.Uri ) => {   
+    let DLToolkit = vscode.commands.registerCommand('extension.DLToolkit', (modeluri?: vscode.Uri ) => {   
         const contentProvider = new ContentProvider();
 
         if (currentPanel) {
@@ -176,14 +178,14 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                         mlperfParam.set("count", msg.text);
                         break;
                     }
-                   
+
                     case "startVerification": {
                         await dockerManager.validation(mlperfParam).then(async () => {
                             vscode.window.showInformationMessage("Validation Done");
                             //Read JSON file from stored location here
 
                             var result_file: string = path.join(os.tmpdir(), "MLPerf", "results.json");
-                            dlToolkitChannel.appendLine(`I got result path: ${result_file}`);
+                            dlToolkitChannel.appendLine(`MLPerf results: ${result_file}`);
 
                             if(fs.existsSync(result_file)) {
 
@@ -285,6 +287,29 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                         break;
                     }
 
+                    case "downloadResult" : {
+                        vscode.window.showSaveDialog({ filters: { '*': ['txt'] } }).then(uri => {
+                            if (!uri) {
+                                vscode.window.showErrorMessage(
+                                'You must select a file location to save the results!'
+                              );
+                              dlToolkitChannel.appendLine("Didnt select a file location!");
+                              return;
+                            }
+                            const fs = require('fs');
+                            fs.copyFile(path.join(os.tmpdir(), "MLPerf", "results.json"), uri.fsPath, (err: any) => {
+                            if (err) {
+                                dlToolkitChannel.appendLine("Errored out while writing the file");
+                                throw err;
+                            }
+                      
+                            dlToolkitChannel.appendLine(`${path.join(os.tmpdir(), "MLPerf", "results.json")} was copied to ${uri.fsPath}`);
+                            });
+                          });
+                        break;
+                    }
+
+
                 }
 
             }, undefined, context.subscriptions);
@@ -363,7 +388,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   //  context.subscriptions.push(convert);
     context.subscriptions.push(quantize);
     context.subscriptions.push(dockerManager);
-    context.subscriptions.push(DLToolKit);
+    context.subscriptions.push(DLToolkit);
     context.subscriptions.push(testResults);
 
     context.subscriptions.push(vscode.commands.registerCommand('firstextension.addCountToPanel', () => {
