@@ -22,6 +22,19 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         extensionStatusBar.show();
     });
 
+
+    let reinitializeEcosystem = vscode.commands.registerCommand('extension.reinitializeEcosystem', async () => {
+        let containerType = await dockerManager.getContainerType();
+        if (containerType){
+            dlToolkitChannel.appendLine("Reinitialization successful!");
+            vscode.window.showInformationMessage("Reinitialization successful!");
+        }
+        else {
+            dlToolkitChannel.appendLine("Reinitialization failed!");
+            vscode.window.showInformationMessage("Reinitialization failed!");
+        }
+    });
+
     let startDocker = vscode.commands.registerCommand('extension.startOnnxEcosystem', async () => {
         let imageID = await dockerManager.getImageId();
         if (imageID) {
@@ -385,7 +398,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     let testResults = vscode.commands.registerCommand('firstextension.tryResults', testPerformanceHandler);
     context.subscriptions.push(initialize);
     context.subscriptions.push(startDocker);
-  //  context.subscriptions.push(convert);
+    context.subscriptions.push(reinitializeEcosystem);
     context.subscriptions.push(quantize);
     context.subscriptions.push(dockerManager);
     context.subscriptions.push(DLToolkit);
