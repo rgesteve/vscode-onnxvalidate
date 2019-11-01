@@ -28,6 +28,7 @@ class ValidateInput extends Component<IValidInputProps, {}> {
         return (
             // TODO: Add different modes accurancy modes. perf mode etc
             //               Add different streams: single stream, multi stream etc
+
             <Stack tokens={tokens.numericalSpacing}>
 
                 <Stack>
@@ -86,6 +87,7 @@ class ValidateInput extends Component<IValidInputProps, {}> {
                 </Stack>
 
             </Stack>
+
         );
     }
 

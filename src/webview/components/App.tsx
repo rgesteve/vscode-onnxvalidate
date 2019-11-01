@@ -368,9 +368,10 @@ class App extends Component<{}, IState> {
     render() {
 
         return (
-            <Fabric className="container-header">
+                <Fabric className="container-header">
+
                
-                <Pivot styles={pivotStyles} linkFormat={PivotLinkFormat.tabs} linkSize={PivotLinkSize.large}>
+                <Pivot styles={pivotStyles} linkFormat={PivotLinkFormat.tabs} linkSize={PivotLinkSize.large}> 
                     <PivotItem headerText="Convert">
                         <Label style={{ color: 'white' }}><Convert
                             inputProps={this.state.convertInputParams}
@@ -410,26 +411,10 @@ class App extends Component<{}, IState> {
     }
 }
 
-
-  const pivotStyles: Partial<IPivotStyles> = {
-    root: [
-      {
-        backgroundColor: 'blue'
-      }
-    ],
-    link: [
-      {
-        color: 'red'
-      }
-    ],
-    linkIsSelected: [
-      {
-        color: 'white',
-        backgroundColor: 'red',
-        fontWeight: 800
-      },
-    ]
+const pivotStyles: Partial<IPivotStyles> = {
+    root: { marginTop: 10 }
   };
+
   
 // const pivotStyles: Partial<IPivotStyles> = {
 //     linkContent: {
@@ -437,8 +422,6 @@ class App extends Component<{}, IState> {
 //         width: "525px",
 //     },
 //     root: {
-//         lineHeight: "100px"
-
-//     }
+//         lineHeight: "100px//     }
 // };
 export default App;

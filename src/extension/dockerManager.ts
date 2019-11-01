@@ -54,7 +54,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
                     }
                     else {
                         dlToolkitChannel.appendLine("Docker doesnt seem to be running! Please make sure that docker is running and run \
-                                                     `DL Toolkit: Check container type" );
+                                                     `DL Toolkit: Reinitialize ecosystem" );
                     }
                 }
             });

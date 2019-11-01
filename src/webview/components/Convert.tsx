@@ -25,7 +25,7 @@ class Convert extends Component<IConvertProps, {}>{
         let { inputNode, outputNode, opset, modelPath } = this.props.inputProps;
         return (
             <div>
-                <Stack>
+                <Stack >
                     <Stack.Item >
                         <Header name={"Conversion Input Parameters"} />
                     </Stack.Item>

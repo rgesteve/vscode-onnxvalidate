@@ -10,7 +10,7 @@ export let g_containerType: string = "";
 
 export async function setMountLocations(userMount: string, extMount: string, containerType: string) : Promise<void> {
 
-    dlToolkitChannel.appendLine(`1 Mount locations: ${g_mountLocation}, ${g_mountOutputLocation} , ${g_containerType} , ${containerType}`);
+    //dlToolkitChannel.appendLine(`1 Mount locations: ${g_mountLocation}, ${g_mountOutputLocation} , ${g_containerType} , ${containerType}`);
     g_containerType = containerType;
 
     if ((isWindows() && containerType === 'linux') || !isWindows()) {
