@@ -49,17 +49,35 @@ class Quantize extends Component<IQuantizeProps, IState>  {
                     <Toggle styles={tStyles} label="Quantize with representative data?" inlineLabel checked={showFields} onChange={this._toggleShowFields} />
                     {showFields && (
                         <>
-                            <Stack horizontal gap={7}>
+                                        <Stack horizontal gap={5} >
+                    <Stack.Item grow>
+                        <Label styles={labelStyles}>Enter path to data set </Label>
+                        <TextField placeholder="Enter path to data set" value={modelPath} />
+                    </Stack.Item>
+                    <Stack.Item align="end" >
+                        <PrimaryButton style={{ width: '200px' }} onClick={this.props.pathToRepresentativeData}>Select Path to model</PrimaryButton>
+                    </Stack.Item>
+                </Stack>
 
-                                <Stack.Item grow>
-                                    <Label styles={labelStyles}>Path To Representative Data </Label>
-                                    <TextField placeholder="Enter path to data" value={datasetPath} />
-                                </Stack.Item>
-                                <Stack.Item align="end" >
-                                    <PrimaryButton style={{ width: '200px' }} onClick={this.props.pathToRepresentativeData} >Select Path to data</PrimaryButton>
-                                </Stack.Item>
-
-                            </Stack>
+                <Stack horizontal gap={5} >
+                    <Stack.Item grow>
+                        <Label styles={labelStyles}>Enter path custom preprocess module</Label>
+                        <TextField placeholder="Enter path custom preprocess module" value={datasetPath} />
+                    </Stack.Item>
+                    <Stack.Item align="end" >
+                        <PrimaryButton style={{ width: '200px' }} onClick={this.props.pathToRepresentativeData}>Select Path to dataset</PrimaryButton>
+                    </Stack.Item>
+                </Stack>
+                <Stack horizontal gap={5} >
+                    <Stack.Item grow>
+                        <Label styles={labelStyles}>Preprocess function name</Label>
+                        <TextField placeholder="Preprocess function name" value={datasetPath} />
+                    </Stack.Item>
+                    <Stack.Item align="end" >
+                        <PrimaryButton style={{ width: '200px' }} onClick={this.props.pathToRepresentativeData}>Select Path to dataset</PrimaryButton>
+                    </Stack.Item>
+                </Stack>
+                            
                         </>
                     )}
                     <Stack horizontal tokens={tokens.customSpacing} padding="s1 35%">

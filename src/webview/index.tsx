@@ -5,7 +5,7 @@ import App from './components/App'
 //import {dlToolkitChannel} from '../extension/dlToolkitChannel'
 const Index: React.FunctionComponent = () => {
     return (
-        <div className="container">
+        <div className="container-header">
                <App />
         </div>
     );
