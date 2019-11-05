@@ -112,7 +112,7 @@ export class SummarizeResult extends Component<ISummarizeResultProps, {}> {
     } 
     render() {
         let result_instance = this.props.summarizeResult;
-        result_instance = "teststststst"
+        //result_instance = "teststststst"
         return (
             <Stack tokens={containerStackTokens}>
 
