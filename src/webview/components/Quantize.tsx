@@ -52,32 +52,12 @@ class Quantize extends Component<IQuantizeProps, IState>  {
                                         <Stack horizontal gap={5} >
                     <Stack.Item grow>
                         <Label styles={labelStyles}>Enter path to data set </Label>
-                        <TextField placeholder="Enter path to data set" value={modelPath} />
+                        <TextField placeholder="Enter path to data set" value={datasetPath} />
                     </Stack.Item>
                     <Stack.Item align="end" >
-                        <PrimaryButton style={{ width: '200px' }} onClick={this.props.pathToRepresentativeData}>Select Path to model</PrimaryButton>
+                        <PrimaryButton style={{ width: '200px' }} onClick={this.props.pathToRepresentativeData}>Select Path dataset</PrimaryButton>
                     </Stack.Item>
-                </Stack>
-
-                <Stack horizontal gap={5} >
-                    <Stack.Item grow>
-                        <Label styles={labelStyles}>Enter path custom preprocess module</Label>
-                        <TextField placeholder="Enter path custom preprocess module" value={datasetPath} />
-                    </Stack.Item>
-                    <Stack.Item align="end" >
-                        <PrimaryButton style={{ width: '200px' }} onClick={this.props.pathToRepresentativeData}>Select Path to dataset</PrimaryButton>
-                    </Stack.Item>
-                </Stack>
-                <Stack horizontal gap={5} >
-                    <Stack.Item grow>
-                        <Label styles={labelStyles}>Preprocess function name</Label>
-                        <TextField placeholder="Preprocess function name" value={datasetPath} />
-                    </Stack.Item>
-                    <Stack.Item align="end" >
-                        <PrimaryButton style={{ width: '200px' }} onClick={this.props.pathToRepresentativeData}>Select Path to dataset</PrimaryButton>
-                    </Stack.Item>
-                </Stack>
-                            
+                </Stack>                            
                         </>
                     )}
                     <Stack horizontal tokens={tokens.customSpacing} padding="s1 35%">

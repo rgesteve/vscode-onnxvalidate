@@ -192,8 +192,7 @@ class App extends Component<{}, IState> {
                 try {
                     console.log(`My payload after summarization is ${ev.data.payload}`)
                     let temp: string = ev.data.payload;
-                    if (temp.startsWith("DONE")) {
-                        let result_string = ev.data.payload.replace("DONE", "");
+                    if (temp) {
                         this.setState(state => ({ summarizeResult: temp }));
                         this.setState(state => ({ summarizeDisplayResult: true }));
                     }

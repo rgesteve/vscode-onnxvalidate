@@ -253,29 +253,41 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
                     case "summarizeGraph": {
                         let temp : string | undefined = convertParam.get("input");
-                        if (temp){
-                            await dockerManager.summarizeGraph(temp).then(async ()=> {
+                        if (temp) {
+                            let summarizeResult: string | undefined = await dockerManager.summarizeGraph(temp);
+                            if (summarizeResult) {
                                 vscode.window.showInformationMessage("Summarize Done");
-                                //Read JSON file from stored location here
-    
-                                var summarizeResult: string = path.join(os.tmpdir(), "MLPerf", "results.json");
                                 dlToolkitChannel.appendLine(`Summarize graph result: ${summarizeResult}`);
-    
-                                if(fs.existsSync(summarizeResult)) {
-    
-                                    let results = JSON.parse(fs.readFileSync(summarizeResult).toString());
-                                    if (currentPanel !== undefined) {
-                                        currentPanel.webview.postMessage({ command: 'result', payload: `DONE ${JSON.stringify(results)}` });
-                                    }
-    
-                                }
-                            }, reason => {
-                                vscode.window.showInformationMessage(`Summarize failed. ${reason}`);
-                                dlToolkitChannel.appendLine(`Summarize graph result: ${reason}`);
                                 if (currentPanel !== undefined) {
-                                    currentPanel.webview.postMessage({ command: 'result', payload: `FAILED` });
+                                    currentPanel.webview.postMessage({ command: 'summarizeResult', payload: summarizeResult });
                                 }
-                            });
+                            }
+                            else {
+                                vscode.window.showInformationMessage("Summarize failed");
+                                dlToolkitChannel.appendLine(`Summarize failed`);
+                            }
+                            // let summarizeResult: string | undefined = await dockerManager.summarizeGraph(temp).then(async ()=> {
+                            //     vscode.window.showInformationMessage("Summarize Done");
+                            //     //Read JSON file from stored location here
+    
+                            //     //var summarizeResult: string = path.join(os.tmpdir(), "MLPerf", "results.json");
+                            //     dlToolkitChannel.appendLine(`Summarize graph result: ${summarizeResult}`);
+    
+                            //     if(fs.existsSync(summarizeResult)) {
+    
+                            //         let results = JSON.parse(fs.readFileSync(summarizeResult).toString());
+                            //         if (currentPanel !== undefined) {
+                            //             currentPanel.webview.postMessage({ command: 'result', payload: `DONE ${JSON.stringify(results)}` });
+                            //         }
+    
+                            //     }
+                            // }, reason => {
+                            //     vscode.window.showInformationMessage(`Summarize failed. ${reason}`);
+                            //     dlToolkitChannel.appendLine(`Summarize graph result: ${reason}`);
+                            //     if (currentPanel !== undefined) {
+                            //         currentPanel.webview.postMessage({ command: 'result', payload: `FAILED` });
+                            //     }
+                            //});
                         }
 
                         break;

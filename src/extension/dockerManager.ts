@@ -263,7 +263,8 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
             dlToolkitChannel.appendLine(`No workspace defined`);
             return undefined;
         }
-        let args: string[] = ['exec', `${tensorflow_binaries[utils.g_containerType]["summarize"]}`, '--in_graph', `${utils.getLocationOnContainer(fileuri)}`];
+        let args: string[] = ['exec', `${this._containerIds[0]}`, `${tensorflow_binaries[utils.g_containerType]["summarize"]}`, '--in_graph='+`${utils.getLocationOnContainer(fileuri)}`];
+        dlToolkitChannel.appendLine(`Summarize params ${args}`);
         return await this.executeCommand("docker", args);
     }
 
