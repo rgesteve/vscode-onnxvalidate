@@ -26,7 +26,7 @@ export const logger = createLogger({
       format.splat(),
       format.json()
     ),
-    defaultMeta: { service: 'your-service-name' },
+    defaultMeta: { service: 'DL-Toolkit' },
     transports: [
       dailyRotateFileTransport
     ]

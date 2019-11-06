@@ -9,6 +9,7 @@ import { spawn } from 'child_process';
 import { dlToolkitChannel} from "./dlToolkitChannel";
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
+
     let extensionStatusBar: vscode.StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 25);
 
     dlToolkitChannel.appendLine("info", `Extension "dl-toolkit" is now active from path ${context.extensionPath}!!`);
@@ -24,7 +25,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
 
     let reinitializeEcosystem = vscode.commands.registerCommand('extension.reinitializeEcosystem', async () => {
-        let containerType = await dockerManager.getContainerType();
+        let containerType = await dockerManager.getContainerType().catch(error => dlToolkitChannel.appendLine("error", `getContainerType got error ${error}`));
 
         if (containerType){
             dlToolkitChannel.appendLine("info", "Reinitialization successful!");
@@ -37,9 +38,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     });
 
     let startDocker = vscode.commands.registerCommand('extension.startOnnxEcosystem', async () => {
-        let imageID = await dockerManager.getImageId();
+        let imageID = await dockerManager.getImageId().catch(error => dlToolkitChannel.appendLine("error", `getImageId got error ${error}`));
         if (imageID) {
-            let containerId = await dockerManager.runImage();
+            let containerId = await dockerManager.runImage().catch(error => dlToolkitChannel.appendLine("error", `runImage got error ${error}`));;
             if (containerId) {
                 dlToolkitChannel.appendLine("info", `Successful in running the image. Container id: ${containerId}`)
                 vscode.window.showInformationMessage("Your development environment is ready");
@@ -91,9 +92,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             let quantizeParam: Map<string, string> = new Map<string, string>();
             // refactor this function out.
 
-            let inputNode:string;
-            let outputNode:string;
-            let opset:string;
+
             currentPanel.webview.onDidReceiveMessage(async msg => {
                 let command : string = msg.command;
                 let subCommand : string = "";
@@ -255,7 +254,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                     case "summarizeGraph": {
                         let temp : string | undefined = convertParam.get("input");
                         if (temp) {
-                            let summarizeResult: string | undefined = await dockerManager.summarizeGraph(temp);
+                            let summarizeResult = await dockerManager.summarizeGraph(temp).catch(error => dlToolkitChannel.appendLine("error", `summarizeGraph got error ${error}`));
                             if (summarizeResult) {
                                 vscode.window.showInformationMessage("Summarize Done");
                                 dlToolkitChannel.appendLine("info", `Summarize graph result: ${summarizeResult}`);
@@ -272,10 +271,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                         break;
                     }
                     case "cancelConversion": {
-                        
-                        inputNode=""
-                        outputNode=""
-                        opset=""
                         break;
                     }
 

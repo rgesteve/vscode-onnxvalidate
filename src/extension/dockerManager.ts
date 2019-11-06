@@ -9,23 +9,17 @@ import { supported_models, docker_images, tensorflow_binaries, tensorflow_quanti
 import { dlToolkitChannel} from "./dlToolkitChannel";
 
 
-export class DockerManager implements vscode.Disposable { // can dispose the vscode context?
-    private _imageId: string | undefined; // declare an array of image ids, that exists on the system, conversionContainerImage, QuantizationImage
-    private _imageIds: string[];
+export class DockerManager implements vscode.Disposable { 
+    private _imageId: string | undefined; 
     private _containerIds: string[];
     private _workspace: vscode.WorkspaceFolder | undefined;
     private _extensionPath: string;
     private _context: vscode.ExtensionContext | undefined;
 
-    // the constructor might need to get the required images from the docker hub too.
     constructor(extensionPath: string, context: vscode.ExtensionContext) {
-        this._imageIds = [];
         this._containerIds = [];
         this._extensionPath = extensionPath;
         this._context = context;
-
-        //TODO: Make sure that the host system has docker and this image.
-        // if not, get it from docker hub? that part needs to be decided.
 
         const workspaceFolders: vscode.WorkspaceFolder[] = vscode.workspace.workspaceFolders || [];
         if (workspaceFolders.length != 0) {
@@ -36,7 +30,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
             let containerType = "";
             containerTypeCP.stdout.on("data", (data: string): void => {
                 dlToolkitChannel.append("info" , data);
-                containerType = containerType + data.toString(); // this should say something like not installed so used that instead of error
+                containerType = containerType + data.toString(); 
             });
 
             containerTypeCP.on('error', (err) => {
@@ -99,7 +93,6 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
 
             childProc.stderr.on("data", (data: string | Buffer) => {
                 dlToolkitChannel.appendLine("warning", data.toString());
-                //reject(`exited with error ${data}`)
             });
 
             childProc.on("error", (data: string | Buffer) => { reject(`Exited with error ${data}`) });
@@ -151,7 +144,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
                     imageID = await this.executeCommand("docker", ['images', "chanchala7/my_ubuntu", '--format', '"{{.Repository}}"']);
                     dlToolkitChannel.appendLine("info", `imageID: ${imageID}`);
                 }, reason => {
-                    dlToolkitChannel.appendLine("error", "Docker pull failed");
+                    dlToolkitChannel.appendLine("error", `Docker pull failed with ${reason}`);
                 });
             }
         }
@@ -180,13 +173,12 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
 
     }
 
-    //TODO: Added default opset value in case user does not enter a value. Default is currently 8, we can add more default value
-    //public async convert(inputNode: string, outputNode: string, opset: string = '8', fileuri: vscode.Uri, ...args: any[]): Promise<string | undefined> {
     public async convert(convertParams: Map<string,string>): Promise<string | undefined> {
         if (!this._workspace) {
             dlToolkitChannel.appendLine("error", `No workspace defined`);
             return undefined;
         }
+
         let modelToConvert : string | undefined = convertParams.get("input");
         if (!modelToConvert) {
             dlToolkitChannel.appendLine("error", `No input model provided`);
@@ -305,17 +297,17 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
             return undefined;
         }
         let model: string | undefined = quantizeParam.get("model");
-        if (model){
-            let args: string[] = ['exec', '-w', `${utils.getScriptsLocationOnContainer()}`, `${this._containerIds[0]}`, 'python3', 'calibrate.py', 
-                                  '--model_path='+`${utils.getLocationOnContainer(quantizeParam.get("model"))}`, 
-                                  '--dataset_path='+`${utils.getLocationOnContainer(quantizeParam.get("dataset"))}` ];
-                dlToolkitChannel.appendLine("info", `Quantize params ${args}`);
-                return await this.executeCommandWithProgress("Quantization done", "Quantizing ONNX FP32 model to ONNX int8 model... ", "docker", args);
-        }
-        else {
+
+        if (!model){
             dlToolkitChannel.appendLine("error", "Model not found!");
             return "Model not found!";
         }
+        
+        let args: string[] = ['exec', '-w', `${utils.getScriptsLocationOnContainer()}`, `${this._containerIds[0]}`, 'python3', 'calibrate.py', 
+                              '--model_path='+`${utils.getLocationOnContainer(quantizeParam.get("model"))}`, 
+                              '--dataset_path='+`${utils.getLocationOnContainer(quantizeParam.get("dataset"))}` ];
+        dlToolkitChannel.appendLine("info", `Quantize params ${args}`);
+        return await this.executeCommandWithProgress("Quantization done", "Quantizing ONNX FP32 model to ONNX int8 model... ", "docker", args);
     }
     
     public async quantizeTFModel(quantizeParam: Map<string, string>): Promise<string | undefined> {
@@ -324,27 +316,29 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
             return undefined;
         }
         let model: string | undefined = quantizeParam.get("model");
-        if (model){
-            if (model.toLowerCase().includes("resnet")) {
-                model = "resnet50";
-            }
-            else if (model.toLowerCase().includes("mobilenet")) {
-                model = "mobilenet";
-            }
-            else {
-                dlToolkitChannel.appendLine("error", "This model is not part of the supported models!");
-                return undefined;
-            }
-            let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(path.dirname(model))}`, `${this._containerIds[0]}`, `${tensorflow_binaries[utils.g_containerType]["transform"]}`,
-                    '--in_graph=', `${path.basename(model)}`, '--out_graph=', `${path.basename(model).replace(".pb", "_quantized.pb")}`,
-                    '--inputs=', `${supported_models[model]["inputs"]}`, '--outputs=', `${supported_models[model]["outputs"]}`, '--transforms=', `${tensorflow_quantization_options}`];
-            dlToolkitChannel.appendLine("info", `Quantize params ${args}`);
-                return await this.executeCommandWithProgress("Quantization done", "Quantizing TF FP32 model to TF int8 model... ", "docker", args);
-        }
-        else {
+        
+        if (!model){
             dlToolkitChannel.appendLine("error", "Model not found!");
             return "Model not found!";
         }
+
+        if (model.toLowerCase().includes("resnet")) {
+            model = "resnet50";
+        }
+        else if (model.toLowerCase().includes("mobilenet")) {
+            model = "mobilenet";
+        }
+        else {
+            dlToolkitChannel.appendLine("error", "This model is not part of the supported models!");
+            return undefined;
+        }
+
+        let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(path.dirname(model))}`, `${this._containerIds[0]}`, `${tensorflow_binaries[utils.g_containerType]["transform"]}`,
+                              '--in_graph=', `${path.basename(model)}`, '--out_graph=', `${path.basename(model).replace(".pb", "_quantized.pb")}`,
+                              '--inputs=', `${supported_models[model]["inputs"]}`, '--outputs=', `${supported_models[model]["outputs"]}`, '--transforms=', `${tensorflow_quantization_options}`];
+        dlToolkitChannel.appendLine("info", `Quantize params ${args}`);
+        return await this.executeCommandWithProgress("Quantization done", "Quantizing TF FP32 model to TF int8 model... ", "docker", args);
+
     }
 
     dockerDisplay(modeluri: vscode.Uri) {
@@ -368,36 +362,35 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
         })
     }
 
-    public async validation(mlperfParams: Map<string, string>): Promise<string | undefined> { // Check this
-        if (this._workspace) {
-            let args: string[] = ['exec', '-w', `${utils.getMLPerfLocation()}`, `${this._containerIds[0]}`, 'python3', `${utils.getMLPerfDriver()}`,];
-            for (var [key, value] of mlperfParams) {
-                if (key === 'dataset-path' || key === 'model') {
-                    args.push(`--${key}`);
-                    args.push(utils.getLocationOnContainer(value));
-                    dlToolkitChannel.appendLine("info", `Location on container: ${utils.getLocationOnContainer(value)}`)
-                }
-                else {
-                    args.push(`--${key}`);
-                    args.push(value);
-                }
-
-            }
-            args.push("--accuracy");
-            args.push("--output");
-
-            if (utils.g_containerType === 'linux') {
-                args.push(`${utils.g_mountOutputLocation}/MLPerf/`);
-            }
-            else {
-                args.push(`${utils.g_mountOutputLocation}\\MLPerf`);
-            }
-
-            dlToolkitChannel.appendLine("info", `MLPerf args ${args}`);
-            return await this.executeCommandWithProgress("Finished Validation", "Validating model with MLPerf... ", "docker", args);
+    public async validation(mlperfParams: Map<string, string>): Promise<string | undefined> {
+        if (!this._workspace) {
+            dlToolkitChannel.appendLine("error", `No workspace defined`);
+            return undefined;
         }
 
+        let args: string[] = ['exec', '-w', `${utils.getMLPerfLocation()}`, `${this._containerIds[0]}`, 'python3', `${utils.getMLPerfDriver()}`,];
+        for (var [key, value] of mlperfParams) {
+            if (key === 'dataset-path' || key === 'model') {
+                args.push(`--${key}`);
+                args.push(utils.getLocationOnContainer(value));
+                dlToolkitChannel.appendLine("info", `Location on container: ${utils.getLocationOnContainer(value)}`)
+            }
+            else {
+                args.push(`--${key}`);
+                args.push(value);
+            }
+        }
+        args.push("--accuracy");
+        args.push("--output");
+        if (utils.g_containerType === 'linux') {
+            args.push(`${utils.g_mountOutputLocation}/MLPerf/`);
+        }
+        else {
+            args.push(`${utils.g_mountOutputLocation}\\MLPerf`);
+        }
 
+        dlToolkitChannel.appendLine("info", `MLPerf args ${args}`);
+        return await this.executeCommandWithProgress("Finished Validation", "Validating model with MLPerf... ", "docker", args);
     }
 
 
