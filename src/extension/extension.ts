@@ -7,9 +7,14 @@ import * as path from 'path';
 import * as os from 'os';
 import { spawn } from 'child_process';
 import { dlToolkitChannel} from "./dlToolkitChannel";
+//import { Logger, LoggerConfig } from "log4ts";
+
+//import {logger} from "./logger"
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
     let extensionStatusBar: vscode.StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 25);
+   // logger.info('Hello world');
+   // logger.debug('Debugging info');
 
     dlToolkitChannel.appendLine("info", `Extension "dl-toolkit" is now active from path ${context.extensionPath}!!`);
 
@@ -20,11 +25,13 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     let initialize = vscode.commands.registerCommand('extension.initializeOnnxEcosystem', async () => {
         extensionStatusBar.text = "Extension initialized!" ;
         extensionStatusBar.show();
+        //logger.debug('initialize info');
     });
 
 
     let reinitializeEcosystem = vscode.commands.registerCommand('extension.reinitializeEcosystem', async () => {
         let containerType = await dockerManager.getContainerType();
+        //logger.debug('rinitialize info');
         if (containerType){
             dlToolkitChannel.appendLine("info", "Reinitialization successful!");
             vscode.window.showInformationMessage("Reinitialization successful!");
