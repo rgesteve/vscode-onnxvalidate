@@ -99,9 +99,12 @@
         "@fortawesome/fontawesome-svg-core": "^1.2.24",
         "@fortawesome/free-solid-svg-icons": "^5.11.1",
         "@fortawesome/react-fontawesome": "^0.1.4",
+        "log4ts": "^0.4.2",
         "react": "^16.8.6",
         "react-dom": "^16.8.6",
         "recharts": "^1.6.2",
-        "time-stamp": "^2.2.0"
+        "time-stamp": "^2.2.0",
+        "winston": "^3.2.1",
+        "winston-daily-rotate-file": "^4.2.1"
     }
 }
