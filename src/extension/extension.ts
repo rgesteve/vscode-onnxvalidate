@@ -25,6 +25,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
     let reinitializeEcosystem = vscode.commands.registerCommand('extension.reinitializeEcosystem', async () => {
         let containerType = await dockerManager.getContainerType();
+
         if (containerType){
             dlToolkitChannel.appendLine("info", "Reinitialization successful!");
             vscode.window.showInformationMessage("Reinitialization successful!");
