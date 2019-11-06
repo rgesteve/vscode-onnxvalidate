@@ -10,7 +10,6 @@ export let g_containerType: string = "";
 
 export async function setMountLocations(userMount: string, extMount: string, containerType: string) : Promise<void> {
 
-    //dlToolkitChannel.appendLine(`1 Mount locations: ${g_mountLocation}, ${g_mountOutputLocation} , ${g_containerType} , ${containerType}`);
     g_containerType = containerType;
 
     if ((isWindows() && containerType === 'linux') || !isWindows()) {
@@ -25,7 +24,7 @@ export async function setMountLocations(userMount: string, extMount: string, con
         g_hostOutputLocation = extMount;
         g_mountOutputLocation = `/${path.basename(extMount)}`;
     }
-    dlToolkitChannel.appendLine(`2 Mount locations: ${g_mountLocation}, ${g_mountOutputLocation} , ${g_containerType} , ${containerType}`);
+    dlToolkitChannel.appendLine("info",`2 Mount locations: ${g_mountLocation}, ${g_mountOutputLocation} , ${g_containerType} , ${containerType}`);
 }
 
 export function isWindows(): boolean {
@@ -54,13 +53,13 @@ export function getLocationOnContainer (pathOnHost: string | undefined): string 
         else if (isWindows() && g_containerType === 'linux') {
             let temp:string  = `${pathOnHost.replace(g_hostLocation, g_mountLocation)}`;
             retString = temp.replace(/\\/g, "/");
-            dlToolkitChannel.appendLine(`Path ${pathOnHost} translates to ${retString}`);
+            dlToolkitChannel.appendLine("info", `Path ${pathOnHost} translates to ${retString}`);
             //dlToolkitChannel.appendLineChannel.appendLine(`Path ${pathOnHost} translates to ${retString}`);
         }
 
         else
             retString = `${g_mountLocation}${pathOnHost.replace(g_hostLocation, "")}`;
-        dlToolkitChannel.appendLine(`Path ${pathOnHost} translates to ${retString}`);
+        dlToolkitChannel.appendLine("info", `Path ${pathOnHost} translates to ${retString}`);
     }
 
     return retString;
