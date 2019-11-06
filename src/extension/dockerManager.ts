@@ -35,13 +35,13 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
             let containerTypeCP = cp.spawn('docker', ['info', '-f', `"{{.OSType}}"`]);
             let containerType = "";
             containerTypeCP.stdout.on("data", (data: string): void => {
-                dlToolkitChannel.append(data);
+                dlToolkitChannel.append("info" , data);
                 containerType = containerType + data.toString(); // this should say something like not installed so used that instead of error
             });
 
             containerTypeCP.on('error', (err) => {
-                dlToolkitChannel.appendLine('Docker client is either not installed or not running!');
-                dlToolkitChannel.appendLine(`Got error ${err}`);
+                dlToolkitChannel.appendLine("error", 'Docker client is either not installed or not running!');
+                dlToolkitChannel.appendLine("error", `Got error ${err}`);
 
             });
 
@@ -50,17 +50,17 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
                     containerType = containerType.trim().replace(/\"/g, "");
                     if (containerType === 'linux' || containerType === 'windows') {
                         utils.setMountLocations(this._workspace.uri.fsPath, os.tmpdir(), containerType);
-                        dlToolkitChannel.appendLine(`Mount locations set! ${this._workspace.uri.fsPath}, ${os.tmpdir()}`);
+                        dlToolkitChannel.appendLine("info", `Mount locations set! ${this._workspace.uri.fsPath}, ${os.tmpdir()}`);
                     }
                     else {
-                        dlToolkitChannel.appendLine("Docker doesnt seem to be running! Please make sure that docker is running and run \
+                        dlToolkitChannel.appendLine("error", "Docker doesnt seem to be running! Please make sure that docker is running and run \
                                                      `DL Toolkit: Reinitialize ecosystem" );
                     }
                 }
             });
         }
         else {
-            dlToolkitChannel.appendLine("No workspace open! Please open your development folder(workspace)");
+            dlToolkitChannel.appendLine("error", "No workspace open! Please open your development folder(workspace)");
         }
     }
 
@@ -74,11 +74,11 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
             if (this._workspace) {
                 if (containerType === "linux" || containerType === "windows"){
                     utils.setMountLocations(this._workspace.uri.fsPath, os.tmpdir(), containerType);
-                    dlToolkitChannel.appendLine(`Mount locations set! ${this._workspace.uri.fsPath}, ${os.tmpdir()}`);
+                    dlToolkitChannel.appendLine("info", `Mount locations set! ${this._workspace.uri.fsPath}, ${os.tmpdir()}`);
                 }
             }
             else {
-                dlToolkitChannel.appendLine("No open workspace found! Please open your workspace");
+                dlToolkitChannel.appendLine("error", "No open workspace found! Please open your workspace");
             }
             return containerType;
         }
@@ -93,12 +93,12 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
 
             childProc.stdout.on("data", (data: string | Buffer) => {
                 data = data.toString();
-                dlToolkitChannel.append(data);
+                dlToolkitChannel.append("info", data);
                 result = result.concat(data);
             });
 
             childProc.stderr.on("data", (data: string | Buffer) => {
-                dlToolkitChannel.appendLine(data.toString());
+                dlToolkitChannel.appendLine("warning", data.toString());
                 //reject(`exited with error ${data}`)
             });
 
@@ -123,7 +123,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
                     p.report({ increment: 100, doneMessage }); // havent figured out how to show the final message yet 
                     resolve(result);
                 } catch (e) {
-                    dlToolkitChannel.appendLine(`Reject ${e}`);
+                    dlToolkitChannel.appendLine("error", `Reject ${e}`);
                     reject(e);
                 }
             });
@@ -138,9 +138,9 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
             if (!imageID || 0 === imageID.length) { // image doesnt exist
                 await this.executeCommand("docker", ["pull", "chanchala7/mlperf_linux:latest"]).then(async () => {
                     imageID = await this.executeCommand("docker", ['images', "chanchala7/mlperf_linux:latest", '--format', '"{{.Repository}}"']);
-                    dlToolkitChannel.appendLine(`imageID: ${imageID}`);
+                    dlToolkitChannel.appendLine("info", `imageID: ${imageID}`);
                 }, reason => {
-                    dlToolkitChannel.appendLine("Docker pull failed");
+                    dlToolkitChannel.appendLine("error", "Docker pull failed");
                 });
             }
         }
@@ -149,20 +149,20 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
             if (!imageID || 0 === imageID.length) { // image doesnt exist
                 await this.executeCommand("docker", ["pull", `${docker_images["windows-mlperf"]["name"]}`]).then(async () => {
                     imageID = await this.executeCommand("docker", ['images', "chanchala7/my_ubuntu", '--format', '"{{.Repository}}"']);
-                    dlToolkitChannel.appendLine(`imageID: ${imageID}`);
+                    dlToolkitChannel.appendLine("info", `imageID: ${imageID}`);
                 }, reason => {
-                    dlToolkitChannel.appendLine("Docker pull failed");
+                    dlToolkitChannel.appendLine("error", "Docker pull failed");
                 });
             }
         }
         else { // containerType was not set correctly
-            dlToolkitChannel.appendLine("There is some issue with docker. Please make sure that docker is running and run \
+            dlToolkitChannel.appendLine("error", "There is some issue with docker. Please make sure that docker is running and run \
                                         `DL Toolkit: Check container type" );
             return imageID;
         }
 
         this._imageId = imageID;
-        dlToolkitChannel.appendLine(`ImageID : ${imageID}`);
+        dlToolkitChannel.appendLine("info", `ImageID : ${imageID}`);
         return imageID;
     }
 
@@ -174,7 +174,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
             let args: string[] = ['run', '-m', '4g', '-t', '-d', '--mount', userWorkspaceMount, '--mount', extensionMount, this._imageId];
             runningContainer = await this.executeCommandWithProgress("Your development environment is ready!", "Starting your development environment...", "docker", args);
             this._containerIds.push(runningContainer.substr(0, 12));
-            dlToolkitChannel.appendLine(`ContainerId: ${this._containerIds[0]}`);
+            dlToolkitChannel.appendLine("info", `ContainerId: ${this._containerIds[0]}`);
         }
         return runningContainer;
 
@@ -184,12 +184,12 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
     //public async convert(inputNode: string, outputNode: string, opset: string = '8', fileuri: vscode.Uri, ...args: any[]): Promise<string | undefined> {
     public async convert(convertParams: Map<string,string>): Promise<string | undefined> {
         if (!this._workspace) {
-            dlToolkitChannel.appendLine(`No workspace defined`);
+            dlToolkitChannel.appendLine("error", `No workspace defined`);
             return undefined;
         }
         let modelToConvert : string | undefined = convertParams.get("input");
         if (!modelToConvert) {
-            dlToolkitChannel.appendLine(`No input model provided`);
+            dlToolkitChannel.appendLine("error", `No input model provided`);
             return undefined;
         }
 
@@ -209,7 +209,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
                 args.push(`${supported_models["mobilenet"]["inputs"]}`);
             }
             else {
-                dlToolkitChannel.appendLine("This model is not part of the supported models!");
+                dlToolkitChannel.appendLine("error", "This model is not part of the supported models!");
                 return undefined;
             }
         }
@@ -224,7 +224,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
                 args.push(`${supported_models["mobilenet"]["outputs"]}`);
             }
             else {
-                dlToolkitChannel.appendLine("This model is not part of the supported models!");
+                dlToolkitChannel.appendLine("error", "This model is not part of the supported models!");
                 return undefined;
             }
         }
@@ -238,7 +238,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
                 if (key === 'input') {
                     args.push(`--${key}`);
                     args.push(utils.getLocationOnContainer(value));
-                    dlToolkitChannel.appendLine(`Location on container: ${utils.getLocationOnContainer(value)}`)
+                    dlToolkitChannel.appendLine("info", `Location on container: ${utils.getLocationOnContainer(value)}`)
                 }
                 else {
                     args.push(`--${key}`);
@@ -254,24 +254,24 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
         args.push("--output");
         args.push(`${path.basename(modelToConvert).replace(".pb", ".onnx")}`);
 
-        dlToolkitChannel.appendLine(`Convert params ${args}`);
+        dlToolkitChannel.appendLine("info", `Convert params ${args}`);
         return await this.executeCommandWithProgress("Finished converting", "Converting to ONNX...", "docker", args);
         }
 
     public async summarizeGraph(fileuri: string) : Promise<string|undefined> {
         if (!this._workspace) {
-            dlToolkitChannel.appendLine(`No workspace defined`);
+            dlToolkitChannel.appendLine("error", `No workspace defined`);
             return undefined;
         }
         let args: string[] = ['exec', `${this._containerIds[0]}`, `${tensorflow_binaries[utils.g_containerType]["summarize"]}`, '--in_graph='+`${utils.getLocationOnContainer(fileuri)}`];
-        dlToolkitChannel.appendLine(`Summarize params ${args}`);
+        dlToolkitChannel.appendLine("info", `Summarize params ${args}`);
         return await this.executeCommand("docker", args);
     }
 
 
     public async quantizeModel(quantizeParam: Map<string, string>): Promise<string | undefined> {
         if (!this._workspace) {
-            dlToolkitChannel.appendLine(`No workspace defined`);
+            dlToolkitChannel.appendLine("error", `No workspace defined`);
             return undefined;
         }
         let model: string | undefined = quantizeParam.get("model");
@@ -288,12 +288,12 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
             }
             else
             {
-                dlToolkitChannel.appendLine("This model is not supported for quantization!");
+                dlToolkitChannel.appendLine("error", "This model is not supported for quantization!");
                 return "This model is not supported for quantization!";
             }
         }
         else {
-            dlToolkitChannel.appendLine("Model not found!");
+            dlToolkitChannel.appendLine("error", "Model not found!");
             return "Model not found!";
         }
 
@@ -301,7 +301,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
 
     public async quantizeONNXModel(quantizeParam: Map<string, string>): Promise<string | undefined> {
         if (!this._workspace) {
-            dlToolkitChannel.appendLine(`No workspace defined`);
+            dlToolkitChannel.appendLine("error", `No workspace defined`);
             return undefined;
         }
         let model: string | undefined = quantizeParam.get("model");
@@ -309,18 +309,18 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
             let args: string[] = ['exec', '-w', `${utils.getScriptsLocationOnContainer()}`, `${this._containerIds[0]}`, 'python3', 'calibrate.py', 
                                   '--model_path='+`${utils.getLocationOnContainer(quantizeParam.get("model"))}`, 
                                   '--dataset_path='+`${utils.getLocationOnContainer(quantizeParam.get("dataset"))}` ];
-                dlToolkitChannel.appendLine(`Quantize params ${args}`);
+                dlToolkitChannel.appendLine("info", `Quantize params ${args}`);
                 return await this.executeCommandWithProgress("Quantization done", "Quantizing ONNX FP32 model to ONNX int8 model... ", "docker", args);
         }
         else {
-            dlToolkitChannel.appendLine("Model not found!");
+            dlToolkitChannel.appendLine("error", "Model not found!");
             return "Model not found!";
         }
     }
     
     public async quantizeTFModel(quantizeParam: Map<string, string>): Promise<string | undefined> {
         if (!this._workspace) {
-            dlToolkitChannel.appendLine(`No workspace defined`);
+            dlToolkitChannel.appendLine("error", `No workspace defined`);
             return undefined;
         }
         let model: string | undefined = quantizeParam.get("model");
@@ -332,17 +332,17 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
                 model = "mobilenet";
             }
             else {
-                dlToolkitChannel.appendLine("This model is not part of the supported models!");
+                dlToolkitChannel.appendLine("error", "This model is not part of the supported models!");
                 return undefined;
             }
             let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(path.dirname(model))}`, `${this._containerIds[0]}`, `${tensorflow_binaries[utils.g_containerType]["transform"]}`,
                     '--in_graph=', `${path.basename(model)}`, '--out_graph=', `${path.basename(model).replace(".pb", "_quantized.pb")}`,
                     '--inputs=', `${supported_models[model]["inputs"]}`, '--outputs=', `${supported_models[model]["outputs"]}`, '--transforms=', `${tensorflow_quantization_options}`];
-            dlToolkitChannel.appendLine(`Quantize params ${args}`);
+            dlToolkitChannel.appendLine("info", `Quantize params ${args}`);
                 return await this.executeCommandWithProgress("Quantization done", "Quantizing TF FP32 model to TF int8 model... ", "docker", args);
         }
         else {
-            dlToolkitChannel.appendLine("Model not found!");
+            dlToolkitChannel.appendLine("error", "Model not found!");
             return "Model not found!";
         }
     }
@@ -351,18 +351,18 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
         //let netronCP = cp.spawn('C:\\Program Files\\Netron\\Netron.exe', [`${modeluri.fsPath}`], { env: [] });
         let netronCP = cp.spawn('C:\\Program Files\\Netron\\Netron.exe', [`${modeluri.fsPath}`]);
         netronCP.on('error', (err: any) => {
-            dlToolkitChannel.appendLine(`Failed to start the container with ${err}`);
+            dlToolkitChannel.appendLine("error", `Failed to start the container with ${err}`);
         });
 
         netronCP.stdout.on('data', (data: string) => {
-            dlToolkitChannel.appendLine(`container id is ${data.toString()}`);
+            dlToolkitChannel.appendLine("info", `container id is ${data.toString()}`);
             this._containerIds.push(data.toString().substr(0, 12));
         });
 
         netronCP.on('exit', (err: any) => {
             if (err != 0) {
 
-                dlToolkitChannel.appendLine(`Exit with error code:  ${err}`);
+                dlToolkitChannel.appendLine("error", `Exit with error code:  ${err}`);
 
             }
         })
@@ -375,7 +375,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
                 if (key === 'dataset-path' || key === 'model') {
                     args.push(`--${key}`);
                     args.push(utils.getLocationOnContainer(value));
-                    dlToolkitChannel.appendLine(`Location on container: ${utils.getLocationOnContainer(value)}`)
+                    dlToolkitChannel.appendLine("info", `Location on container: ${utils.getLocationOnContainer(value)}`)
                 }
                 else {
                     args.push(`--${key}`);
@@ -393,7 +393,7 @@ export class DockerManager implements vscode.Disposable { // can dispose the vsc
                 args.push(`${utils.g_mountOutputLocation}\\MLPerf`);
             }
 
-            dlToolkitChannel.appendLine(`MLPerf args ${args}`);
+            dlToolkitChannel.appendLine("info", `MLPerf args ${args}`);
             return await this.executeCommandWithProgress("Finished Validation", "Validating model with MLPerf... ", "docker", args);
         }
 
