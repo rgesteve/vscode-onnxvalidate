@@ -2,24 +2,19 @@
 import * as cp from 'child_process';
 import * as vscode from 'vscode';
 import * as path from 'path';
-import * as fs from 'fs';
 import * as os from 'os';
 import * as utils from './osUtils';
 import { supported_models, docker_images, tensorflow_binaries, tensorflow_quantization_options } from './config';
-import { dlToolkitChannel} from "./dlToolkitChannel";
+import { dlToolkitChannel } from "./dlToolkitChannel";
 
 
-export class DockerManager implements vscode.Disposable { 
-    private _imageId: string | undefined; 
+class DockerManager implements vscode.Disposable {
+    private _imageId: string | undefined;
     private _containerIds: string[];
     private _workspace: vscode.WorkspaceFolder | undefined;
-    private _extensionPath: string;
-    private _context: vscode.ExtensionContext | undefined;
 
-    constructor(extensionPath: string, context: vscode.ExtensionContext) {
+    constructor() {
         this._containerIds = [];
-        this._extensionPath = extensionPath;
-        this._context = context;
 
         const workspaceFolders: vscode.WorkspaceFolder[] = vscode.workspace.workspaceFolders || [];
         if (workspaceFolders.length != 0) {
@@ -29,8 +24,8 @@ export class DockerManager implements vscode.Disposable {
             let containerTypeCP = cp.spawn('docker', ['info', '-f', `"{{.OSType}}"`]);
             let containerType = "";
             containerTypeCP.stdout.on("data", (data: string): void => {
-                dlToolkitChannel.append("info" , data);
-                containerType = containerType + data.toString(); 
+                dlToolkitChannel.append("info", data);
+                containerType = containerType + data.toString();
             });
 
             containerTypeCP.on('error', (err) => {
@@ -58,15 +53,15 @@ export class DockerManager implements vscode.Disposable {
         }
     }
 
-    public async getContainerType() : Promise<string|undefined> {
-        let containerType : string | undefined = await this.executeCommand("docker", ['info', '-f', `{{.OSType}}`]);
-        if (!containerType){
+    public async getContainerType(): Promise<string | undefined> {
+        let containerType: string | undefined = await this.executeCommand("docker", ['info', '-f', `{{.OSType}}`]);
+        if (!containerType) {
             return undefined;
         }
         else {
             containerType = containerType.trim().replace(/\"/g, "");
             if (this._workspace) {
-                if (containerType === "linux" || containerType === "windows"){
+                if (containerType === "linux" || containerType === "windows") {
                     utils.setMountLocations(this._workspace.uri.fsPath, os.tmpdir(), containerType);
                     dlToolkitChannel.appendLine("info", `Mount locations set! ${this._workspace.uri.fsPath}, ${os.tmpdir()}`);
                 }
@@ -173,21 +168,20 @@ export class DockerManager implements vscode.Disposable {
 
     }
 
-    public async convert(convertParams: Map<string,string>): Promise<string | undefined> {
+    public async convert(convertParams: Map<string, string>): Promise<string | undefined> {
         if (!this._workspace) {
             dlToolkitChannel.appendLine("error", `No workspace defined`);
             return undefined;
         }
 
-        let modelToConvert : string | undefined = convertParams.get("input");
+        let modelToConvert: string | undefined = convertParams.get("input");
         if (!modelToConvert) {
             dlToolkitChannel.appendLine("error", `No input model provided`);
             return undefined;
         }
 
         let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(path.dirname(modelToConvert))}`, `${this._containerIds[0]}`, 'python3', '-m', 'tf2onnx.convert',];
-        if (convertParams.get("inputs") === undefined) 
-        { 
+        if (convertParams.get("inputs") === undefined) {
             if (path.basename(modelToConvert).toLowerCase().includes("resnet")) {
                 args.push("--inputs");
                 args.push(`${supported_models["resnet50"]["inputs"]}`);
@@ -220,13 +214,13 @@ export class DockerManager implements vscode.Disposable {
                 return undefined;
             }
         }
-        
+
         if (convertParams.get("opset") === undefined) {
             args.push("--opset");
             args.push("8");
         }
         for (var [key, value] of convertParams) {
-            if (value) { 
+            if (value) {
                 if (key === 'input') {
                     args.push(`--${key}`);
                     args.push(utils.getLocationOnContainer(value));
@@ -248,14 +242,14 @@ export class DockerManager implements vscode.Disposable {
 
         dlToolkitChannel.appendLine("info", `Convert params ${args}`);
         return await this.executeCommandWithProgress("Finished converting", "Converting to ONNX...", "docker", args);
-        }
+    }
 
-    public async summarizeGraph(fileuri: string) : Promise<string|undefined> {
+    public async summarizeGraph(fileuri: string): Promise<string | undefined> {
         if (!this._workspace) {
             dlToolkitChannel.appendLine("error", `No workspace defined`);
             return undefined;
         }
-        let args: string[] = ['exec', `${this._containerIds[0]}`, `${tensorflow_binaries[utils.g_containerType]["summarize"]}`, '--in_graph='+`${utils.getLocationOnContainer(fileuri)}`];
+        let args: string[] = ['exec', `${this._containerIds[0]}`, `${tensorflow_binaries[utils.g_containerType]["summarize"]}`, '--in_graph=' + `${utils.getLocationOnContainer(fileuri)}`];
         dlToolkitChannel.appendLine("info", `Summarize params ${args}`);
         return await this.executeCommand("docker", args);
     }
@@ -267,8 +261,7 @@ export class DockerManager implements vscode.Disposable {
             return undefined;
         }
         let model: string | undefined = quantizeParam.get("model");
-        if (model)
-        {
+        if (model) {
             let fileExt = model.split('.').pop();
             if (fileExt === 'pb') // tensorflow quantization to follow
             {
@@ -278,8 +271,7 @@ export class DockerManager implements vscode.Disposable {
             {
                 return this.quantizeONNXModel(quantizeParam);
             }
-            else
-            {
+            else {
                 dlToolkitChannel.appendLine("error", "This model is not supported for quantization!");
                 return "This model is not supported for quantization!";
             }
@@ -298,26 +290,26 @@ export class DockerManager implements vscode.Disposable {
         }
         let model: string | undefined = quantizeParam.get("model");
 
-        if (!model){
+        if (!model) {
             dlToolkitChannel.appendLine("error", "Model not found!");
             return "Model not found!";
         }
-        
-        let args: string[] = ['exec', '-w', `${utils.getScriptsLocationOnContainer()}`, `${this._containerIds[0]}`, 'python3', 'calibrate.py', 
-                              '--model_path='+`${utils.getLocationOnContainer(quantizeParam.get("model"))}`, 
-                              '--dataset_path='+`${utils.getLocationOnContainer(quantizeParam.get("dataset"))}` ];
+
+        let args: string[] = ['exec', '-w', `${utils.getScriptsLocationOnContainer()}`, `${this._containerIds[0]}`, 'python3', 'calibrate.py',
+            '--model_path=' + `${utils.getLocationOnContainer(quantizeParam.get("model"))}`,
+            '--dataset_path=' + `${utils.getLocationOnContainer(quantizeParam.get("dataset"))}`];
         dlToolkitChannel.appendLine("info", `Quantize params ${args}`);
         return await this.executeCommandWithProgress("Quantization done", "Quantizing ONNX FP32 model to ONNX int8 model... ", "docker", args);
     }
-    
+
     public async quantizeTFModel(quantizeParam: Map<string, string>): Promise<string | undefined> {
         if (!this._workspace) {
             dlToolkitChannel.appendLine("error", `No workspace defined`);
             return undefined;
         }
         let model: string | undefined = quantizeParam.get("model");
-        
-        if (!model){
+
+        if (!model) {
             dlToolkitChannel.appendLine("error", "Model not found!");
             return "Model not found!";
         }
@@ -334,8 +326,8 @@ export class DockerManager implements vscode.Disposable {
         }
 
         let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(path.dirname(model))}`, `${this._containerIds[0]}`, `${tensorflow_binaries[utils.g_containerType]["transform"]}`,
-                              '--in_graph=', `${path.basename(model)}`, '--out_graph=', `${path.basename(model).replace(".pb", "_quantized.pb")}`,
-                              '--inputs=', `${supported_models[model]["inputs"]}`, '--outputs=', `${supported_models[model]["outputs"]}`, '--transforms=', `${tensorflow_quantization_options}`];
+            '--in_graph=', `${path.basename(model)}`, '--out_graph=', `${path.basename(model).replace(".pb", "_quantized.pb")}`,
+            '--inputs=', `${supported_models[model]["inputs"]}`, '--outputs=', `${supported_models[model]["outputs"]}`, '--transforms=', `${tensorflow_quantization_options}`];
         dlToolkitChannel.appendLine("info", `Quantize params ${args}`);
         return await this.executeCommandWithProgress("Quantization done", "Quantizing TF FP32 model to TF int8 model... ", "docker", args);
 
@@ -398,3 +390,5 @@ export class DockerManager implements vscode.Disposable {
         this.executeCommand("docker", ["stop", `${this._containerIds[0]}`]);
     }
 }
+
+export const dockerManager: DockerManager = new DockerManager();
