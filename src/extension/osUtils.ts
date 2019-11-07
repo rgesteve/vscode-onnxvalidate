@@ -54,7 +54,6 @@ export function getLocationOnContainer (pathOnHost: string | undefined): string 
             let temp:string  = `${pathOnHost.replace(g_hostLocation, g_mountLocation)}`;
             retString = temp.replace(/\\/g, "/");
             dlToolkitChannel.appendLine("info", `Path ${pathOnHost} translates to ${retString}`);
-            //dlToolkitChannel.appendLineChannel.appendLine(`Path ${pathOnHost} translates to ${retString}`);
         }
 
         else
