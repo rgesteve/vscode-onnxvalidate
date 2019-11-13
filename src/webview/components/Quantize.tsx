@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Header from './Header';
 import { Stack, TextField, PrimaryButton, Label, Toggle, ILabelStyles, IToggleStyles } from "office-ui-fabric-react";
 import { QuantizeInputParams } from './QuantizeHelper';
+import { func } from 'prop-types';
 
 interface IState {
 
@@ -10,7 +11,9 @@ interface IState {
 
 interface IQuantizeProps {
     inputProps: QuantizeInputParams;
+    quantizeFormHandler: (e: any, task: String) => void;
     pathToModel: (event: React.MouseEvent<HTMLButtonElement>) => void
+    pathToPreprocessModule: (event: React.MouseEvent<HTMLButtonElement>) => void
     pathToRepresentativeData: (event: React.MouseEvent<HTMLButtonElement>) => void
     startQuantization: (event: React.MouseEvent<HTMLButtonElement>) => void
     cancelQuantization: (event: React.MouseEvent<HTMLButtonElement>) => void
@@ -27,7 +30,7 @@ class Quantize extends Component<IQuantizeProps, IState>  {
 
     render() {
 
-        let { datasetPath, modelPath } = this.props.inputProps;
+        let { preprocessModulePath, functionName, datasetPath, modelPath } = this.props.inputProps;
         let { showFields } = this.state;
         return (
             <div>
@@ -43,21 +46,35 @@ class Quantize extends Component<IQuantizeProps, IState>  {
                             <TextField placeholder="Enter path to model" value={modelPath} />
                         </Stack.Item>
                         <Stack.Item align="end" >
-                            <PrimaryButton style={{ width: '200px' }} onClick={this.props.pathToModel}>Select Path to model</PrimaryButton>
+                            <PrimaryButton style={{ width: '200px' }} onClick={this.props.pathToModel}>Select model</PrimaryButton>
                         </Stack.Item>
                     </Stack>
                     <Toggle styles={tStyles} label="Quantize with representative data?" inlineLabel checked={showFields} onChange={this._toggleShowFields} />
                     {showFields && (
                         <>
-                                        <Stack horizontal gap={5} >
+                    <Stack horizontal gap={5} >
                     <Stack.Item grow>
                         <Label styles={labelStyles}>Enter path to data set </Label>
                         <TextField placeholder="Enter path to data set" value={datasetPath} />
                     </Stack.Item>
                     <Stack.Item align="end" >
-                        <PrimaryButton style={{ width: '200px' }} onClick={this.props.pathToRepresentativeData}>Select Path dataset</PrimaryButton>
+                        <PrimaryButton style={{ width: '200px' }} onClick={this.props.pathToRepresentativeData}>Select dataset</PrimaryButton>
                     </Stack.Item>
-                </Stack>                            
+                </Stack>     
+
+                <Stack horizontal gap={5} >
+                    <Stack.Item grow>
+                        <Label styles={labelStyles}>Enter path custom preprocess module</Label>
+                        <TextField placeholder="Enter path custom preprocess module" value={preprocessModulePath} />
+                    </Stack.Item>
+                    <Stack.Item align="end" >
+                        <PrimaryButton style={{ width: '200px' }} onClick={this.props.pathToPreprocessModule}>Select module</PrimaryButton>
+                    </Stack.Item>
+                    <Stack.Item grow>
+                            <Label styles={labelStyles} >Enter function name </Label>
+                            <TextField placeholder="module_name.function_name" value={functionName} onChange={(e: any) => this.props.quantizeFormHandler(e, "onFunctionNameChange")} />
+                        </Stack.Item>
+                </Stack>                       
                         </>
                     )}
                     <Stack horizontal tokens={tokens.customSpacing} padding="s1 35%">

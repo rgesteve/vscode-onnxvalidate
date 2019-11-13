@@ -260,7 +260,7 @@ class DockerManager implements vscode.Disposable {
             dlToolkitChannel.appendLine("error", `No workspace defined`);
             return undefined;
         }
-        let model: string | undefined = quantizeParam.get("model");
+        let model: string | undefined = quantizeParam.get("model_path");
         if (model) {
             let fileExt = model.split('.').pop();
             if (fileExt === 'pb') // tensorflow quantization to follow
@@ -288,16 +288,31 @@ class DockerManager implements vscode.Disposable {
             dlToolkitChannel.appendLine("error", `No workspace defined`);
             return undefined;
         }
-        let model: string | undefined = quantizeParam.get("model");
+        let model: string | undefined = quantizeParam.get("model_path");
 
         if (!model) {
             dlToolkitChannel.appendLine("error", "Model not found!");
             return "Model not found!";
         }
 
-        let args: string[] = ['exec', '-w', `${utils.getScriptsLocationOnContainer()}`, `${this._containerIds[0]}`, 'python3', 'calibrate.py',
-            '--model_path=' + `${utils.getLocationOnContainer(quantizeParam.get("model"))}`,
-            '--dataset_path=' + `${utils.getLocationOnContainer(quantizeParam.get("dataset"))}`];
+        let args: string[] = ['exec', '-w', `${utils.getScriptsLocationOnContainer()}`, `${this._containerIds[0]}`, 'python3']
+        if (quantizeParam.size == 1) {
+            args.push('quantizeDriver.py');
+            args.push(`--model_path=${model}`);
+        }
+        else {
+            args.push('calibrate.py');
+            for (var [key, value] of quantizeParam) {
+                if (key === 'dataset_path' || key === 'model_path' || key === 'data_preprocess_filepath') {
+                    args.push(`--${key}=${utils.getLocationOnContainer(value)}`);
+                    dlToolkitChannel.appendLine("info", `Location on container: ${utils.getLocationOnContainer(value)}`)
+                }
+                else {
+                    args.push(`--${key}=${value}`);
+                }
+            }
+        }
+
         dlToolkitChannel.appendLine("info", `Quantize params ${args}`);
         return await this.executeCommandWithProgress("Quantization done", "Quantizing ONNX FP32 model to ONNX int8 model... ", "docker", args);
     }

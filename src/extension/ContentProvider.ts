@@ -72,7 +72,7 @@ class ContentProvider implements Disposable {
                                     break;
                                 }
                                 case "quantize": {
-                                    this.quantizeParam.set("model", value.fsPath);
+                                    this.quantizeParam.set("model_path", value.fsPath);
                                     if (this.currentPanel) {
                                         this.currentPanel.webview.postMessage({ command: "modelPathQuantize", payload: value.fsPath });
                                     }
@@ -94,14 +94,14 @@ class ContentProvider implements Disposable {
             }
             case "setDataset": {
                 window.showOpenDialog({
-                    canSelectFolders: true, canSelectFiles: true, canSelectMany: false,
+                    canSelectFolders: true, canSelectFiles: false, canSelectMany: false,
                     openLabel: 'Select dataset'
                 }).then((folderUris) => {
                     if (folderUris) {
                         folderUris.forEach(value => {
                             switch (subCommand) {
                                 case "quantize": {
-                                    this.quantizeParam.set("dataset", value.fsPath);
+                                    this.quantizeParam.set("dataset_path", value.fsPath);
                                     if (this.currentPanel) {
                                         this.currentPanel.webview.postMessage({ command: "datasetQuantize", payload: value.fsPath });
                                     }
@@ -116,6 +116,23 @@ class ContentProvider implements Disposable {
                                 }
                             }
                             this.mlperfParam.set("dataset-path", value.fsPath);
+                        });
+                    }
+                });
+                break;
+            }
+
+            case "setPreprocessModulePath": {
+                window.showOpenDialog({
+                    canSelectFolders: true, canSelectFiles: false, canSelectMany: false,
+                    openLabel: 'Select module path'
+                }).then((folderUris) => {
+                    if (folderUris) {
+                        folderUris.forEach(value => {
+                            this.quantizeParam.set("data_preprocess_filepath", value.fsPath);
+                            if (this.currentPanel) {
+                                this.currentPanel.webview.postMessage({ command: "preprocessModulePath", payload: value.fsPath });
+                            }
                         });
                     }
                 });
@@ -230,7 +247,10 @@ class ContentProvider implements Disposable {
                 });
                 break;
             }
-
+            case "setFunctionName": {
+                this.quantizeParam.set("data_preprocess", msg.text);
+                break;
+            }
             case "downloadResult": {
                 window.showSaveDialog({ filters: { '*': ['txt'] } }).then(uri => {
                     if (!uri) {

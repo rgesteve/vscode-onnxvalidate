@@ -98,7 +98,7 @@ class App extends Component<{}, IState> {
         );
 
         console.log("Entering output node for conversion");
-        window.console.log("Entering Output node for conversion");
+        window.console.log("Entering output node for conversion");
         vscode.postMessage(
             {
                 command: 'setOutputNode',
@@ -106,15 +106,23 @@ class App extends Component<{}, IState> {
             }
         );
         console.log("Entering opset node for conversion");
-        window.console.log("Entering Output node for conversion");
+        window.console.log("Entering opset node for conversion");
         vscode.postMessage(
             {
                 command: 'setOpsetNode',
                 text: this.state.convertInputParams.opset
             }
         );
-
-
+        
+        // update on quantization paramerers
+        console.log("Entering function name for preprocessing");
+        window.console.log("Entering function name for preprocessing");
+        vscode.postMessage(
+            {
+                command: 'setFunctionName',
+                text: this.state.quantizeInputParams.functionName
+            }
+        );
 
 
 
@@ -146,6 +154,13 @@ class App extends Component<{}, IState> {
                 this.setState(state => ({ quantizeInputParams: myobjQuantize }));
                 break;
             }
+            case "preprocessModulePath": {
+                console.log(`Quantize: Got a message from the host ${ev.data}`);
+                myobjQuantize.preprocessModulePath = ev.data.payload;
+                this.setState(state => ({ quantizeInputParams: myobjQuantize }));
+                break;
+            }
+
             case "datasetValidate": {
                 console.log(`Got a message from the host ${ev.data}`);
                 myobj.datasetPath = ev.data.payload;
@@ -224,6 +239,15 @@ class App extends Component<{}, IState> {
         window.console.log(`Sent message to host.`);
     };
 
+    
+    pathToPreprocessModule = () => {
+        window.console.log("Select path to preprocess module");
+        vscode.postMessage({
+            command: 'setPreprocessModulePath',
+            text: 'Select path to preprocess module path'
+        });
+        window.console.log(`Sent message to host.`);
+    };
     startQuantization = () => {
         vscode.postMessage({
              command: 'startQuantization',
@@ -297,6 +321,17 @@ class App extends Component<{}, IState> {
 
     }
 
+    quantizeFormHandler = (event: any, task: String): void => {
+        let myobj = this.state.quantizeInputParams;
+        switch (task) {
+            case 'onFunctionNameChange':
+                myobj.functionName = event.target.value;
+                console.log(myobj.functionName);
+                break;
+        }
+        this.setState({ quantizeInputParams: myobj });
+
+    }
 
     validateFormHandler = (event: any, task: String): void => {
         let myobj = this.state.validateInputParams;
@@ -387,6 +422,8 @@ class App extends Component<{}, IState> {
                         <Label style={{ color: 'white' }}><Quantize
                             inputProps={this.state.quantizeInputParams}
                             pathToModel={this.pathToModelQuantize}
+                            pathToPreprocessModule={this.pathToPreprocessModule}
+                            quantizeFormHandler={this.quantizeFormHandler}
                             startQuantization={this.startQuantization}
                             cancelQuantization={this.cancelConversion}
                             pathToRepresentativeData={this.PathToRepresentativeData}
