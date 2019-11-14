@@ -179,10 +179,31 @@ class ContentProvider implements Disposable {
                 });
                 break;
             }
-            //Need to fix. Add post message to send message to UI to clear input fields.
-            case "cancel": {
+
+            case "cancelValidation": {
                 this.mlperfParam.clear();
-                dlToolkitChannel.appendLine("info", "Canceling verification, cleared mlperfParam");
+                dlToolkitChannel.appendLine("info", "Canceling validation, cleared mlperfParam");
+                if (this.currentPanel !== undefined) {
+                    this.currentPanel.webview.postMessage({ command: 'clearValidationForm' });
+                }
+                break;
+            }
+
+            case "cancelConversion": {
+                this.convertParam.clear();
+                dlToolkitChannel.appendLine("info", "Canceling conversion, cleared convertParam");
+                if (this.currentPanel !== undefined) {
+                    this.currentPanel.webview.postMessage({ command: 'clearConversionForm' });
+                }
+                break;
+            }
+
+            case "cancelQuantization": {
+                this.quantizeParam.clear();
+                dlToolkitChannel.appendLine("info", "Canceling quantization, cleared quantizeParam");
+                if (this.currentPanel !== undefined) {
+                    this.currentPanel.webview.postMessage({ command: 'clearQuantizationForm' });
+                }
                 break;
             }
             case "setModel": {
@@ -211,7 +232,6 @@ class ContentProvider implements Disposable {
                 });
                 break;
             }
-            //Need to fix. Add post message to send message to UI to clear input fields.
 
             case "summarizeGraph": {
                 let temp: string | undefined = this.convertParam.get("input");
@@ -230,9 +250,6 @@ class ContentProvider implements Disposable {
                     }
                 }
 
-                break;
-            }
-            case "cancelConversion": {
                 break;
             }
 

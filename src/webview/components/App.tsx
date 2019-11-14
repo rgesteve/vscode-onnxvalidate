@@ -9,6 +9,7 @@ import ValidateInput from './ValidateInput';
 import ValidationResult , {SummarizeResult} from './ValidationResult'
 import { Result, ValidationInputParams } from './ValidationHelper';
 import { Fabric } from 'office-ui-fabric-react';
+const clonedeep = require('lodash.clonedeep')
 
 declare var acquireVsCodeApi: any;
 const vscode = acquireVsCodeApi();
@@ -44,31 +45,44 @@ class App extends Component<{}, IState> {
 
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(_prevProps: any, prevState: IState) {
+        console.log("Entering componentDidUpdate");
 
+        if (this.state.quantizeInputParams.functionName !== prevState.quantizeInputParams.functionName)
+        {
+            vscode.postMessage(
+                {
+                    command: 'setFunctionName',
+                    text: this.state.quantizeInputParams.functionName
+                }
+            );
+            window.console.log(`Sent message to host: setFunctionName ${this.state.quantizeInputParams.functionName}`);
+        }
         //update on input validation components
-        console.log("Selecting profile");
-        window.console.log("Testing......");
+        if (this.state.validateInputParams.selectedItem !== prevState.validateInputParams.selectedItem)
+        {
         vscode.postMessage(
             {
                 command: 'setProfileOption',
                 text: this.state.validateInputParams.selectedItem
             }
         );
-        window.console.log(`Sent message to host.`);
+            window.console.log(`Sent message to host: setProfileOption ${this.state.validateInputParams.selectedItem}`);
+        }
 
-        console.log("Selecting backend");
-        window.console.log("Testing......");
+        if (this.state.validateInputParams.selectedBackend !== prevState.validateInputParams.selectedBackend)
+        {
         vscode.postMessage(
             {
                 command: 'setBackend',
                 text: this.state.validateInputParams.selectedBackend
             }
         );
-        window.console.log(`Sent message to host.`);
+        window.console.log(`Sent message to host: selectedBackend ${this.state.validateInputParams.selectedBackend}`);
+        }
 
-        console.log("Selecting data format");
-        window.console.log("Testing......");
+        if (this.state.validateInputParams.selectedDataFormat !== prevState.validateInputParams.selectedDataFormat)
+        {
         vscode.postMessage(
             {
                 command: 'setDataFormat',
@@ -76,57 +90,52 @@ class App extends Component<{}, IState> {
             }
         );
 
-        window.console.log(`Sent message to host.`);
+        window.console.log(`Sent message to host: selectedDataFormat ${this.state.validateInputParams.selectedDataFormat}`);
+        }
 
-        console.log("Entering number of images from the data set")
-        window.console.log("Testing");
+        if (this.state.validateInputParams.numberOfImages !== prevState.validateInputParams.numberOfImages)
+        {
         vscode.postMessage(
             {
                 command: 'setnumberOfImages',
                 text: this.state.validateInputParams.numberOfImages
             }
         );
-
+        window.console.log(`Sent message to host: setnumberOfImages ${this.state.validateInputParams.numberOfImages}`);
+        }
         //update on any convert components 
-        console.log("Entering Input node for conversion");
-        window.console.log("Entering Input node for conversion");
+        if (this.state.convertInputParams.inputNode !== prevState.convertInputParams.inputNode)
+        {
         vscode.postMessage(
             {
                 command: 'setInputNode',
                 text: this.state.convertInputParams.inputNode
             }
         );
-
-        console.log("Entering output node for conversion");
-        window.console.log("Entering output node for conversion");
+        window.console.log(`Sent message to host: setInputNode ${this.state.convertInputParams.inputNode}`);
+        }
+        if (this.state.convertInputParams.outputNode !== prevState.convertInputParams.outputNode)
+        {
         vscode.postMessage(
             {
                 command: 'setOutputNode',
                 text: this.state.convertInputParams.outputNode
             }
         );
-        console.log("Entering opset node for conversion");
-        window.console.log("Entering opset node for conversion");
+        window.console.log(`Sent message to host: setOutputNode ${this.state.convertInputParams.outputNode}`);
+        }
+        if (this.state.convertInputParams.opset !== prevState.convertInputParams.opset)
+        {
         vscode.postMessage(
             {
                 command: 'setOpsetNode',
                 text: this.state.convertInputParams.opset
             }
         );
-        
-        // update on quantization paramerers
-        console.log("Entering function name for preprocessing");
-        window.console.log("Entering function name for preprocessing");
-        vscode.postMessage(
-            {
-                command: 'setFunctionName',
-                text: this.state.quantizeInputParams.functionName
-            }
-        );
-
-
-
+        window.console.log(`Sent message to host: setOpsetNode ${this.state.convertInputParams.opset}`);
+        }
     }
+
     componentWillUnmount() {
         window.removeEventListener('message', this.handleWindowListener);
     }
@@ -137,51 +146,66 @@ class App extends Component<{}, IState> {
         let myobjQuantize = this.state.quantizeInputParams;
         switch (ev.data.command) {
             case "modelPathValidate": {
-                console.log(`Got a message from the host ${ev.data}`);
+                console.log(`Got a message from the host modelPathValidate ${ev.data}`);
                 myobj.modelPath = ev.data.payload;
+                console.log(`{myobj.modelPath ${myobj.modelPath}`);
+                console.log(`this.state.validateInputParams.modelPath ${this.state.validateInputParams.modelPath}`);
                 this.setState(state => ({ validateInputParams: myobj }));
                 break;
             }
             case "modelPathConvert": {
-                console.log(`Convert: Got a message from the host ${ev.data}`);
+                console.log(`Convert: Got a message from the host modelPathConvert ${ev.data}`);
                 myobjConvert.modelPath = ev.data.payload;
+                console.log(`{myobjConvert.modelPath ${myobjConvert.modelPath}`);
+                console.log(`this.state.convertInputParams.modelPath ${this.state.convertInputParams.modelPath}`);
                 this.setState(state => ({ convertInputParams: myobjConvert }));
                 break;
             }
             case "modelPathQuantize": {
-                console.log(`Quantize: Got a message from the host ${ev.data}`);
+                console.log(`Quantize: Got a message from the host modelPathQuantize ${ev.data}`);
                 myobjQuantize.modelPath = ev.data.payload;
+                console.log(`{myobjQuantize.modelPath ${myobjQuantize.modelPath}`);
+                console.log(`this.state.quantizeInputParams.modelPath ${this.state.quantizeInputParams.modelPath}`);
                 this.setState(state => ({ quantizeInputParams: myobjQuantize }));
                 break;
             }
             case "preprocessModulePath": {
-                console.log(`Quantize: Got a message from the host ${ev.data}`);
+                console.log(`Quantize: Got a message from the host preprocessModulePath ${ev.data}`);
                 myobjQuantize.preprocessModulePath = ev.data.payload;
+                console.log(`{myobjQuantize.preprocessModulePath ${myobjQuantize.preprocessModulePath}`);
+                console.log(`this.state.quantizeInputParams.preprocessModulePath ${this.state.quantizeInputParams.preprocessModulePath}`);
                 this.setState(state => ({ quantizeInputParams: myobjQuantize }));
                 break;
             }
 
             case "datasetValidate": {
-                console.log(`Got a message from the host ${ev.data}`);
+                console.log(`Got a message from the host datasetValidate ${ev.data}`);
                 myobj.datasetPath = ev.data.payload;
+                console.log(`{myobj.datasetPath ${myobj.datasetPath}`);
+                console.log(`this.state.validateInputParams.datasetPath ${this.state.validateInputParams.datasetPath}`);
                 this.setState(state => ({ validateInputParams: myobj }));
                 break;
             }
             case "datasetQuantize": {
-                console.log(`Got a message from the host ${ev.data}`);
+                console.log(`Got a message from the host datasetQuantize ${ev.data}`);
                 myobjQuantize.datasetPath = ev.data.payload;
+                console.log(`{myobjQuantize.datasetPath ${myobjQuantize.datasetPath}`);
+                console.log(`this.state.quantizeInputParams.datasetPath ${this.state.quantizeInputParams.datasetPath}`);
                 this.setState(state => ({ quantizeInputParams: myobjQuantize }));
                 break;
             }
-            case "count": {
-                console.log(`Got a message from the host ${ev.data}`);
-                myobj.count = ev.data.payload;
-                this.setState(state => ({ validateInputParams: myobj }));
-                break;
-            }
+            // case "count": {
+            //     console.log(`Got a message from the host : count ${ev.data}`);
+            //     myobj.count = ev.data.payload;
+            //     console.log(`{myobj.count ${myobj.count}`);
+            //     console.log(`this.state.validateInputParams.count ${this.state.validateInputParams.count}`);
+            //     this.setState(state => ({ validateInputParams: myobj }));
+            //     break;
+            // }
             case "selectedItem": {
                 console.log(`Got a message from the host ${ev.data}`);
-                myobj.selectedItem = ev.data.payload;
+                console.log(`myobj.selectedItem ${myobj.selectedItem}`);
+                console.log(`this.state.validateInputParams.selectedItem ${this.state.validateInputParams.selectedItem}`);
                 this.setState(state => ({ validateInputParams: myobj }));
                 break;
             }
@@ -214,6 +238,43 @@ class App extends Component<{}, IState> {
                 } catch {
                     console.log("Couldn't display keys to the element");
                 }
+                break;
+            }
+            case "clearValidationForm": {
+                console.log(`Got a message from the host : clearValidationForm`);
+
+                myobj.selectedItem = "";
+                myobj.selectedDataFormat = "";
+                myobj.numberOfImages = "";
+                myobj.modelPath = "";
+                myobj.datasetPath = "";
+                myobj.count = 0;
+
+                this.setState(state => ({ validateInputParams: myobj }));
+                break;
+            }
+
+            case "clearConversionForm": {
+                console.log(`Got a message from the host : clearConversionForm`);
+
+                myobjConvert.inputNode = "";
+                myobjConvert.modelPath = "";
+                myobjConvert.opset = "";
+                myobjConvert.outputNode = "";
+
+                this.setState(state => ({ convertInputParams: myobjConvert }));
+                break;
+            }
+
+            case "clearQuantizationForm": {
+                console.log(`Got a message from the host : clearQuantizationForm`);
+
+                myobjQuantize.datasetPath = "";
+                myobjQuantize.functionName = "";
+                myobjQuantize.modelPath = "";
+                myobjQuantize.preprocessModulePath = "";
+
+                this.setState(state => ({ quantizeInputParams: myobjQuantize }));
                 break;
             }
         }
@@ -302,65 +363,72 @@ class App extends Component<{}, IState> {
 
 
     formHandler = (event: any, task: String): void => {
-        let myobj = this.state.convertInputParams;
+        //let myobj = this.state.convertInputParams;
+        const deepcloned = clonedeep(this.state.convertInputParams);
         switch (task) {
             case 'onInputNodeChange':
-                myobj.inputNode = event.target.value;
-                console.log(myobj.inputNode);
+                deepcloned.inputNode = event.target.value;
+                console.log(deepcloned.inputNode);
                 break;
             case 'onOutputNodeChange':
-                myobj.outputNode = event.target.value;
-                console.log(myobj.outputNode);
+                deepcloned.outputNode = event.target.value;
+                console.log(deepcloned.outputNode);
                 break;
             case 'onOpsetChange':
-                myobj.opset = event.target.value;
-                console.log(myobj.opset);
+                deepcloned.opset = event.target.value;
+                console.log(deepcloned.opset);
                 break;
         }
-        this.setState({ convertInputParams: myobj });
+        console.log("Setting state convertInputParams");
+        this.setState({ convertInputParams: deepcloned });
 
     }
 
     quantizeFormHandler = (event: any, task: String): void => {
-        let myobj = this.state.quantizeInputParams;
+        //let myobj = this.state.quantizeInputParams;
+        const deepcloned = clonedeep(this.state.quantizeInputParams);
         switch (task) {
             case 'onFunctionNameChange':
-                myobj.functionName = event.target.value;
-                console.log(myobj.functionName);
+                deepcloned.functionName = event.target.value;
+                console.log(deepcloned.functionName);
                 break;
         }
-        this.setState({ quantizeInputParams: myobj });
+        console.log("Setting state quantizeInputParams");
+        this.setState({ quantizeInputParams: deepcloned });
 
     }
 
     validateFormHandler = (event: any, task: String): void => {
-        let myobj = this.state.validateInputParams;
+        //console.log(`before ${this.state.validateInputParams.numberOfImages}`);
+        //const myobj = this.state.validateInputParams;
+        const deepcloned = clonedeep(this.state.validateInputParams);
         switch (task) {
             case 'onItemChangedHandler':
-                myobj.selectedItem = event.text;
+                deepcloned.selectedItem = event.text;
                 break;
 
             case 'onBackendSelectedHandler':
-                myobj.selectedBackend = event.text;
+                deepcloned.selectedBackend = event.text;
                 break;
 
             case 'onDataFormatSelectedHandler':
-                myobj.selectedDataFormat = event.text;
+                deepcloned.selectedDataFormat = event.text;
                 break;
 
             case "onImageCountChangeHandler":
-                myobj.numberOfImages = event.target.value;
+                deepcloned.numberOfImages = event.target.value;
+                console.log(deepcloned.numberOfImages);
+                //this.setState({ validateInputParams.numberOfImages: event.target.value})
                 break;
         }
-        this.setState({ validateInputParams: myobj });
+        this.setState({ validateInputParams: deepcloned });
     }
 
     startValidation = () => {
         vscode.postMessage({
             command: 'startVerification',
-            text: 'check out from host',
         });
-        window.console.log(`Sent message to host.`);
+        window.console.log(`Sent message to host: startValidation`);
     };
 
     pathToModelValidate = () => {
@@ -369,7 +437,7 @@ class App extends Component<{}, IState> {
             command: 'setModelPath:validate',
             text: 'Select path to model'
         });
-        window.console.log(`Sent message to host.`);
+        window.console.log(`Sent message to host: pathToModelValidate`);
     };
 
     pathToDatasetHandler = () => {
@@ -378,16 +446,15 @@ class App extends Component<{}, IState> {
             command: 'setDataset:validate',
             text: 'Select path to dataset'
         });
-        window.console.log(`Sent message to host.`);
+        window.console.log(`Sent message to host: pathToDatasetHandler`);
     };
 
     cancelValidation = () => {
         window.console.log("Select reference output");
         vscode.postMessage({
-            command: 'cancel',
-            text: 'Cancel'
+            command: 'cancelValidation',
         });
-        window.console.log(`Sent message to host.`);
+        window.console.log(`Sent message to host: cancelValidation`);
         //TODO: Add code to clear form fields
     };
 
@@ -397,7 +464,7 @@ class App extends Component<{}, IState> {
             command: 'downloadResult',
             text: 'Download Result',
         });
-        window.console.log(`Sent message to host.`);
+        window.console.log(`Sent message to host: downloadResult`);
     };
     render() {
 
@@ -425,7 +492,7 @@ class App extends Component<{}, IState> {
                             pathToPreprocessModule={this.pathToPreprocessModule}
                             quantizeFormHandler={this.quantizeFormHandler}
                             startQuantization={this.startQuantization}
-                            cancelQuantization={this.cancelConversion}
+                            cancelQuantization={this.cancelQuantization}
                             pathToRepresentativeData={this.PathToRepresentativeData}
                         /></Label>
                     </PivotItem>
