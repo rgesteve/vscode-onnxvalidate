@@ -6,6 +6,7 @@ import * as os from 'os';
 import * as utils from './osUtils';
 import { supported_models, docker_images, tensorflow_binaries, tensorflow_quantization_options } from './config';
 import { dlToolkitChannel } from "./dlToolkitChannel";
+import { rejects } from 'assert';
 
 
 class DockerManager implements vscode.Disposable {

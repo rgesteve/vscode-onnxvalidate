@@ -53,12 +53,8 @@ class ContentProvider implements Disposable {
         switch (command) {
             case "setModelPath": {
                 window.showOpenDialog({
-                    canSelectFolders: false, canSelectFiles: true, canSelectMany: false,
+                     canSelectFiles: true, canSelectFolders: false, canSelectMany: false,
                     openLabel: 'Select model',
-                    filters: {
-                        'TensorFlow models .pb': ['pb'],
-                        'Onnxruntime models .onnx': ['onnx']
-                    }
                 }).then((folderUris) => {
                     if (folderUris) {
                         folderUris.forEach(value => {

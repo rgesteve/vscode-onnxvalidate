@@ -6,7 +6,7 @@ import { Label } from 'office-ui-fabric-react/lib/Label';
 import { ConversionInputParams } from './ConversionHelper';
 import { QuantizeInputParams } from './QuantizeHelper';
 import ValidateInput from './ValidateInput';
-import ValidationResult , {SummarizeResult} from './ValidationResult'
+import ValidationResult, { SummarizeResult } from './ValidationResult'
 import { Result, ValidationInputParams } from './ValidationHelper';
 import { Fabric } from 'office-ui-fabric-react';
 const clonedeep = require('lodash.clonedeep')
@@ -46,10 +46,8 @@ class App extends Component<{}, IState> {
     }
 
     componentDidUpdate(_prevProps: any, prevState: IState) {
-        console.log("Entering componentDidUpdate");
 
-        if (this.state.quantizeInputParams.functionName !== prevState.quantizeInputParams.functionName)
-        {
+        if (this.state.quantizeInputParams.functionName !== prevState.quantizeInputParams.functionName) {
             vscode.postMessage(
                 {
                     command: 'setFunctionName',
@@ -59,80 +57,73 @@ class App extends Component<{}, IState> {
             window.console.log(`Sent message to host: setFunctionName ${this.state.quantizeInputParams.functionName}`);
         }
         //update on input validation components
-        if (this.state.validateInputParams.selectedItem !== prevState.validateInputParams.selectedItem)
-        {
-        vscode.postMessage(
-            {
-                command: 'setProfileOption',
-                text: this.state.validateInputParams.selectedItem
-            }
-        );
+        if (this.state.validateInputParams.selectedItem !== prevState.validateInputParams.selectedItem) {
+            vscode.postMessage(
+                {
+                    command: 'setProfileOption',
+                    text: this.state.validateInputParams.selectedItem
+                }
+            );
             window.console.log(`Sent message to host: setProfileOption ${this.state.validateInputParams.selectedItem}`);
         }
 
-        if (this.state.validateInputParams.selectedBackend !== prevState.validateInputParams.selectedBackend)
-        {
-        vscode.postMessage(
-            {
-                command: 'setBackend',
-                text: this.state.validateInputParams.selectedBackend
-            }
-        );
-        window.console.log(`Sent message to host: selectedBackend ${this.state.validateInputParams.selectedBackend}`);
+        if (this.state.validateInputParams.selectedBackend !== prevState.validateInputParams.selectedBackend) {
+            vscode.postMessage(
+                {
+                    command: 'setBackend',
+                    text: this.state.validateInputParams.selectedBackend
+                }
+            );
+            window.console.log(`Sent message to host: selectedBackend ${this.state.validateInputParams.selectedBackend}`);
         }
 
-        if (this.state.validateInputParams.selectedDataFormat !== prevState.validateInputParams.selectedDataFormat)
-        {
-        vscode.postMessage(
-            {
-                command: 'setDataFormat',
-                text: this.state.validateInputParams.selectedDataFormat
-            }
-        );
+        if (this.state.validateInputParams.selectedDataFormat !== prevState.validateInputParams.selectedDataFormat) {
+            vscode.postMessage(
+                {
+                    command: 'setDataFormat',
+                    text: this.state.validateInputParams.selectedDataFormat
+                }
+            );
 
-        window.console.log(`Sent message to host: selectedDataFormat ${this.state.validateInputParams.selectedDataFormat}`);
+            window.console.log(`Sent message to host: selectedDataFormat ${this.state.validateInputParams.selectedDataFormat}`);
         }
 
-        if (this.state.validateInputParams.numberOfImages !== prevState.validateInputParams.numberOfImages)
-        {
-        vscode.postMessage(
-            {
-                command: 'setnumberOfImages',
-                text: this.state.validateInputParams.numberOfImages
-            }
-        );
-        window.console.log(`Sent message to host: setnumberOfImages ${this.state.validateInputParams.numberOfImages}`);
+        if (this.state.validateInputParams.numberOfImages !== prevState.validateInputParams.numberOfImages) {
+            vscode.postMessage(
+                {
+                    command: 'setnumberOfImages',
+                    text: this.state.validateInputParams.numberOfImages
+                }
+            );
+            window.console.log(`Sent message to host: setnumberOfImages ${this.state.validateInputParams.numberOfImages}`);
         }
         //update on any convert components 
-        if (this.state.convertInputParams.inputNode !== prevState.convertInputParams.inputNode)
-        {
-        vscode.postMessage(
-            {
-                command: 'setInputNode',
-                text: this.state.convertInputParams.inputNode
-            }
-        );
-        window.console.log(`Sent message to host: setInputNode ${this.state.convertInputParams.inputNode}`);
+        if (this.state.convertInputParams.inputNode !== prevState.convertInputParams.inputNode) {
+            vscode.postMessage(
+                {
+                    command: 'setInputNode',
+                    text: this.state.convertInputParams.inputNode
+                }
+            );
+            window.console.log(`Sent message to host: setInputNode ${this.state.convertInputParams.inputNode}`);
         }
-        if (this.state.convertInputParams.outputNode !== prevState.convertInputParams.outputNode)
-        {
-        vscode.postMessage(
-            {
-                command: 'setOutputNode',
-                text: this.state.convertInputParams.outputNode
-            }
-        );
-        window.console.log(`Sent message to host: setOutputNode ${this.state.convertInputParams.outputNode}`);
+        if (this.state.convertInputParams.outputNode !== prevState.convertInputParams.outputNode) {
+            vscode.postMessage(
+                {
+                    command: 'setOutputNode',
+                    text: this.state.convertInputParams.outputNode
+                }
+            );
+            window.console.log(`Sent message to host: setOutputNode ${this.state.convertInputParams.outputNode}`);
         }
-        if (this.state.convertInputParams.opset !== prevState.convertInputParams.opset)
-        {
-        vscode.postMessage(
-            {
-                command: 'setOpsetNode',
-                text: this.state.convertInputParams.opset
-            }
-        );
-        window.console.log(`Sent message to host: setOpsetNode ${this.state.convertInputParams.opset}`);
+        if (this.state.convertInputParams.opset !== prevState.convertInputParams.opset) {
+            vscode.postMessage(
+                {
+                    command: 'setOpsetNode',
+                    text: this.state.convertInputParams.opset
+                }
+            );
+            window.console.log(`Sent message to host: setOpsetNode ${this.state.convertInputParams.opset}`);
         }
     }
 
@@ -146,66 +137,45 @@ class App extends Component<{}, IState> {
         let myobjQuantize = this.state.quantizeInputParams;
         switch (ev.data.command) {
             case "modelPathValidate": {
-                console.log(`Got a message from the host modelPathValidate ${ev.data}`);
+                console.log(`Got a message from the host: modelPathValidate ${ev.data.payload}`);
                 myobj.modelPath = ev.data.payload;
-                console.log(`{myobj.modelPath ${myobj.modelPath}`);
-                console.log(`this.state.validateInputParams.modelPath ${this.state.validateInputParams.modelPath}`);
                 this.setState(state => ({ validateInputParams: myobj }));
                 break;
             }
             case "modelPathConvert": {
-                console.log(`Convert: Got a message from the host modelPathConvert ${ev.data}`);
+                console.log(`Convert: Got a message from the host modelPathConvert ${ev.data.payload}`);
                 myobjConvert.modelPath = ev.data.payload;
-                console.log(`{myobjConvert.modelPath ${myobjConvert.modelPath}`);
-                console.log(`this.state.convertInputParams.modelPath ${this.state.convertInputParams.modelPath}`);
                 this.setState(state => ({ convertInputParams: myobjConvert }));
                 break;
             }
             case "modelPathQuantize": {
-                console.log(`Quantize: Got a message from the host modelPathQuantize ${ev.data}`);
+                console.log(`Quantize: Got a message from the host modelPathQuantize ${ev.data.payload}`);
                 myobjQuantize.modelPath = ev.data.payload;
-                console.log(`{myobjQuantize.modelPath ${myobjQuantize.modelPath}`);
-                console.log(`this.state.quantizeInputParams.modelPath ${this.state.quantizeInputParams.modelPath}`);
                 this.setState(state => ({ quantizeInputParams: myobjQuantize }));
                 break;
             }
             case "preprocessModulePath": {
-                console.log(`Quantize: Got a message from the host preprocessModulePath ${ev.data}`);
+                console.log(`Quantize: Got a message from the host preprocessModulePath ${ev.data.payload}`);
                 myobjQuantize.preprocessModulePath = ev.data.payload;
-                console.log(`{myobjQuantize.preprocessModulePath ${myobjQuantize.preprocessModulePath}`);
-                console.log(`this.state.quantizeInputParams.preprocessModulePath ${this.state.quantizeInputParams.preprocessModulePath}`);
                 this.setState(state => ({ quantizeInputParams: myobjQuantize }));
                 break;
             }
 
             case "datasetValidate": {
-                console.log(`Got a message from the host datasetValidate ${ev.data}`);
+                console.log(`Got a message from the host datasetValidate ${ev.data.payload}`);
                 myobj.datasetPath = ev.data.payload;
-                console.log(`{myobj.datasetPath ${myobj.datasetPath}`);
-                console.log(`this.state.validateInputParams.datasetPath ${this.state.validateInputParams.datasetPath}`);
                 this.setState(state => ({ validateInputParams: myobj }));
                 break;
             }
             case "datasetQuantize": {
-                console.log(`Got a message from the host datasetQuantize ${ev.data}`);
+                console.log(`Got a message from the host datasetQuantize ${ev.data.payload}`);
                 myobjQuantize.datasetPath = ev.data.payload;
-                console.log(`{myobjQuantize.datasetPath ${myobjQuantize.datasetPath}`);
-                console.log(`this.state.quantizeInputParams.datasetPath ${this.state.quantizeInputParams.datasetPath}`);
                 this.setState(state => ({ quantizeInputParams: myobjQuantize }));
                 break;
             }
-            // case "count": {
-            //     console.log(`Got a message from the host : count ${ev.data}`);
-            //     myobj.count = ev.data.payload;
-            //     console.log(`{myobj.count ${myobj.count}`);
-            //     console.log(`this.state.validateInputParams.count ${this.state.validateInputParams.count}`);
-            //     this.setState(state => ({ validateInputParams: myobj }));
-            //     break;
-            // }
+
             case "selectedItem": {
-                console.log(`Got a message from the host ${ev.data}`);
-                console.log(`myobj.selectedItem ${myobj.selectedItem}`);
-                console.log(`this.state.validateInputParams.selectedItem ${this.state.validateInputParams.selectedItem}`);
+                console.log(`Got a message from the host ${ev.data.payload}`);
                 this.setState(state => ({ validateInputParams: myobj }));
                 break;
             }
@@ -236,7 +206,7 @@ class App extends Component<{}, IState> {
                         this.setState(state => ({ summarizeDisplayResult: true }));
                     }
                 } catch {
-                    console.log("Couldn't display keys to the element");
+                    console.log("Couldn't display summarize result");
                 }
                 break;
             }
@@ -281,49 +251,45 @@ class App extends Component<{}, IState> {
     }
 
     PathToRepresentativeData = () => {
-        console.log("inside select path to representative data");
-        window.console.log("Select path to representative data");
         vscode.postMessage({
             command: 'setDataset:quantize',
-             text: 'Select path to representative data'
-          });
-        window.console.log(`Sent message to host.`);
+            text: 'Select path to representative data'
+        });
+        window.console.log(`Sent message to host: setDataset:quantize`);
 
     };
 
     pathToModelQuantize = () => {
-        window.console.log("Select path to model");
         vscode.postMessage({
             command: 'setModelPath:quantize',
             text: 'Select path to model'
         });
-        window.console.log(`Sent message to host.`);
+        window.console.log(`Sent message to host: setModelPath:quantize`);
     };
 
-    
+
     pathToPreprocessModule = () => {
         window.console.log("Select path to preprocess module");
         vscode.postMessage({
             command: 'setPreprocessModulePath',
             text: 'Select path to preprocess module path'
         });
-        window.console.log(`Sent message to host.`);
+        window.console.log(`Sent message to host: setPreprocessModulePath`);
     };
     startQuantization = () => {
         vscode.postMessage({
-             command: 'startQuantization',
-             text: 'start process of quantization',
-         });
-        window.console.log(`Sent message to host.`);
+            command: 'startQuantization',
+            text: 'start process of quantization',
+        });
+        window.console.log(`Sent message to host: startQuantization`);
     };
 
     cancelQuantization = () => {
         vscode.postMessage({
-             command: 'cancelQuantization',
-             text: 'Cancel'
-         });
-        window.console.log(`Sent message to host.`);
-        //TODO: Add code to clear form fields
+            command: 'cancelQuantization',
+            text: 'Cancel'
+        });
+        window.console.log(`Sent message to host: cancelQuantization`);
     };
 
     pathToModelConvert = () => {
@@ -332,51 +298,46 @@ class App extends Component<{}, IState> {
             command: 'setModelPath:convert',
             text: 'Select path to model'
         });
-        window.console.log(`Sent message to host.`);
+        window.console.log(`Sent message to host: setModelPath:convert`);
     };
     summarizeGraph = () => {
 
         vscode.postMessage({
-           command: 'summarizeGraph',
-           text: 'summarize graph',
-         });
-        window.console.log(`Sent message to host.`);
+            command: 'summarizeGraph',
+            text: 'summarize graph',
+        });
+        window.console.log(`Sent message to host: summarizeGraph`);
     };
     startConversion = () => {
 
         vscode.postMessage({
-           command: 'startConversion',
-           text: 'start process of conversion',
-         });
-        window.console.log(`Sent message to host.`);
+            command: 'startConversion',
+            text: 'start process of conversion',
+        });
+        window.console.log(`Sent message to host: startConversion`);
     };
 
     cancelConversion = () => {
-      
+
         vscode.postMessage({
-             command: 'cancelConversion',
-             text: 'Cancel'
-         });
-        window.console.log(`Sent message to host.`);
-        //TODO: Add code to clear form fields
+            command: 'cancelConversion',
+            text: 'Cancel'
+        });
+        window.console.log(`Sent message to host: cancelConversion`);
     };
 
 
     formHandler = (event: any, task: String): void => {
-        //let myobj = this.state.convertInputParams;
         const deepcloned = clonedeep(this.state.convertInputParams);
         switch (task) {
             case 'onInputNodeChange':
                 deepcloned.inputNode = event.target.value;
-                console.log(deepcloned.inputNode);
                 break;
             case 'onOutputNodeChange':
                 deepcloned.outputNode = event.target.value;
-                console.log(deepcloned.outputNode);
                 break;
             case 'onOpsetChange':
                 deepcloned.opset = event.target.value;
-                console.log(deepcloned.opset);
                 break;
         }
         console.log("Setting state convertInputParams");
@@ -385,12 +346,10 @@ class App extends Component<{}, IState> {
     }
 
     quantizeFormHandler = (event: any, task: String): void => {
-        //let myobj = this.state.quantizeInputParams;
         const deepcloned = clonedeep(this.state.quantizeInputParams);
         switch (task) {
             case 'onFunctionNameChange':
                 deepcloned.functionName = event.target.value;
-                console.log(deepcloned.functionName);
                 break;
         }
         console.log("Setting state quantizeInputParams");
@@ -399,8 +358,6 @@ class App extends Component<{}, IState> {
     }
 
     validateFormHandler = (event: any, task: String): void => {
-        //console.log(`before ${this.state.validateInputParams.numberOfImages}`);
-        //const myobj = this.state.validateInputParams;
         const deepcloned = clonedeep(this.state.validateInputParams);
         switch (task) {
             case 'onItemChangedHandler':
@@ -417,10 +374,9 @@ class App extends Component<{}, IState> {
 
             case "onImageCountChangeHandler":
                 deepcloned.numberOfImages = event.target.value;
-                console.log(deepcloned.numberOfImages);
-                //this.setState({ validateInputParams.numberOfImages: event.target.value})
                 break;
         }
+        console.log("Setting state validateInputParams");
         this.setState({ validateInputParams: deepcloned });
     }
 
@@ -432,7 +388,6 @@ class App extends Component<{}, IState> {
     };
 
     pathToModelValidate = () => {
-        window.console.log("Select path to model");
         vscode.postMessage({
             command: 'setModelPath:validate',
             text: 'Select path to model'
@@ -441,7 +396,6 @@ class App extends Component<{}, IState> {
     };
 
     pathToDatasetHandler = () => {
-        window.console.log("Select path to data set");
         vscode.postMessage({
             command: 'setDataset:validate',
             text: 'Select path to dataset'
@@ -450,12 +404,10 @@ class App extends Component<{}, IState> {
     };
 
     cancelValidation = () => {
-        window.console.log("Select reference output");
         vscode.postMessage({
             command: 'cancelValidation',
         });
         window.console.log(`Sent message to host: cancelValidation`);
-        //TODO: Add code to clear form fields
     };
 
 
@@ -469,10 +421,10 @@ class App extends Component<{}, IState> {
     render() {
 
         return (
-                <Fabric className="container-header">
+            <Fabric className="container-header">
 
-               
-                <Pivot styles={pivotStyles} linkFormat={PivotLinkFormat.tabs} linkSize={PivotLinkSize.large}> 
+
+                <Pivot styles={pivotStyles} linkFormat={PivotLinkFormat.tabs} linkSize={PivotLinkSize.large}>
                     <PivotItem headerText="Convert">
                         <Label style={{ color: 'white' }}><Convert
                             inputProps={this.state.convertInputParams}
@@ -482,7 +434,7 @@ class App extends Component<{}, IState> {
                             startConversion={this.startConversion}
                             cancelConversion={this.cancelConversion}
                         />
-                        {this.state.summarizeDisplayResult == true ? <SummarizeResult summarizeResult={this.state.summarizeResult} /> : null}
+                            {this.state.summarizeDisplayResult == true ? <SummarizeResult summarizeResult={this.state.summarizeResult} /> : null}
                         </Label>
                     </PivotItem>
                     <PivotItem headerText="Quantize">
@@ -504,8 +456,8 @@ class App extends Component<{}, IState> {
                             pathToModelHandler={this.pathToModelValidate}
                             pathToDatasetHandler={this.pathToDatasetHandler}
                             cancelValidation={this.cancelValidation} />
-                            {this.state.validationDisplayResult == true ? 
-                            <ValidationResult resultJSON={this.state.validationResult} downloadHandler={this.downloadResult} /> : null}
+                            {this.state.validationDisplayResult == true ?
+                                <ValidationResult resultJSON={this.state.validationResult} downloadHandler={this.downloadResult} /> : null}
                         </Label>
                     </PivotItem>
                 </Pivot>
@@ -516,9 +468,9 @@ class App extends Component<{}, IState> {
 
 const pivotStyles: Partial<IPivotStyles> = {
     root: { marginTop: 10 }
-  };
+};
 
-  
+
 // const pivotStyles: Partial<IPivotStyles> = {
 //     linkContent: {
 //         fontSize: "20px",
