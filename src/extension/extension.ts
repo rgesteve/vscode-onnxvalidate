@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { contentProvider } from './ContentProvider';
+import { contentProvider } from './contentProvider';
 import { dockerManager } from './dockerManager';
 import { basename, join } from 'path';
 import { spawn } from 'child_process';
