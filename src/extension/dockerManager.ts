@@ -54,12 +54,6 @@ class DockerManager implements vscode.Disposable {
         }
     }
 
-    public updateWorkspace() {
-        let workspace = vscode.workspace.workspaceFolders || [];
-        if (workspace.length!= 0)
-            this._workspace = workspace[0];
-    }
-
     public async getContainerType(): Promise<string> {
         let containerType = await this.executeCommand("docker", ['info', '-f', `{{.OSType}}`]);
         if (!containerType) {
@@ -206,7 +200,7 @@ class DockerManager implements vscode.Disposable {
         let modelToConvert: string | undefined = convertParams.get("input");
         if (!modelToConvert) {
             dlToolkitChannel.appendLine("error", `No input model provided`);
-            return Promise.resolve("No input model provided");
+            return Promise.reject("No input model provided");
         }
 
         let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(path.dirname(modelToConvert))}`, `${this._containerIds[0]}`, 'python3', '-m', 'tf2onnx.convert',];
