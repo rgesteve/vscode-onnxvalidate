@@ -11,14 +11,14 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
     dlToolkitChannel.appendLine("info", `Extension "dl-toolkit" is now active from path ${context.extensionPath}!!`);
 
-    let initialize = vscode.commands.registerCommand('extension.initializeOnnxEcosystem', async () => {
+    let initialize = vscode.commands.registerCommand('extension.initializeOnnxEcosystem', () => {
         extensionStatusBar.text = "Extension initialized!";
         extensionStatusBar.show();
     });
 
 
     let reinitializeEcosystem = vscode.commands.registerCommand('extension.reinitializeEcosystem', async () => {
-        let containerType = await dockerManager.getContainerType().catch(error => dlToolkitChannel.appendLine("error", `getContainerType got error ${error}`));
+        let containerType = await dockerManager.getContainerType().catch(error => dlToolkitChannel.appendLine("error", `getContainerType: ${error}`));
 
         if (containerType) {
             dlToolkitChannel.appendLine("info", "Reinitialization successful!");
@@ -31,9 +31,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     });
 
     let startDocker = vscode.commands.registerCommand('extension.startOnnxEcosystem', async () => {
-        let imageID = await dockerManager.getImageId().catch(error => dlToolkitChannel.appendLine("error", `getImageId got error ${error}`));
+        let imageID = await dockerManager.getImageId().catch(error => dlToolkitChannel.appendLine("error", `getImageId: ${error}`));
         if (imageID) {
-            let containerId = await dockerManager.runImage().catch(error => dlToolkitChannel.appendLine("error", `runImage got error ${error}`));;
+            let containerId = await dockerManager.runImage().catch(error => dlToolkitChannel.appendLine("error", `runImage: ${error}`));;
             if (containerId) {
                 dlToolkitChannel.appendLine("info", `Successful in running the image. Container id: ${containerId}`)
                 vscode.window.showInformationMessage("Your development environment is ready");
