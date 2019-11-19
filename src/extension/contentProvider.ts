@@ -1,5 +1,5 @@
 
-import { Uri, Disposable, ViewColumn, WebviewPanel, window } from 'vscode';
+import * as vscode from 'vscode';
 import { join } from 'path';
 import { dlToolkitChannel } from "./dlToolkitChannel";
 import * as fs from 'fs';
@@ -7,10 +7,10 @@ import * as path from 'path';
 import * as os from 'os';
 import { dockerManager } from './dockerManager';
 
-class ContentProvider implements Disposable {
+class ContentProvider implements vscode.Disposable {
     protected readonly viewType: string = "DL-Toolkit.webview";
-    protected currentPanel: WebviewPanel | undefined;
-    private listeners: Disposable[] = [];
+    protected currentPanel: vscode.WebviewPanel | undefined;
+    private listeners: vscode.Disposable[] = [];
     private mlperfParam: Map<string, string> = new Map<string, string>();
     private convertParam: Map<string, string> = new Map<string, string>();
     private quantizeParam: Map<string, string> = new Map<string, string>();
@@ -23,13 +23,13 @@ class ContentProvider implements Disposable {
 
     public showWebview(extensionPath: string): void {
         if (this.currentPanel) {
-            this.currentPanel.reveal(ViewColumn.Two);
+            this.currentPanel.reveal(vscode.ViewColumn.Two);
         }
         else {
-            this.currentPanel = window.createWebviewPanel(
+            this.currentPanel = vscode.window.createWebviewPanel(
                 "dl toolkit webview",
                 "DL Toolkit Webview",
-                ViewColumn.One,
+                vscode.ViewColumn.One,
                 {
                     enableScripts: true,
                     retainContextWhenHidden: true
@@ -47,13 +47,12 @@ class ContentProvider implements Disposable {
         let command: string = msg.command;
         let subCommand: string = "";
         if (msg.command.includes(":")) {
-            command = msg.command.split(":")[0];
-            subCommand = msg.command.split(":")[1];
+            [command, subCommand]  = msg.command.split(":");
         }
         switch (command) {
             case "setModelPath": {
-                window.showOpenDialog({
-                     canSelectFiles: true, canSelectFolders: false, canSelectMany: false,
+                vscode.window.showOpenDialog({
+                    canSelectFiles: true, canSelectFolders: false, canSelectMany: false,
                     openLabel: 'Select model',
                 }).then((folderUris) => {
                     if (folderUris) {
@@ -89,7 +88,7 @@ class ContentProvider implements Disposable {
                 break;
             }
             case "setDataset": {
-                window.showOpenDialog({
+                vscode.window.showOpenDialog({
                     canSelectFolders: true, canSelectFiles: false, canSelectMany: false,
                     openLabel: 'Select dataset'
                 }).then((folderUris) => {
@@ -119,7 +118,7 @@ class ContentProvider implements Disposable {
             }
 
             case "setPreprocessModulePath": {
-                window.showOpenDialog({
+                vscode.window.showOpenDialog({
                     canSelectFolders: true, canSelectFiles: false, canSelectMany: false,
                     openLabel: 'Select module path'
                 }).then((folderUris) => {
@@ -153,8 +152,9 @@ class ContentProvider implements Disposable {
             }
 
             case "startVerification": {
-                await dockerManager.validation(this.mlperfParam).then(async () => {
-                    window.showInformationMessage("Validation Done");
+                let test = await dockerManager.validation(this.mlperfParam).then(async () => {
+                    vscode.window.showInformationMessage("Validation done");
+                    dlToolkitChannel.appendLine("info", "Validation done");
 
                     var result_file: string = path.join(os.tmpdir(), "MLPerf", "results.json");
                     dlToolkitChannel.appendLine("info", `MLPerf results: ${result_file}`);
@@ -168,7 +168,8 @@ class ContentProvider implements Disposable {
 
                     }
                 }, reason => {
-                    window.showInformationMessage(`Validation failed. ${reason}`);
+                    vscode.window.showInformationMessage(`Validation failed`);
+                    dlToolkitChannel.appendLine("error", `Validation failed. Error: ${reason}`);
                     if (this.currentPanel !== undefined) {
                         this.currentPanel.webview.postMessage({ command: 'result', payload: `FAILED` });
                     }
@@ -220,10 +221,12 @@ class ContentProvider implements Disposable {
             }
             case "startConversion": {
                 try {
-                    await dockerManager.convert(this.convertParam);
-                    window.showInformationMessage("Conversion Done");
+                    let test = await dockerManager.convert(this.convertParam);
+                    vscode.window.showInformationMessage("Conversion done");
+                    dlToolkitChannel.appendLine("info", "Conversion done");
                 } catch (e) {
-                    window.showInformationMessage(`Conversion failed. ${e}`);
+                    vscode.window.showInformationMessage("Conversion failed");
+                    dlToolkitChannel.appendLine("error", `Conversion failed. Error: ${e}`);
                 }
                 break;
             }
@@ -231,18 +234,24 @@ class ContentProvider implements Disposable {
             case "summarizeGraph": {
                 let temp: string | undefined = this.convertParam.get("input");
                 if (temp) {
-                    let summarizeResult = await dockerManager.summarizeGraph(temp).catch(error => dlToolkitChannel.appendLine("error", `summarizeGraph got error ${error}`));
-                    if (summarizeResult) {
-                        window.showInformationMessage("Summarize Done");
-                        dlToolkitChannel.appendLine("info", `Summarize graph result: ${summarizeResult}`);
-                        if (this.currentPanel !== undefined) {
-                            this.currentPanel.webview.postMessage({ command: 'summarizeResult', payload: summarizeResult });
+                    try {
+                        let summarizeResult = await dockerManager.summarizeGraph(temp);
+                        if (summarizeResult) {
+                            vscode.window.showInformationMessage("Summarize done");
+                            dlToolkitChannel.appendLine("info", `Summarize graph result: ${summarizeResult}`);
+                            if (this.currentPanel !== undefined) {
+                                this.currentPanel.webview.postMessage({ command: 'summarizeResult', payload: summarizeResult });
+                            }
+                        }
+                        else {
+                            dlToolkitChannel.appendLine("error", `Summarize returned empty string`);
                         }
                     }
-                    else {
-                        window.showInformationMessage("Summarize failed");
-                        dlToolkitChannel.appendLine("error", `Summarize failed`);
+                    catch (e) {
+                        vscode.window.showInformationMessage("Summarize graph failed");
+                        dlToolkitChannel.appendLine("error", `Summarize graph failed. Error: ${e}`);
                     }
+
                 }
 
                 break;
@@ -250,10 +259,10 @@ class ContentProvider implements Disposable {
 
             case "startQuantization": {
 
-                await dockerManager.quantizeModel(this.quantizeParam).then(async () => {
-                    window.showInformationMessage("Quantization Done");
+                let test = await dockerManager.quantizeModel(this.quantizeParam).then(async () => {
+                    vscode.window.showInformationMessage("Quantization Done");
                 }, reason => {
-                    window.showInformationMessage(`Quantization failed. ${reason}`);
+                    vscode.window.showInformationMessage(`Quantization failed. ${reason}`);
                     dlToolkitChannel.appendLine("error", `Quantization failed. ${reason}`);
 
                 });
@@ -264,18 +273,18 @@ class ContentProvider implements Disposable {
                 break;
             }
             case "downloadResult": {
-                window.showSaveDialog({ filters: { '*': ['txt'] } }).then(uri => {
+                vscode.window.showSaveDialog({ filters: { '*': ['txt'] } }).then(uri => {
                     if (!uri) {
-                        window.showErrorMessage(
-                            'You must select a file location to save the results!'
+                        vscode.window.showErrorMessage(
+                            'You must select a file location to save the results'
                         );
-                        dlToolkitChannel.appendLine("error", "Didnt select a file location!");
+                        dlToolkitChannel.appendLine("error", "Did not select a file location");
                         return;
                     }
                     const fs = require('fs');
                     fs.copyFile(path.join(os.tmpdir(), "MLPerf", "results.json"), uri.fsPath, (err: any) => {
                         if (err) {
-                            dlToolkitChannel.appendLine("error", "Errored out while writing the file");
+                            dlToolkitChannel.appendLine("error", "Error while writing the file");
                             throw err;
                         }
 
@@ -299,7 +308,7 @@ class ContentProvider implements Disposable {
     }
 
     getProdContent(extension: string) {
-        const unBundleDiskPath = Uri.file(join(extension, "out", "webview", "webview.bundle.js"));
+        const unBundleDiskPath = vscode.Uri.file(join(extension, "out", "webview", "webview.bundle.js"));
         const unBundlePath = unBundleDiskPath.with({ scheme: 'vscode-resource' });
         return `
         <!doctype html>

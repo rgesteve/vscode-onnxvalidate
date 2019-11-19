@@ -7,6 +7,8 @@ import * as utils from './osUtils';
 import * as configs from './config';
 import { dlToolkitChannel } from "./dlToolkitChannel";
 
+
+
 class DockerManager implements vscode.Disposable {
     private _imageId: string | undefined;
     private _containerIds: string[];
@@ -29,7 +31,7 @@ class DockerManager implements vscode.Disposable {
 
             containerTypeCP.on('error', (err) => {
                 dlToolkitChannel.appendLine("error", 'Docker client is either not installed or not running!');
-                dlToolkitChannel.appendLine("error", `Got error ${err}`);
+                dlToolkitChannel.appendLine("error", `Error: ${err}`);
 
             });
 
@@ -52,8 +54,53 @@ class DockerManager implements vscode.Disposable {
         }
     }
 
+    async exeCmd(cmd: string, args: string[]): Promise<string> {
+        return new Promise((resolve, reject) => {
+            let result: string = "";
+
+            const childProc: cp.ChildProcess = cp.spawn(cmd, args, { shell: true });
+
+            childProc.stdout.on("data", (data: string | Buffer) => {
+                data = data.toString();
+                dlToolkitChannel.append("info", data);
+                result = result.concat(data);
+            });
+
+            childProc.stderr.on("data", (data: string | Buffer) => {
+                dlToolkitChannel.appendLine("warning", data.toString());
+            });
+
+            childProc.on("error", (data: string | Buffer) => { reject(data) });
+
+            childProc.on("close", (code: number) => {
+                if (code !== 0) {
+                    reject(code);
+                } else {
+                    resolve(result);
+                }
+            });
+        });
+    }
+
+    async exeCmdProgressBar(mes: string, cmd: string, args: string[]): Promise<string> {
+        let result: string = "";
+        await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification }, async (p) => {
+            return new Promise(async (resolve, reject) => {
+                p.report({ message: mes });
+                try {
+                    result = await this.exeCmd(cmd, args);
+                    resolve(result);
+                } catch (e) {
+                    dlToolkitChannel.appendLine("error", `Error: ${e}`);
+                    reject(e);
+                }
+            });
+        });
+        return result;
+    }
+
     public async getContainerType(): Promise<string> {
-        let containerType = await this.executeCommand("docker", ['info', '-f', `{{.OSType}}`]);
+        let containerType = await this.exeCmd("docker", ['info', '-f', `{{.OSType}}`]);
         if (!containerType) {
             return Promise.reject("Container type is empty");
         }
@@ -72,72 +119,26 @@ class DockerManager implements vscode.Disposable {
         }
     }
 
-
-    async executeCommand(command: string, args: string[], options: cp.SpawnOptions = { shell: true }): Promise<string> {
-        return new Promise((resolve: (res: string) => void, reject: (error: string | Buffer) => void): void => {
-            let result: string = "";
-
-            const childProc: cp.ChildProcess = cp.spawn(command, args, { ...options });
-
-            childProc.stdout.on("data", (data: string | Buffer) => {
-                data = data.toString();
-                dlToolkitChannel.append("info", data);
-                result = result.concat(data);
-            });
-
-            childProc.stderr.on("data", (data: string | Buffer) => {
-                dlToolkitChannel.appendLine("warning", data.toString());
-            });
-
-            childProc.on("error", (data: string | Buffer) => { reject(`Exited with error ${data}`) });
-
-            childProc.on("close", (code: number) => {
-                if (code !== 0) {
-                    reject(`Exited with error ${code}`);
-                } else {
-                    resolve(result);
-                }
-            });
-        });
-    }
-    async executeCommandWithProgress(doneMessage: string, message: string, command: string, args: string[], options: cp.SpawnOptions = { shell: true }): Promise<string> {
-        let result: string = "";
-        await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification }, async (p: vscode.Progress<{}>) => {
-            return new Promise(async (resolve: (res: string) => void, reject: (e: Error) => void): Promise<void> => {
-                p.report({ message });
-                try {
-                    result = await this.executeCommand(command, args, options);
-                    p.report({ doneMessage }); // havent figured out how to show the final message yet
-                    resolve(result);
-                } catch (e) {
-                    dlToolkitChannel.appendLine("error", `Reject ${e}`);
-                    reject(e);
-                }
-            });
-        });
-        return result;
-    }
-
     public async getImageId(): Promise<string> {
         let imageID: string = "";
         if (utils.g_containerType === "linux") {
-            imageID = await this.executeCommand("docker", ['images', "chanchala7/mlperf_linux:latest", '--format', '"{{.Repository}}"']);
+            imageID = await this.exeCmd("docker", ['images', "chanchala/mlperf_linux7:latest", '--format', '"{{.Repository}}"']);
             if (!imageID || 0 === imageID.length) { // image doesnt exist
-                await this.executeCommand("docker", ["pull", "chanchala7/mlperf_linux:latest"])
+                await this.exeCmd("docker", ["pull", "chanchala7/mlperf_linux:latest"])
                 try {
-                    imageID = await this.executeCommand("docker", ['images', "chanchala7/mlperf_linux:latest", '--format', '"{{.Repository}}"']);
+                    imageID = await this.exeCmd("docker", ['images', "chanchala7/mlperf_linux:latest", '--format', '"{{.Repository}}"']);
                     dlToolkitChannel.appendLine("info", `imageID: ${imageID}`);
-                } catch(e) {
+                } catch (e) {
                     dlToolkitChannel.appendLine("error", `Docker pull failed with ${e}`);
                 };
             }
         }
         else if (utils.g_containerType === "windows") {
-            imageID = await this.executeCommand("docker", ['images', `${configs.docker_images["windows-mlperf"]["name"]}`, '--format', '"{{.Repository}}"']);
+            imageID = await this.exeCmd("docker", ['images', `${configs.docker_images["windows-mlperf"]["name"]}`, '--format', '"{{.Repository}}"']);
             if (!imageID || 0 === imageID.length) { // image doesnt exist
-                await this.executeCommand("docker", ["pull", `${configs.docker_images["windows-mlperf"]["name"]}`]);
+                await this.exeCmd("docker", ["pull", `${configs.docker_images["windows-mlperf"]["name"]}`]);
                 try {
-                    imageID = await this.executeCommand("docker", ['images', "chanchala7/my_ubuntu", '--format', '"{{.Repository}}"']);
+                    imageID = await this.exeCmd("docker", ['images', "chanchala7/my_ubuntu", '--format', '"{{.Repository}}"']);
                     dlToolkitChannel.appendLine("info", `imageID: ${imageID}`);
                 } catch (e) {
                     dlToolkitChannel.appendLine("error", `Docker pull failed with ${e}`);
@@ -147,13 +148,13 @@ class DockerManager implements vscode.Disposable {
         else { // containerType was not set correctly
             dlToolkitChannel.appendLine("error", "There is some issue with docker. Please make sure that docker is running and run \
                                         'DL Toolkit: Reinitialize'" );
-            return Promise.reject(Error("There is some issue with docker. Please make sure that docker is running and run 'DL Toolkit: Reinitialize'"));
+            return Promise.reject("There is some issue with docker. Please make sure that docker is running and run 'DL Toolkit: Reinitialize'");
         }
 
         this._imageId = imageID;
         if (imageID == "") {
             dlToolkitChannel.appendLine("error", `ImageID is empty`);
-            throw Error("Empty image id");
+            return Promise.reject("Empty image id");
         }
         dlToolkitChannel.appendLine("info", `ImageID : ${imageID}`);
         return imageID;
@@ -163,29 +164,27 @@ class DockerManager implements vscode.Disposable {
 
         if (!this._workspace) {
             dlToolkitChannel.appendLine("error", `No workspace defined`);
-            throw Error("No workspace defined");
+            return Promise.reject("No workspace defined");
         }
 
         if (!this._imageId) {
             dlToolkitChannel.appendLine("error", "No imageId found");
-            throw Error("No imageId found");
+            return Promise.reject("No imageId found");
         }
 
         let userWorkspaceMount: string = `source=${utils.g_hostLocation},target=${utils.g_mountLocation},type=bind`;
         let extensionMount: string = `source=${utils.g_hostOutputLocation},target=${utils.g_mountOutputLocation},type=bind`;
         let args: string[] = ['run', '-m', '4g', '-t', '-d', '--mount', userWorkspaceMount, '--mount', extensionMount, this._imageId];
-        let runningContainer = await this.executeCommandWithProgress("Your development environment is ready!",
-                                                                     "Starting your development environment...", "docker", args).catch(err => {
-                                                                        dlToolkitChannel.appendLine("error", err);
-                                                                      });
-        if (runningContainer)
-        {
+        let runningContainer = await this.exeCmdProgressBar("Starting your development environment...", "docker", args).catch(err => {
+                dlToolkitChannel.appendLine("error", err);
+            });
+        if (runningContainer) {
             this._containerIds.push(runningContainer.substr(0, 12));
             dlToolkitChannel.appendLine("info", `ContainerId: ${this._containerIds[0]}`);
             return runningContainer;
         }
         else
-            throw Error("Couldnot get a running comtainer");
+            return Promise.reject("Couldnot get a running comtainer");
 
     }
 
@@ -264,8 +263,9 @@ class DockerManager implements vscode.Disposable {
         args.push(`${path.basename(modelToConvert).replace(".pb", ".onnx")}`);
 
         dlToolkitChannel.appendLine("info", `Convert params ${args}`);
-        return await this.executeCommandWithProgress("Finished converting", "Converting to ONNX...", "docker", args);
-
+        
+        //let test = await this.exeCmdProgressBar("Converting to ONNX...", "docker", args);
+        return await this.exeCmdProgressBar("Converting to ONNX...", "docker", args);
     }
 
     public async summarizeGraph(fileuri: string): Promise<string> {
@@ -276,7 +276,7 @@ class DockerManager implements vscode.Disposable {
 
         let args: string[] = ['exec', `${this._containerIds[0]}`, `${configs.tensorflow_binaries[utils.g_containerType]["summarize"]}`, '--in_graph=' + `${utils.getLocationOnContainer(fileuri)}`];
         dlToolkitChannel.appendLine("info", `Summarize params ${args}`);
-        return await this.executeCommand("docker", args);
+        return await this.exeCmd("docker", args);
     }
 
 
@@ -339,7 +339,7 @@ class DockerManager implements vscode.Disposable {
         }
 
         dlToolkitChannel.appendLine("info", `Quantize params ${args}`);
-        return await this.executeCommandWithProgress("Quantization done", "Quantizing ONNX FP32 model to ONNX int8 model... ", "docker", args);
+        return await this.exeCmdProgressBar("Quantizing ONNX FP32 model to ONNX int8 model... ", "docker", args);
     }
 
     public async quantizeTFModel(quantizeParam: Map<string, string>): Promise<string> {
@@ -350,8 +350,8 @@ class DockerManager implements vscode.Disposable {
         let model: string | undefined = quantizeParam.get("model");
 
         if (!model) {
-            dlToolkitChannel.appendLine("error", "Model not found!");
-            return Promise.reject("Model not found!");
+            dlToolkitChannel.appendLine("error", "Model not found");
+            return Promise.reject("Model not found");
         }
 
         if (model.toLowerCase().includes("resnet")) {
@@ -369,29 +369,8 @@ class DockerManager implements vscode.Disposable {
             '--in_graph=', `${path.basename(model)}`, '--out_graph=', `${path.basename(model).replace(".pb", "_quantized.pb")}`,
             '--inputs=', `${configs.supported_models[model]["inputs"]}`, '--outputs=', `${configs.supported_models[model]["outputs"]}`, '--transforms=', `${configs.tensorflow_quantization_options}`];
         dlToolkitChannel.appendLine("info", `Quantize params ${args}`);
-        return await this.executeCommandWithProgress("Quantization done", "Quantizing TF FP32 model to TF int8 model... ", "docker", args);
+        return await this.exeCmdProgressBar( "Quantizing TF FP32 model to TF int8 model... ", "docker", args);
 
-    }
-
-    dockerDisplay(modeluri: vscode.Uri) {
-        //let netronCP = cp.spawn('C:\\Program Files\\Netron\\Netron.exe', [`${modeluri.fsPath}`], { env: [] });
-        let netronCP = cp.spawn('C:\\Program Files\\Netron\\Netron.exe', [`${modeluri.fsPath}`]);
-        netronCP.on('error', (err: any) => {
-            dlToolkitChannel.appendLine("error", `Failed to start the container with ${err}`);
-        });
-
-        netronCP.stdout.on('data', (data: string) => {
-            dlToolkitChannel.appendLine("info", `container id is ${data.toString()}`);
-            this._containerIds.push(data.toString().substr(0, 12));
-        });
-
-        netronCP.on('exit', (err: any) => {
-            if (err != 0) {
-
-                dlToolkitChannel.appendLine("error", `Exit with error code:  ${err}`);
-
-            }
-        })
     }
 
     public async validation(mlperfParams: Map<string, string>): Promise<string> {
@@ -422,12 +401,12 @@ class DockerManager implements vscode.Disposable {
         }
 
         dlToolkitChannel.appendLine("info", `MLPerf args ${args}`);
-        return await this.executeCommandWithProgress("Finished Validation", "Validating model with MLPerf... ", "docker", args);
+        return await this.exeCmdProgressBar("Validating model with MLPerf... ", "docker", args);
     }
 
 
     public dispose(): void {
-        this.executeCommand("docker", ["stop", `${this._containerIds[0]}`]);
+        this.exeCmd("docker", ["stop", `${this._containerIds[0]}`]);
     }
 }
 

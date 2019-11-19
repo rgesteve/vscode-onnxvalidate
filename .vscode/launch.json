@@ -24,8 +24,11 @@
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
 			"args": [
+                "/home/chanchala/Documents/test_workspace.code-workspace",
+                "--disable-extension",
 				"--extensionDevelopmentPath=${workspaceFolder}",
-				"--extensionTestsPath=${workspaceFolder}/out/test"
+                "--extensionTestsPath=${workspaceFolder}/out/test",
+                "--timeout=999999"
 			],
 			"outFiles": [
 				"${workspaceFolder}/out/test/**/*.js"
