@@ -373,27 +373,6 @@ class DockerManager implements vscode.Disposable {
 
     }
 
-    dockerDisplay(modeluri: vscode.Uri) {
-        //let netronCP = cp.spawn('C:\\Program Files\\Netron\\Netron.exe', [`${modeluri.fsPath}`], { env: [] });
-        let netronCP = cp.spawn('C:\\Program Files\\Netron\\Netron.exe', [`${modeluri.fsPath}`]);
-        netronCP.on('error', (err: any) => {
-            dlToolkitChannel.appendLine("error", `Failed to start the container with ${err}`);
-        });
-
-        netronCP.stdout.on('data', (data: string) => {
-            dlToolkitChannel.appendLine("info", `container id is ${data.toString()}`);
-            this._containerIds.push(data.toString().substr(0, 12));
-        });
-
-        netronCP.on('exit', (err: any) => {
-            if (err != 0) {
-
-                dlToolkitChannel.appendLine("error", `Exit with error code:  ${err}`);
-
-            }
-        })
-    }
-
     public async validation(mlperfParams: Map<string, string>): Promise<string> {
         if (!this._workspace) {
             dlToolkitChannel.appendLine("error", `No workspace defined`);
