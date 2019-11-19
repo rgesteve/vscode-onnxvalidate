@@ -1,6 +1,6 @@
 import * as path from 'path';
 import { dlToolkitChannel} from './dlToolkitChannel';
-
+import * as configs from './config'
 export let g_mountLocation: string = "";
 export let g_hostLocation: string = "";
 
@@ -8,7 +8,7 @@ export let g_mountOutputLocation: string = "";
 export let g_hostOutputLocation: string = "";
 export let g_containerType: string = "";
 
-export async function setMountLocations(userMount: string, extMount: string, containerType: string) : Promise<void> {
+export function setMountLocations(userMount: string, extMount: string, containerType: string) : void {
 
     g_containerType = containerType;
 
@@ -32,17 +32,11 @@ export function isWindows(): boolean {
 }
 
 export function getMLPerfLocation(): string {
-    if (g_containerType === 'windows')
-        return "C:\\inference\\v0.5\\classification_and_detection";
-    else
-        return "/inference/v0.5/classification_and_detection";
+    return configs.mlperf[g_containerType]["location"];
 }
 
 export function getMLPerfDriver(): string {
-    if (g_containerType === 'windows')
-        return "python\\main.py";
-    else
-        return "python/main.py";
+    return configs.mlperf[g_containerType]["driver"];
 }
 
 export function getLocationOnContainer (pathOnHost: string | undefined): string {
@@ -65,8 +59,5 @@ export function getLocationOnContainer (pathOnHost: string | undefined): string 
 }
 
 export function getScriptsLocationOnContainer() : string {
-    if (g_containerType === 'windows')
-        return "C:\\scripts";
-    else
-        return "/scripts";
+    return configs.scriptsLocation[g_containerType]["location"];
 }

@@ -11,7 +11,30 @@ export const supported_models : { [key: string]: {inputs: string, outputs: strin
         "outputs": "MobilenetV1/Predictions/Reshape_1:0",
     },
 }
-
+// Configs for MLPerf
+export const mlperf :  { [key: string]: {location: string, driver: string}} = {
+    // windows container
+    "windows" : {
+        "location" : "C:\\inference\\v0.5\\classification_and_detection",
+        "driver" : "python\\main.py"
+    },
+    // linux container
+    "linux" : {
+        "location" : "/inference/v0.5/classification_and_detection",
+        "driver" : "python/main.py"
+    }
+}
+// Configs for scripts
+export const scriptsLocation: { [key: string]: {location: string}} = {
+        // windows container
+        "windows" : {
+            "location" : "C:\\scripts",
+        },
+        // linux container
+        "linux" : {
+            "location" : "/scripts",
+        }
+}
 // Configs for the docker container run
 export const docker_images : { [key: string]: {name: string, memory: string, cpu: string}} = {
     "windows-onnxruntime": {
@@ -50,7 +73,7 @@ export const tensorflow_binaries : { [key: string]: {transform: string, summariz
     }
 }
 
-export const tensorflow_quantization_options : string  = 
+export const tensorflow_quantization_options : string  =
     'add_default_attributes \
      strip_unused_nodes(type=float, shape="1,224,224,3") \
      remove_nodes(op=Identity, op=CheckNumerics) \

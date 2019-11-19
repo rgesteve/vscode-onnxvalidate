@@ -219,13 +219,12 @@ class ContentProvider implements Disposable {
                 break;
             }
             case "startConversion": {
-
-                await dockerManager.convert(this.convertParam).then(async () => {
+                try {
+                    await dockerManager.convert(this.convertParam);
                     window.showInformationMessage("Conversion Done");
-                }, reason => {
-                    window.showInformationMessage(`Conversion failed. ${reason}`);
-
-                });
+                } catch (e) {
+                    window.showInformationMessage(`Conversion failed. ${e}`);
+                }
                 break;
             }
 

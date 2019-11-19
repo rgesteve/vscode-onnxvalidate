@@ -4,10 +4,8 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as os from 'os';
 import * as utils from './osUtils';
-import { supported_models, docker_images, tensorflow_binaries, tensorflow_quantization_options } from './config';
+import * as configs from './config';
 import { dlToolkitChannel } from "./dlToolkitChannel";
-import { rejects } from 'assert';
-
 
 class DockerManager implements vscode.Disposable {
     private _imageId: string | undefined;
@@ -109,7 +107,7 @@ class DockerManager implements vscode.Disposable {
                 p.report({ message });
                 try {
                     result = await this.executeCommand(command, args, options);
-                    p.report({ doneMessage }); // havent figured out how to show the final message yet 
+                    p.report({ doneMessage }); // havent figured out how to show the final message yet
                     resolve(result);
                 } catch (e) {
                     dlToolkitChannel.appendLine("error", `Reject ${e}`);
@@ -125,23 +123,25 @@ class DockerManager implements vscode.Disposable {
         if (utils.g_containerType === "linux") {
             imageID = await this.executeCommand("docker", ['images', "chanchala7/mlperf_linux:latest", '--format', '"{{.Repository}}"']);
             if (!imageID || 0 === imageID.length) { // image doesnt exist
-                await this.executeCommand("docker", ["pull", "chanchala7/mlperf_linux:latest"]).then(async () => {
+                await this.executeCommand("docker", ["pull", "chanchala7/mlperf_linux:latest"])
+                try {
                     imageID = await this.executeCommand("docker", ['images', "chanchala7/mlperf_linux:latest", '--format', '"{{.Repository}}"']);
                     dlToolkitChannel.appendLine("info", `imageID: ${imageID}`);
-                }, reason => {
-                    dlToolkitChannel.appendLine("error", "Docker pull failed");
-                });
+                } catch(e) {
+                    dlToolkitChannel.appendLine("error", `Docker pull failed with ${e}`);
+                };
             }
         }
         else if (utils.g_containerType === "windows") {
-            imageID = await this.executeCommand("docker", ['images', `${docker_images["windows-mlperf"]["name"]}`, '--format', '"{{.Repository}}"']);
+            imageID = await this.executeCommand("docker", ['images', `${configs.docker_images["windows-mlperf"]["name"]}`, '--format', '"{{.Repository}}"']);
             if (!imageID || 0 === imageID.length) { // image doesnt exist
-                await this.executeCommand("docker", ["pull", `${docker_images["windows-mlperf"]["name"]}`]).then(async () => {
+                await this.executeCommand("docker", ["pull", `${configs.docker_images["windows-mlperf"]["name"]}`]);
+                try {
                     imageID = await this.executeCommand("docker", ['images', "chanchala7/my_ubuntu", '--format', '"{{.Repository}}"']);
                     dlToolkitChannel.appendLine("info", `imageID: ${imageID}`);
-                }, reason => {
-                    dlToolkitChannel.appendLine("error", `Docker pull failed with ${reason}`);
-                });
+                } catch (e) {
+                    dlToolkitChannel.appendLine("error", `Docker pull failed with ${e}`);
+                };
             }
         }
         else { // containerType was not set correctly
@@ -170,11 +170,11 @@ class DockerManager implements vscode.Disposable {
             dlToolkitChannel.appendLine("error", "No imageId found");
             throw Error("No imageId found");
         }
-    
+
         let userWorkspaceMount: string = `source=${utils.g_hostLocation},target=${utils.g_mountLocation},type=bind`;
         let extensionMount: string = `source=${utils.g_hostOutputLocation},target=${utils.g_mountOutputLocation},type=bind`;
         let args: string[] = ['run', '-m', '4g', '-t', '-d', '--mount', userWorkspaceMount, '--mount', extensionMount, this._imageId];
-        let runningContainer = await this.executeCommandWithProgress("Your development environment is ready!", 
+        let runningContainer = await this.executeCommandWithProgress("Your development environment is ready!",
                                                                      "Starting your development environment...", "docker", args).catch(err => {
                                                                         dlToolkitChannel.appendLine("error", err);
                                                                       });
@@ -207,15 +207,15 @@ class DockerManager implements vscode.Disposable {
         if (convertParams.get("inputs") === undefined) {
             if (path.basename(modelToConvert).toLowerCase().includes("resnet")) {
                 args.push("--inputs");
-                args.push(`${supported_models["resnet50"]["inputs"]}`);
+                args.push(`${configs.supported_models["resnet50"]["inputs"]}`);
                 args.push("--inputs-as-nchw");
-                args.push(`${supported_models["resnet50"]["inputs"]}`);
+                args.push(`${configs.supported_models["resnet50"]["inputs"]}`);
             }
             else if (path.basename(modelToConvert).toLowerCase().includes("mobilenet")) {
                 args.push("--inputs");
-                args.push(`${supported_models["mobilenet"]["inputs"]}`);
+                args.push(`${configs.supported_models["mobilenet"]["inputs"]}`);
                 args.push("--inputs-as-nchw");
-                args.push(`${supported_models["mobilenet"]["inputs"]}`);
+                args.push(`${configs.supported_models["mobilenet"]["inputs"]}`);
             }
             else {
                 dlToolkitChannel.appendLine("error", "This model is not part of the supported models!");
@@ -226,11 +226,11 @@ class DockerManager implements vscode.Disposable {
         if (convertParams.get("outputs") === undefined) {
             if (path.basename(modelToConvert).toLowerCase().includes("resnet")) {
                 args.push("--outputs");
-                args.push(`${supported_models["resnet50"]["outputs"]}`);
+                args.push(`${configs.supported_models["resnet50"]["outputs"]}`);
             }
             else if (path.basename(modelToConvert).toLowerCase().includes("mobilenet")) {
                 args.push("--outputs");
-                args.push(`${supported_models["mobilenet"]["outputs"]}`);
+                args.push(`${configs.supported_models["mobilenet"]["outputs"]}`);
             }
             else {
                 dlToolkitChannel.appendLine("error", "This model is not part of the supported models!");
@@ -274,7 +274,7 @@ class DockerManager implements vscode.Disposable {
             return Promise.reject("No workspace defined");
         }
 
-        let args: string[] = ['exec', `${this._containerIds[0]}`, `${tensorflow_binaries[utils.g_containerType]["summarize"]}`, '--in_graph=' + `${utils.getLocationOnContainer(fileuri)}`];
+        let args: string[] = ['exec', `${this._containerIds[0]}`, `${configs.tensorflow_binaries[utils.g_containerType]["summarize"]}`, '--in_graph=' + `${utils.getLocationOnContainer(fileuri)}`];
         dlToolkitChannel.appendLine("info", `Summarize params ${args}`);
         return await this.executeCommand("docker", args);
     }
@@ -365,9 +365,9 @@ class DockerManager implements vscode.Disposable {
             return Promise.reject("This model is not part of the supported models!");
         }
 
-        let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(path.dirname(model))}`, `${this._containerIds[0]}`, `${tensorflow_binaries[utils.g_containerType]["transform"]}`,
+        let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(path.dirname(model))}`, `${this._containerIds[0]}`, `${configs.tensorflow_binaries[utils.g_containerType]["transform"]}`,
             '--in_graph=', `${path.basename(model)}`, '--out_graph=', `${path.basename(model).replace(".pb", "_quantized.pb")}`,
-            '--inputs=', `${supported_models[model]["inputs"]}`, '--outputs=', `${supported_models[model]["outputs"]}`, '--transforms=', `${tensorflow_quantization_options}`];
+            '--inputs=', `${configs.supported_models[model]["inputs"]}`, '--outputs=', `${configs.supported_models[model]["outputs"]}`, '--transforms=', `${configs.tensorflow_quantization_options}`];
         dlToolkitChannel.appendLine("info", `Quantize params ${args}`);
         return await this.executeCommandWithProgress("Quantization done", "Quantizing TF FP32 model to TF int8 model... ", "docker", args);
 
