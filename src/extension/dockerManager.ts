@@ -147,13 +147,13 @@ class DockerManager implements vscode.Disposable {
         else { // containerType was not set correctly
             dlToolkitChannel.appendLine("error", "There is some issue with docker. Please make sure that docker is running and run \
                                         'DL Toolkit: Reinitialize'" );
-            return Promise.reject(Error("There is some issue with docker. Please make sure that docker is running and run 'DL Toolkit: Reinitialize'"));
+            return Promise.reject("There is some issue with docker. Please make sure that docker is running and run 'DL Toolkit: Reinitialize'");
         }
 
         this._imageId = imageID;
         if (imageID == "") {
             dlToolkitChannel.appendLine("error", `ImageID is empty`);
-            throw Error("Empty image id");
+            return Promise.reject("Empty image id");
         }
         dlToolkitChannel.appendLine("info", `ImageID : ${imageID}`);
         return imageID;
@@ -163,12 +163,12 @@ class DockerManager implements vscode.Disposable {
 
         if (!this._workspace) {
             dlToolkitChannel.appendLine("error", `No workspace defined`);
-            throw Error("No workspace defined");
+            return Promise.reject("No workspace defined");
         }
 
         if (!this._imageId) {
             dlToolkitChannel.appendLine("error", "No imageId found");
-            throw Error("No imageId found");
+            return Promise.reject("No imageId found");
         }
 
         let userWorkspaceMount: string = `source=${utils.g_hostLocation},target=${utils.g_mountLocation},type=bind`;
@@ -185,7 +185,7 @@ class DockerManager implements vscode.Disposable {
             return runningContainer;
         }
         else
-            throw Error("Couldnot get a running comtainer");
+        return Promise.reject("Couldnot get a running comtainer");
 
     }
 
