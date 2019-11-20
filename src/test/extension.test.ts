@@ -9,65 +9,66 @@ var assert = require('assert');
 import * as vscode from 'vscode';
 
 import { dockerManager } from '../extension/dockerManager';
+import { doesNotReject } from 'assert';
 
 
 // Defines a Mocha test suite to group tests of similar kind together
 
 suite("Extension Tests Positive", function () {
     let a = 0;
-    // doenst work
-    // suiteSetup( async () => {
-    //     console.log('No workspace defined and no docker running')
-    //     let uri = vscode.Uri.file("/home/chanchala/Documents");
-    //     return await vscode.commands.executeCommand('vscode.openFolder', uri);
+
+    // DOESNT WORK
+    // suiteSetup(function () {
+    //     return new Promise(async (resolve) => {
+    //         let uri = vscode.Uri.file("/home/chanchala/Documents");
+    //         await vscode.commands.executeCommand('vscode.', uri);
+    //         a = 1;
+    //         resolve();
+    //     });
     // });
 
-    // doesnt work
-    // suiteSetup( () => {
-    //     return new Promise( async (resolve, reject) => {
-    //         let uri = vscode.Uri.file("/home/chanchala/Documents");
-    //         try {
-    //             await vscode.commands.executeCommand('vscode.openFolder', uri);
-    //             a = 1;
-    //             resolve();
-    //         } catch(e) {
-    //             reject(e);
-    //         }
-    
-    //       });
-    //     });
-
-    // works
-
-    suiteSetup(  () => {
-        return new Promise((resolve) => {
+    // WORKS
+    suiteSetup(() => {
+        return new Promise(async (resolve) => {
             setTimeout(() => {
                 a = 1;
                 resolve();
-            }, 200);
+            }, 3000);
         });
     });
 
-        test("Something 1", () => {
-            assert.equal(-1, [1, 2, 3].indexOf(5));
-            assert.equal(-1, [1, 2, 3].indexOf(0));
 
-            assert(a===1);
+
+    test("Something 1", () => {
+
+        assert.equal(-1, [1, 2, 3].indexOf(5));
+        assert.equal(-1, [1, 2, 3].indexOf(0));
+
+        assert(a === 1);
+
+
+
+    });
+    test('Convert returns resolved promise', () => {
+
+        const convertParams: Map<string, string> = new Map<string, string>();
+        // set up all the required parameters
+        return dockerManager.convert(convertParams)
+            .then(() => assert(false), () => assert(true));
+
+
+    });
+
+    test("Promise example", () => {
+
+        return Promise.resolve(1).then((x) => {
+            assert.equal(x, 1);
+
+
         });
-    
-        test('Convert returns resolved promise', () => {
-            const convertParams: Map<string, string> = new Map<string, string>();
-            // set up all the required parameters
-            return dockerManager.convert(convertParams)
-                .then(() => assert(false), () => assert(true));
-        });
-    
-        test("Promise example", () => {
-            return Promise.resolve(1).then((x) => {
-                assert.equal(x, 1);
-            });
-        });
-    }); 
+
+    });
+});
 
 
 
@@ -96,8 +97,8 @@ suite("Extension Tests Positive", function () {
 //     });
 // });
 
-teardown( () => {
+// teardown( () => {
 
-        console.log("Mocha done")
+//         console.log("Mocha done")
 
-  });
+//   });
