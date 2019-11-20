@@ -10,40 +10,56 @@ import * as vscode from 'vscode';
 
 import { dockerManager } from '../extension/dockerManager';
 
+
 // Defines a Mocha test suite to group tests of similar kind together
 
-// setup(async () => {
-//     try {
-//         let uri = vscode.Uri.file("/home/chanchala/Documents");
-//         await vscode.commands.executeCommand('vscode.openFolder', uri);
-//     }
-//     catch (err) {
-//       console.log(err);
-//     }
-//   });
-
 suite("Extension Tests Positive", function () {
+    let a = 0;
+    // doenst work
+    // suiteSetup( async () => {
+    //     console.log('No workspace defined and no docker running')
+    //     let uri = vscode.Uri.file("/home/chanchala/Documents");
+    //     return await vscode.commands.executeCommand('vscode.openFolder', uri);
+    // });
 
-    var p;
-    suiteSetup( async () => {
-        console.log('No workspace defined and no docker running')
-        let uri = vscode.Uri.file("/home/chanchala/Documents");
-        p = await vscode.commands.executeCommand('vscode.openFolder', uri);
+    // doesnt work
+    // suiteSetup( () => {
+    //     return new Promise( async (resolve, reject) => {
+    //         let uri = vscode.Uri.file("/home/chanchala/Documents");
+    //         try {
+    //             await vscode.commands.executeCommand('vscode.openFolder', uri);
+    //             a = 1;
+    //             resolve();
+    //         } catch(e) {
+    //             reject(e);
+    //         }
+    
+    //       });
+    //     });
+
+    // works
+
+    suiteSetup(  () => {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                a = 1;
+                resolve();
+            }, 200);
+        });
     });
 
-    Promise.all([p]).then(()=> {
-        console.log("done");
-    }).then(() => {
         test("Something 1", () => {
             assert.equal(-1, [1, 2, 3].indexOf(5));
             assert.equal(-1, [1, 2, 3].indexOf(0));
+
+            assert(a===1);
         });
     
         test('Convert returns resolved promise', () => {
             const convertParams: Map<string, string> = new Map<string, string>();
             // set up all the required parameters
             return dockerManager.convert(convertParams)
-                .then(() => assert(true), () => assert(false));
+                .then(() => assert(false), () => assert(true));
         });
     
         test("Promise example", () => {
@@ -52,7 +68,7 @@ suite("Extension Tests Positive", function () {
             });
         });
     }); 
-});
+
 
 
 
