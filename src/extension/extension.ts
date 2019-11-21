@@ -1,18 +1,16 @@
 import * as vscode from 'vscode';
 import { contentProvider } from './contentProvider';
 import { dockerManager } from './dockerManager';
-import { basename, join } from 'path';
-import { spawn } from 'child_process';
 import { dlToolkitChannel } from "./dlToolkitChannel";
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 
     let extensionStatusBar: vscode.StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 25);
 
-    dlToolkitChannel.appendLine("info", `Extension "dl-toolkit" is now active from path ${context.extensionPath}!!`);
+    dlToolkitChannel.appendLine("info", `Extension "dl-toolkit" is now active from path ${context.extensionPath}`);
 
     let initialize = vscode.commands.registerCommand('extension.initializeOnnxEcosystem', () => {
-        extensionStatusBar.text = "Extension initialized!";
+        extensionStatusBar.text = "Extension initialized";
         extensionStatusBar.show();
     });
 
@@ -21,12 +19,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         let containerType = await dockerManager.getContainerType().catch(error => dlToolkitChannel.appendLine("error", `getContainerType: ${error}`));
 
         if (containerType) {
-            dlToolkitChannel.appendLine("info", "Reinitialization successful!");
-            vscode.window.showInformationMessage("Reinitialization successful!");
+            dlToolkitChannel.appendLine("info", "Reinitialization successful");
+            vscode.window.showInformationMessage("Reinitialization successful");
         }
         else {
-            dlToolkitChannel.appendLine("error", "Reinitialization failed!");
-            vscode.window.showInformationMessage("Reinitialization failed!");
+            dlToolkitChannel.appendLine("error", "Reinitialization failed");
+            vscode.window.showInformationMessage("Reinitialization failed");
         }
     });
 
@@ -48,8 +46,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             vscode.window.showInformationMessage(`Starting your development environment failed`);
         }
     });
-
-
 
     context.subscriptions.push(initialize);
     context.subscriptions.push(startDocker);
