@@ -24,8 +24,11 @@
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
 			"args": [
+                "${workspaceFolder}/test_workspace/test_workspace.code-workspace",
+                "--disable-extension",
 				"--extensionDevelopmentPath=${workspaceFolder}",
-				"--extensionTestsPath=${workspaceFolder}/out/test"
+                "--extensionTestsPath=${workspaceFolder}/out/test",
+                "--timeout=999999",
 			],
 			"outFiles": [
 				"${workspaceFolder}/out/test/**/*.js"

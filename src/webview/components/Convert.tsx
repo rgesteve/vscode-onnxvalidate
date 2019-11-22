@@ -34,7 +34,7 @@ class Convert extends Component<IConvertProps, {}>{
                 <Stack horizontal gap={7}>
                         <Stack.Item grow>
                             <Label styles={labelStyles}>Enter path to model </Label>
-                            <TextField placeholder="Enter path to model" value={modelPath} />
+                            <TextField placeholder="Enter path to model" value={modelPath} required/>
                         </Stack.Item>
                         <Stack.Item align="end" >
                             <PrimaryButton style={{ width: '200px' }} onClick={this.props.pathToModel}>Select Path to model</PrimaryButton>
