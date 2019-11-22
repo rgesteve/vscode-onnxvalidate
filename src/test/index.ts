@@ -21,7 +21,6 @@ testRunner.configure({
     enableTimeouts: true,
     timeout: 99999,
     fullStackTrace: true
-
 });
 
 module.exports = testRunner;

@@ -5,32 +5,24 @@
 
 // The module 'assert' provides assertion methods from node
 import * as assert from 'assert';
-//var assert = require('assert');
 import * as vscode from 'vscode';
 
 import { dockerManager } from '../extension/dockerManager';
-import { doesNotReject } from 'assert';
-
-
+import * as path from 'path'
+import * as fs from 'fs'
+import * as os from 'os'
 // Defines a Mocha test suite to group tests of similar kind together
 
-suite("Docker running", () => {
 
-
-    test("Something 1", () => {
-
-        assert.equal(-1, [1, 2, 3].indexOf(5));
-        assert.equal(-1, [1, 2, 3].indexOf(0));
-
-    });
-
+var runningContainerId = "";
+suite("Positive tests while docker running", () => {
     test('getContainerType should revolve', async () => {
         try {
             await dockerManager.getContainerType().then((containerType: string) => {
                 assert.equal(containerType, "linux")
             });
         } catch (e) {
-            assert.fail("getContainerType didnt resolve");
+            assert.fail("getContainerType did not resolve");
         }
 
     });
@@ -38,64 +30,83 @@ suite("Docker running", () => {
     test('getImageID should revolve', async () => {
         try {
             await dockerManager.getImageId().then((imageID: string) => {
-                assert.notEqual(imageID, "")
+                assert.notEqual(imageID, "");
+
             });
         } catch (e) {
-            assert.fail("getImageID didnt resolve ");
+            assert.fail("getImageID did not resolve ");
+            
         }
 
     });
 
-    test('Convert returns resolved promise', () => {
 
-        // const convertParams: Map<string, string> = new Map<string, string>();
-        // // set up all the required parameters
-        // return dockerManager.convert(convertParams)
-        //     .then(() => assert.(false), () => assert(true));
+    test('runImage should revolve', async () => {
+        try {
+            await dockerManager.runImage().then((containerId: string) => {
+                runningContainerId = containerId;
+                assert.notEqual(containerId, "")
+            });
+        } catch (e) {
+            assert.fail("runImage did not resolve ");
+        }
+
+    });
+
+    test('Convert returns resolved promise', async () => {
+        const convertParams: Map<string, string> = new Map<string, string>();
+        const workspaceFolders: vscode.WorkspaceFolder[] = vscode.workspace.workspaceFolders || [];
+        assert.equal(workspaceFolders.length, 1);
+
+        convertParams.set("input", path.join(workspaceFolders[0].uri.fsPath, "final_models", "resnet50", "resnet50_v1.pb"));
+        try {
+            await dockerManager.convert(convertParams).then(() => {
+                if (!fs.existsSync(path.join(workspaceFolders[0].uri.fsPath, "final_models", "resnet50", "resnet50_v1.onnx"))) {
+                    assert.fail("Converted file does not exist ");
+                }
+            });
+        } catch (e) {
+            assert.fail("Conversion failed");
+        }
 
 
     });
 
-    test("Promise example", () => {
+    test('Validation returns resolved promise', async () => {
+        const mlperfParam: Map<string, string> = new Map<string, string>();
+        const workspaceFolders: vscode.WorkspaceFolder[] = vscode.workspace.workspaceFolders || [];
+        assert.equal(workspaceFolders.length, 1);
 
-        return Promise.resolve(1).then((x) => {
-            assert.equal(x, 1);
+        mlperfParam.set("model", path.join(workspaceFolders[0].uri.fsPath, "final_models", "resnet50", "resnet50_v1.pb"));
+        mlperfParam.set("profile", "resnet50-tf");
+        mlperfParam.set("backend", "tensorflow");
+        mlperfParam.set("data-format", "NHWC");
+        mlperfParam.set("count", "10");
+        mlperfParam.set("dataset-path", path.join(workspaceFolders[0].uri.fsPath, "representative_dataset"));
+        try {
+            await dockerManager.validation(mlperfParam).then(() => {
+                if (!fs.existsSync(path.join(os.tmpdir(), "MLPerf", "results.json"))) {
+                    assert.fail("Result file does not exist");
+                }
+            });
+        } catch (e) {
+            assert.fail("Validation did not resolve");
+        }
 
-
-        });
 
     });
 });
 
 
+suite("Docker exec tests", () => {
+    test('Docker stop container', async () => {
+        try {
+            await dockerManager.exeCmd("docker", ["stop", `${runningContainerId}`]).then(()=>{
+                assert.ok("Docker stop work");
+            });
+        } catch (e) {
+            assert.fail("Docker exeCmd to stop container did not work");
+        }
+    });
+});
 
-
-// suite("Extension Tests Negative", function () {
-
-//     suiteSetup(() => {
-//         console.log('No workspace defined and no docker running')
-
-//       })
-//     test("Something 1", () => {
-//         assert.equal(-1, [1, 2, 3].indexOf(5));
-//         assert.equal(-1, [1, 2, 3].indexOf(0));
-//     });
-
-//     test('Convert returns rejected promise', () => {
-//         const convertParams: Map<string, string> = new Map<string, string>();
-//         return dockerManager.convert(convertParams)
-//         .then(() => assert(false), () => assert(true));
-//       });
-
-//      test("Promise example", () => {
-//         return Promise.resolve(1).then((x) => {
-//             assert.equal(x, 1);
-//         });
-//     });
-// });
-
-// teardown( () => {
-
-//         console.log("Mocha done")
-
-//   });
