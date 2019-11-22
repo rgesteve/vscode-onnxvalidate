@@ -263,8 +263,7 @@ class DockerManager implements vscode.Disposable {
         args.push(`${path.basename(modelToConvert).replace(".pb", ".onnx")}`);
 
         dlToolkitChannel.appendLine("info", `Convert params ${args}`);
-        
-        //let test = await this.exeCmdProgressBar("Converting to ONNX...", "docker", args);
+
         return await this.exeCmdProgressBar("Converting to ONNX...", "docker", args);
     }
 
@@ -292,11 +291,11 @@ class DockerManager implements vscode.Disposable {
         }
 
         let fileExt = model.split('.').pop();
-        if (fileExt === 'pb') // tensorflow quantization to follow
+        if (fileExt === 'pb') 
         {
             return await this.quantizeTFModel(quantizeParam);
         }
-        else if (fileExt === 'onnx') // onnx quantization to follow
+        else if (fileExt === 'onnx')
         {
             return await this.quantizeONNXModel(quantizeParam);
         }

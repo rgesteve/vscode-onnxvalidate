@@ -24,20 +24,16 @@ suite("Positive tests while docker running", () => {
         } catch (e) {
             assert.fail("getContainerType did not resolve");
         }
-
     });
 
     test('getImageID should revolve', async () => {
         try {
             await dockerManager.getImageId().then((imageID: string) => {
                 assert.notEqual(imageID, "");
-
             });
         } catch (e) {
             assert.fail("getImageID did not resolve ");
-            
         }
-
     });
 
 
@@ -50,7 +46,6 @@ suite("Positive tests while docker running", () => {
         } catch (e) {
             assert.fail("runImage did not resolve ");
         }
-
     });
 
     test('Convert returns resolved promise', async () => {
@@ -92,8 +87,6 @@ suite("Positive tests while docker running", () => {
         } catch (e) {
             assert.fail("Validation did not resolve");
         }
-
-
     });
 });
 
@@ -101,7 +94,7 @@ suite("Positive tests while docker running", () => {
 suite("Docker exec tests", () => {
     test('Docker stop container', async () => {
         try {
-            await dockerManager.exeCmd("docker", ["stop", `${runningContainerId}`]).then(()=>{
+            await dockerManager.exeCmd("docker", ["stop", `${runningContainerId}`]).then(() => {
                 assert.ok("Docker stop work");
             });
         } catch (e) {
