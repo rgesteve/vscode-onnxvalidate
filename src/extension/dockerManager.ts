@@ -8,50 +8,48 @@ import * as configs from './config';
 import { dlToolkitChannel } from "./dlToolkitChannel";
 
 
-
 class DockerManager implements vscode.Disposable {
     private _imageId: string | undefined;
     private _containerIds: string[];
-    private _workspace: vscode.WorkspaceFolder | undefined;
+    private _mountLocation: string | undefined;
+
 
     constructor() {
         this._containerIds = [];
-
-        const workspaceFolders: vscode.WorkspaceFolder[] = vscode.workspace.workspaceFolders || [];
-        if (workspaceFolders.length != 0) {
-            // Check if docker is installed and has the image that we require
-            this._workspace = workspaceFolders[0];
-
+        let mountLocation = utils.getMountLocation();
+        if (mountLocation) {
+            this._mountLocation = mountLocation;
             let containerTypeCP = cp.spawn('docker', ['info', '-f', `"{{.OSType}}"`]);
-            let containerType = "";
-            containerTypeCP.stdout.on("data", (data: string): void => {
-                dlToolkitChannel.append("info", data);
-                containerType = containerType + data.toString();
-            });
-
-            containerTypeCP.on('error', (err) => {
-                dlToolkitChannel.appendLine("error", 'Docker client is either not installed or not running!');
-                dlToolkitChannel.appendLine("error", `Error: ${err}`);
-
-            });
-
-            containerTypeCP.on("exit", (data: string | Buffer): void => {
-                if (this._workspace) {
-                    containerType = containerType.trim().replace(/\"/g, "");
-                    if (containerType === 'linux' || containerType === 'windows') {
-                        utils.setMountLocations(this._workspace.uri.fsPath, os.tmpdir(), containerType);
-                        dlToolkitChannel.appendLine("info", `Mount locations set! ${this._workspace.uri.fsPath}, ${os.tmpdir()}`);
+                let containerType = "";
+                containerTypeCP.stdout.on("data", (data: string): void => {
+                    dlToolkitChannel.append("info", data);
+                    containerType = containerType + data.toString();
+                });
+    
+                containerTypeCP.on('error', (err) => {
+                    dlToolkitChannel.appendLine("error", 'Docker client is either not installed or not running!');
+                    dlToolkitChannel.appendLine("error", `Error: ${err}`);
+    
+                });
+    
+                containerTypeCP.on("exit", (data: string | Buffer): void => {
+                    if ( this._mountLocation) {
+                        containerType = containerType.trim().replace(/\"/g, "");
+                        if (containerType === 'linux' || containerType === 'windows') {
+    
+                            utils.setMountLocations( this._mountLocation, os.tmpdir(), containerType);
+                            dlToolkitChannel.appendLine("info", `Mount locations set! ${ this._mountLocation}, ${os.tmpdir()}`);
+                        }
+                        else {
+                            dlToolkitChannel.appendLine("error", "Docker doesnt seem to be running! Please make sure that docker is running and run \
+                                                         `DL Toolkit: Reinitialize ecosystem" );
+                        }
                     }
-                    else {
-                        dlToolkitChannel.appendLine("error", "Docker doesnt seem to be running! Please make sure that docker is running and run \
-                                                     `DL Toolkit: Reinitialize ecosystem" );
-                    }
-                }
-            });
-        }
+                });
+        } 
         else {
-            dlToolkitChannel.appendLine("error", "No workspace open! Please open your development folder(workspace)");
-        }
+            dlToolkitChannel.appendLine("error", "No workspace or mount location specied!");
+        }     
     }
 
     async exeCmd(cmd: string, args: string[]): Promise<string> {
@@ -106,10 +104,10 @@ class DockerManager implements vscode.Disposable {
         }
         else {
             containerType = containerType.trim().replace(/\"/g, "");
-            if (this._workspace) {
+            if ( this._mountLocation) {
                 if (containerType === "linux" || containerType === "windows") {
-                    utils.setMountLocations(this._workspace.uri.fsPath, os.tmpdir(), containerType);
-                    dlToolkitChannel.appendLine("info", `Mount locations set! ${this._workspace.uri.fsPath}, ${os.tmpdir()}`);
+                    utils.setMountLocations( this._mountLocation, os.tmpdir(), containerType);
+                    dlToolkitChannel.appendLine("info", `Mount locations set! ${ this._mountLocation}, ${os.tmpdir()}`);
                 }
             }
             else {
@@ -162,9 +160,9 @@ class DockerManager implements vscode.Disposable {
 
     public async runImage(): Promise<string> {
 
-        if (!this._workspace) {
-            dlToolkitChannel.appendLine("error", `No workspace defined`);
-            return Promise.reject("No workspace defined");
+        if (!this._mountLocation) {
+            dlToolkitChannel.appendLine("error", `No workspace defined or mount location defined`);
+            return Promise.reject("No workspace defined or mount location defined");
         }
 
         if (!this._imageId) {
@@ -190,9 +188,9 @@ class DockerManager implements vscode.Disposable {
 
     public async convert(convertParams: Map<string, string>): Promise<string> {
 
-        if (!this._workspace) {
-            dlToolkitChannel.appendLine("error", `No workspace defined`);
-            return Promise.reject("No workspace defined");
+        if (!this._mountLocation) {
+            dlToolkitChannel.appendLine("error", `No workspace defined or mount location defined`);
+            return Promise.reject("No workspace defined or mount location defined");
 
         }
 
@@ -268,9 +266,9 @@ class DockerManager implements vscode.Disposable {
     }
 
     public async summarizeGraph(fileuri: string): Promise<string> {
-        if (!this._workspace) {
-            dlToolkitChannel.appendLine("error", `No workspace defined`);
-            return Promise.reject("No workspace defined");
+        if (!this._mountLocation) {
+            dlToolkitChannel.appendLine("error", `No workspace defined or mount location defined`);
+            return Promise.reject("No workspace defined or mount location defined");
         }
 
         let args: string[] = ['exec', `${this._containerIds[0]}`, `${configs.tensorflow_binaries[utils.g_containerType]["summarize"]}`, '--in_graph=' + `${utils.getLocationOnContainer(fileuri)}`];
@@ -280,9 +278,9 @@ class DockerManager implements vscode.Disposable {
 
 
     public async quantizeModel(quantizeParam: Map<string, string>): Promise<string> {
-        if (!this._workspace) {
-            dlToolkitChannel.appendLine("error", `No workspace defined`);
-            return Promise.reject("No workspace defined");
+        if (!this._mountLocation) {
+            dlToolkitChannel.appendLine("error", `No workspace defined or mount location defined`);
+            return Promise.reject("No workspace defined or mount location defined");
         }
         let model: string | undefined = quantizeParam.get("model_path");
         if (!model) {
@@ -308,9 +306,9 @@ class DockerManager implements vscode.Disposable {
     }
 
     public async quantizeONNXModel(quantizeParam: Map<string, string>): Promise<string> {
-        if (!this._workspace) {
-            dlToolkitChannel.appendLine("error", `No workspace defined`);
-            return Promise.reject("No workspace defined");
+        if (!this._mountLocation) {
+            dlToolkitChannel.appendLine("error", `No workspace defined or mount location defined`);
+            return Promise.reject("No workspace defined or mount location defined");
         }
 
         let model: string | undefined = quantizeParam.get("model_path");
@@ -342,9 +340,9 @@ class DockerManager implements vscode.Disposable {
     }
 
     public async quantizeTFModel(quantizeParam: Map<string, string>): Promise<string> {
-        if (!this._workspace) {
-            dlToolkitChannel.appendLine("error", `No workspace defined`);
-            return Promise.reject("No workspace defined");
+        if (!this._mountLocation) {
+            dlToolkitChannel.appendLine("error", `No workspace defined or mount location defined`);
+            return Promise.reject("No workspace defined or mount location defined");
         }
         let model: string | undefined = quantizeParam.get("model");
 
@@ -373,9 +371,9 @@ class DockerManager implements vscode.Disposable {
     }
 
     public async validation(mlperfParams: Map<string, string>): Promise<string> {
-        if (!this._workspace) {
-            dlToolkitChannel.appendLine("error", `No workspace defined`);
-            return Promise.reject("No workspace defined");
+        if (!this._mountLocation) {
+            dlToolkitChannel.appendLine("error", `No workspace defined or mount location defined`);
+            return Promise.reject("No workspace defined or mount location defined");
         }
 
         let args: string[] = ['exec', '-w', `${utils.getMLPerfLocation()}`, `${this._containerIds[0]}`, 'python3', `${utils.getMLPerfDriver()}`,];

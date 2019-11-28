@@ -1,12 +1,31 @@
 import * as path from 'path';
 import { dlToolkitChannel} from './dlToolkitChannel';
 import * as configs from './config'
+import * as vscode from 'vscode';
+import { WorkspaceConfiguration } from 'vscode';
 export let g_mountLocation: string = "";
 export let g_hostLocation: string = "";
 
 export let g_mountOutputLocation: string = "";
 export let g_hostOutputLocation: string = "";
-export let g_containerType: string = "";
+export let g_containerType: string = ""; 
+
+export function getMountLocation(): string | undefined {
+    const config: WorkspaceConfiguration = vscode.workspace.getConfiguration("dl-toolkit");
+    let mountLocation: string | undefined = config.get<string>("mountLocation");
+
+    if (!mountLocation) // user didnt define the mount location, then use the open workspace
+    {
+        const workspaceFolders: vscode.WorkspaceFolder[] = vscode.workspace.workspaceFolders || [];
+        if (workspaceFolders.length != 0) {
+            mountLocation = workspaceFolders[0].uri.fsPath;
+        }
+        else {
+            dlToolkitChannel.appendLine("error",`No workspace open or mount location specified`);
+        }
+    } 
+    return mountLocation;
+}
 
 export function setMountLocations(userMount: string, extMount: string, containerType: string) : void {
 
