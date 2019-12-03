@@ -89,7 +89,6 @@ class ContentProvider implements vscode.Disposable {
             }
             case "setDataset": {
                 vscode.window.showOpenDialog({
-                    canSelectFolders: true, canSelectFiles: false, canSelectMany: false,
                     openLabel: 'Select dataset'
                 }).then((folderUris) => {
                     if (folderUris) {
@@ -117,20 +116,8 @@ class ContentProvider implements vscode.Disposable {
                 break;
             }
 
-            case "setPreprocessModulePath": {
-                vscode.window.showOpenDialog({
-                    canSelectFolders: true, canSelectFiles: false, canSelectMany: false,
-                    openLabel: 'Select module path'
-                }).then((folderUris) => {
-                    if (folderUris) {
-                        folderUris.forEach(value => {
-                            this.quantizeParam.set("data_preprocess_filepath", value.fsPath);
-                            if (this.currentPanel) {
-                                this.currentPanel.webview.postMessage({ command: "preprocessModulePath", payload: value.fsPath });
-                            }
-                        });
-                    }
-                });
+            case "setDatasetSize": {
+                this.quantizeParam.set("dataset_size", msg.text);
                 break;
             }
             case "setProfileOption": {

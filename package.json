@@ -68,7 +68,7 @@
             "properties": {
                 "dl-toolkit.mountLocation" :{
                     "type" :["string", "null"],
-                    "default": "/home/chanchala/Documents/ILSVRC2012_img_val",
+                    "default": null,
                     "description": "Specifies the folder path to be mounted on the container."
                 }
             }

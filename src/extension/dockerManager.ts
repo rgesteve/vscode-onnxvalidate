@@ -120,7 +120,8 @@ class DockerManager implements vscode.Disposable {
     public async getImageId(): Promise<string> {
         let imageID: string = "";
         if (utils.g_containerType === "linux") {
-            imageID = await this.exeCmd("docker", ['images', "chanchala/mlperf_linux7:latest", '--format', '"{{.Repository}}"']);
+            //imageID = await this.exeCmd("docker", ['images', "chanchala/mlperf_linux7:latest", '--format', '"{{.Repository}}"']);
+            imageID = await this.exeCmd("docker", ['images', "test5:latest", '--format', '"{{.Repository}}"']);
             if (!imageID || 0 === imageID.length) { // image doesnt exist
                 await this.exeCmd("docker", ["pull", "chanchala7/mlperf_linux:latest"])
                 try {
@@ -319,13 +320,13 @@ class DockerManager implements vscode.Disposable {
 
         let args: string[] = ['exec', '-w', `${utils.getScriptsLocationOnContainer()}`, `${this._containerIds[0]}`, 'python3']
         if (quantizeParam.size == 1) {
-            args.push('quantizeDriver.py');
-            args.push(`--model_path=${model}`);
+            args.push('quantize_driver.py');
+            args.push(`--model_path=${utils.getLocationOnContainer(model)}`);
         }
         else {
             args.push('calibrate.py');
             for (var [key, value] of quantizeParam) {
-                if (key === 'dataset_path' || key === 'model_path' || key === 'data_preprocess_filepath') {
+                if (key === 'dataset_path' || key === 'model_path') {
                     args.push(`--${key}=${utils.getLocationOnContainer(value)}`);
                     dlToolkitChannel.appendLine("info", `Location on container: ${utils.getLocationOnContainer(value)}`)
                 }
@@ -333,6 +334,12 @@ class DockerManager implements vscode.Disposable {
                     args.push(`--${key}=${value}`);
                 }
             }
+            // if (!quantizeParam.has("data_preprocess")) { 
+            //     // using a preprocessed protobuf input so tell the number of images in the protobuf input
+            //     //&& quantizeParam.has("dataset_size")) { 
+                
+            //     args.push(`--dataset_size=${value}`);
+            // }
         }
 
         dlToolkitChannel.appendLine("info", `Quantize params ${args}`);

@@ -12,6 +12,7 @@ interface IState {
 interface IQuantizeProps {
     inputProps: QuantizeInputParams;
     quantizeFormHandler: (e: any, task: String) => void;
+    datasetquantizeFormHandler: (e: any, task: String) => void;
     pathToModel: (event: React.MouseEvent<HTMLButtonElement>) => void
     pathToPreprocessModule: (event: React.MouseEvent<HTMLButtonElement>) => void
     pathToRepresentativeData: (event: React.MouseEvent<HTMLButtonElement>) => void
@@ -30,7 +31,7 @@ class Quantize extends Component<IQuantizeProps, IState>  {
 
     render() {
 
-        let { preprocessModulePath, functionName, datasetPath, modelPath } = this.props.inputProps;
+        let { datasetSize, functionName, datasetPath, modelPath } = this.props.inputProps;
         let { showFields } = this.state;
         return (
             <div>
@@ -64,15 +65,14 @@ class Quantize extends Component<IQuantizeProps, IState>  {
 
                 <Stack horizontal gap={5} >
                     <Stack.Item grow>
-                        <Label styles={labelStyles}>Enter path custom preprocess module</Label>
-                        <TextField placeholder="Enter path custom preprocess module" value={preprocessModulePath} />
+
+                        <Label styles={labelStyles} >Preprocess function </Label>
+                            <TextField placeholder="preprocess_method1" value={functionName} onChange={(e: any) => this.props.quantizeFormHandler(e, "onFunctionNameChange")} />
                     </Stack.Item>
-                    <Stack.Item align="end" >
-                        <PrimaryButton style={{ width: '200px' }} onClick={this.props.pathToPreprocessModule}>Select module</PrimaryButton>
-                    </Stack.Item>
+                    
                     <Stack.Item grow>
-                            <Label styles={labelStyles} >Enter function name </Label>
-                            <TextField placeholder="module_name.function_name" value={functionName} onChange={(e: any) => this.props.quantizeFormHandler(e, "onFunctionNameChange")} />
+                            <Label styles={labelStyles} >Dataset size (only if using a preprocessed pb as dataset) </Label>
+                            <TextField placeholder="28" value={datasetSize} onChange={(e: any) => this.props.quantizeFormHandler(e, "onDatasetSizeChange")} />
                         </Stack.Item>
                 </Stack>                       
                         </>
