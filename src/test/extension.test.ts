@@ -67,6 +67,23 @@ suite("Positive tests while docker running", () => {
 
     });
 
+    test('Quantization without dataset returns resolved promis', async () => {
+        const quantizationParams: Map<string, string> = new Map<string, string>();
+        const workspaceFolders: vscode.WorkspaceFolder[] = vscode.workspace.workspaceFolders || [];
+        assert.equal(workspaceFolders.length, 1);
+
+        quantizationParams.set("model", path.join(workspaceFolders[0].uri.fsPath, "final_models", "resnet50", "resnet50_v1.onnx"));
+        
+        try {
+            await dockerManager.quantizeModel(quantizationParams).then(() => {
+                if (!fs.existsSync(path.join(workspaceFolders[0].uri.fsPath, "final_models", "resnet50", "quantized_resnet50_v1.onnx"))) {
+                    assert.fail("quantized file does not exist ");
+                }
+            });
+        } catch (e) {
+            assert.fail("Quantization failed");
+        } 
+    });
     test('Validation returns resolved promise', async () => {
         const mlperfParam: Map<string, string> = new Map<string, string>();
         const workspaceFolders: vscode.WorkspaceFolder[] = vscode.workspace.workspaceFolders || [];
