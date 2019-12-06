@@ -63,11 +63,14 @@
                 }
             ]
         },
-        "configuration" : {
+        "configuration": {
             "title": "dl-toolkit",
             "properties": {
-                "dl-toolkit.mountLocation" :{
-                    "type" :["string", "null"],
+                "dl-toolkit.mountLocation": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
                     "default": null,
                     "description": "Specifies the folder path to be mounted on the container."
                 }

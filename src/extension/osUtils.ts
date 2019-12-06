@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { dlToolkitChannel} from './dlToolkitChannel';
+import { dlToolkitChannel } from './dlToolkitChannel';
 import * as configs from './config'
 import * as vscode from 'vscode';
 import { WorkspaceConfiguration } from 'vscode';
@@ -8,7 +8,7 @@ export let g_hostLocation: string = "";
 
 export let g_mountOutputLocation: string = "";
 export let g_hostOutputLocation: string = "";
-export let g_containerType: string = ""; 
+export let g_containerType: string = "";
 
 export function getMountLocation(): string | undefined {
     const config: WorkspaceConfiguration = vscode.workspace.getConfiguration("dl-toolkit");
@@ -21,13 +21,13 @@ export function getMountLocation(): string | undefined {
             mountLocation = workspaceFolders[0].uri.fsPath;
         }
         else {
-            dlToolkitChannel.appendLine("error",`No workspace open or mount location specified`);
+            dlToolkitChannel.appendLine("error", `No workspace open or mount location specified`);
         }
-    } 
+    }
     return mountLocation;
 }
 
-export function setMountLocations(userMount: string, extMount: string, containerType: string) : void {
+export function setMountLocations(userMount: string, extMount: string, containerType: string): void {
 
     g_containerType = containerType;
 
@@ -43,7 +43,7 @@ export function setMountLocations(userMount: string, extMount: string, container
         g_hostOutputLocation = extMount;
         g_mountOutputLocation = `/${path.basename(extMount)}`;
     }
-    dlToolkitChannel.appendLine("info",`2 Mount locations: ${g_mountLocation}, ${g_mountOutputLocation} , ${g_containerType} , ${containerType}`);
+    dlToolkitChannel.appendLine("info", `2 Mount locations: ${g_mountLocation}, ${g_mountOutputLocation} , ${g_containerType} , ${containerType}`);
 }
 
 export function isWindows(): boolean {
@@ -58,13 +58,21 @@ export function getMLPerfDriver(): string {
     return configs.mlperf[g_containerType]["driver"];
 }
 
-export function getLocationOnContainer (pathOnHost: string | undefined): string {
+export function getLocationOnContainer(pathOnHost: string | undefined): string {
     let retString = "";
     if (pathOnHost != undefined) {
         if (isWindows() && g_containerType === 'windows')
             retString = `${g_mountLocation}\\${pathOnHost.replace(g_hostLocation, "")}`;
         else if (isWindows() && g_containerType === 'linux') {
-            let temp:string  = `${pathOnHost.replace(g_hostLocation, g_mountLocation)}`;
+            dlToolkitChannel.appendLine("info", `g_hostLocation ${g_hostLocation} g_mountLocation  ${g_mountLocation}`);
+            dlToolkitChannel.appendLine("info", `pathOnHost ${pathOnHost}`);
+            let temp: string = pathOnHost.replace(g_hostLocation, g_mountLocation);
+            let tofind = "test";
+            let replaceWith = "123";
+            let actualString = "hellotest";
+            let finalstring = actualString.replace(tofind, replaceWith);
+            dlToolkitChannel.appendLine("info", `finalstring ${finalstring}`);
+            dlToolkitChannel.appendLine("info", `temp ${temp}`);
             retString = temp.replace(/\\/g, "/");
             dlToolkitChannel.appendLine("info", `Path ${pathOnHost} translates to ${retString}`);
         }
@@ -77,6 +85,6 @@ export function getLocationOnContainer (pathOnHost: string | undefined): string 
     return retString;
 }
 
-export function getScriptsLocationOnContainer() : string {
+export function getScriptsLocationOnContainer(): string {
     return configs.scriptsLocation[g_containerType]["location"];
 }

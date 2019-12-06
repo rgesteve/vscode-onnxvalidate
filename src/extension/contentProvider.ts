@@ -89,6 +89,7 @@ class ContentProvider implements vscode.Disposable {
             }
             case "setDataset": {
                 vscode.window.showOpenDialog({
+                    canSelectFolders: true, 
                     openLabel: 'Select dataset'
                 }).then((folderUris) => {
                     if (folderUris) {
@@ -114,6 +115,35 @@ class ContentProvider implements vscode.Disposable {
                     }
                 });
                 break;
+            }
+            case "setDatasetSingleFile": {
+                    vscode.window.showOpenDialog({
+                        canSelectFolders: false, 
+                        openLabel: 'Select dataset'
+                    }).then((folderUris) => {
+                        if (folderUris) {
+                            folderUris.forEach(value => {
+                                switch (subCommand) {
+                                    case "quantize": {
+                                        this.quantizeParam.set("dataset_path", value.fsPath);
+                                        if (this.currentPanel) {
+                                            this.currentPanel.webview.postMessage({ command: "datasetQuantizePreprocessed", payload: value.fsPath });
+                                        }
+                                        break;
+                                    }
+                                    case "validate": {
+                                        this.mlperfParam.set("dataset-path", value.fsPath);
+                                        if (this.currentPanel) {
+                                            this.currentPanel.webview.postMessage({ command: "datasetValidate", payload: this.mlperfParam.get("dataset-path") });
+                                        }
+                                        break;
+                                    }
+                                }
+                                this.mlperfParam.set("dataset-path", value.fsPath);
+                            });
+                        }
+                    });
+                    break;
             }
 
             case "setDatasetSize": {

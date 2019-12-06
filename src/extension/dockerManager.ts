@@ -65,7 +65,7 @@ class DockerManager implements vscode.Disposable {
             });
 
             childProc.stderr.on("data", (data: string | Buffer) => {
-                dlToolkitChannel.appendLine("warning", data.toString());
+                dlToolkitChannel.appendLine("info", data.toString());
             });
 
             childProc.on("error", (data: string | Buffer) => { reject(data) });
@@ -325,6 +325,13 @@ class DockerManager implements vscode.Disposable {
         }
         else {
             args.push('calibrate.py');
+            // if (quantizeParam.has("data_preprocess") && !quantizeParam.has("dataset_size")) { 
+            //     return Promise.reject("Need dataset size for preprocessed protobuf input data");
+            // }
+            let dataset = quantizeParam.get("dataset_path");
+            if (dataset && dataset.endsWith('.pb') && !quantizeParam.has("dataset_size")) { 
+                return Promise.reject("Need dataset size for preprocessed protobuf input data");
+            }
             for (var [key, value] of quantizeParam) {
                 if (key === 'dataset_path' || key === 'model_path') {
                     args.push(`--${key}=${utils.getLocationOnContainer(value)}`);
@@ -334,12 +341,7 @@ class DockerManager implements vscode.Disposable {
                     args.push(`--${key}=${value}`);
                 }
             }
-            // if (!quantizeParam.has("data_preprocess")) { 
-            //     // using a preprocessed protobuf input so tell the number of images in the protobuf input
-            //     //&& quantizeParam.has("dataset_size")) { 
-                
-            //     args.push(`--dataset_size=${value}`);
-            // }
+
         }
 
         dlToolkitChannel.appendLine("info", `Quantize params ${args}`);
@@ -351,27 +353,33 @@ class DockerManager implements vscode.Disposable {
             dlToolkitChannel.appendLine("error", `No workspace defined or mount location defined`);
             return Promise.reject("No workspace defined or mount location defined");
         }
-        let model: string | undefined = quantizeParam.get("model");
+        let model_path: string | undefined = quantizeParam.get("model_path");
 
-        if (!model) {
+        if (!model_path) {
             dlToolkitChannel.appendLine("error", "Model not found");
             return Promise.reject("Model not found");
         }
 
+        let model = path.parse(model_path).base;
+        let profile : string = "";
         if (model.toLowerCase().includes("resnet")) {
-            model = "resnet50";
+            profile = "resnet50";
         }
         else if (model.toLowerCase().includes("mobilenet")) {
-            model = "mobilenet";
+            profile = "mobilenet";
         }
         else {
             dlToolkitChannel.appendLine("error", "This model is not part of the supported models!");
             return Promise.reject("This model is not part of the supported models!");
         }
 
-        let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(path.dirname(model))}`, `${this._containerIds[0]}`, `${configs.tensorflow_binaries[utils.g_containerType]["transform"]}`,
-            '--in_graph=', `${path.basename(model)}`, '--out_graph=', `${path.basename(model).replace(".pb", "_quantized.pb")}`,
-            '--inputs=', `${configs.supported_models[model]["inputs"]}`, '--outputs=', `${configs.supported_models[model]["outputs"]}`, '--transforms=', `${configs.tensorflow_quantization_options}`];
+        let args: string[] = ['exec', '-w', `${utils.getLocationOnContainer(path.dirname(model_path))}`, `${this._containerIds[0]}`, 'bash', '-c']
+
+   
+        let transformArg  = `"${configs.tensorflow_binaries[utils.g_containerType]["transform"]} --in_graph=${path.basename(model)} \
+                               --out_graph=${path.basename(model).replace(".pb", "_quantized.pb")} --inputs=${configs.supported_models[profile]["inputs"]} \
+                               --outputs=${configs.supported_models[profile]["outputs"]} --transforms=\\\"${configs.tensorflow_quantization_options}\\\""`;
+        args.push(transformArg);
         dlToolkitChannel.appendLine("info", `Quantize params ${args}`);
         return await this.exeCmdProgressBar( "Quantizing TF FP32 model to TF int8 model... ", "docker", args);
 

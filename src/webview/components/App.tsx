@@ -178,7 +178,14 @@ class App extends Component<{}, IState> {
             }
             case "datasetQuantize": {
                 console.log(`Got a message from the host datasetQuantize ${ev.data.payload}`);
-                myobjQuantize.datasetPath = ev.data.payload;
+                myobjQuantize.datasetPath= ev.data.payload;
+                this.setState(state => ({ quantizeInputParams: myobjQuantize }));
+                break;
+            }
+
+            case "datasetQuantizePreprocessed": {
+                console.log(`Got a message from the host datasetQuantize ${ev.data.payload}`);
+                myobjQuantize.datasetPathPreprocessed= ev.data.payload;
                 this.setState(state => ({ quantizeInputParams: myobjQuantize }));
                 break;
             }
@@ -252,6 +259,7 @@ class App extends Component<{}, IState> {
                 myobjQuantize.functionName = "";
                 myobjQuantize.modelPath = "";
                 myobjQuantize.datasetSize = "";
+                myobjQuantize.datasetPathPreprocessed ="";
 
                 this.setState(state => ({ quantizeInputParams: myobjQuantize }));
                 break;
@@ -280,7 +288,7 @@ class App extends Component<{}, IState> {
     pathToPreprocessModule = () => {
         window.console.log("Select path to preprocess module");
         vscode.postMessage({
-            command: 'setPreprocessModulePath',
+            command: 'setDatasetSingleFile:quantize',
             text: 'Select path to preprocess module path'
         });
         window.console.log(`Sent message to host: setPreprocessModulePath`);
