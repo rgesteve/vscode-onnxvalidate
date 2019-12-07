@@ -2,12 +2,14 @@ export class QuantizeInputParams {
     "datasetPath": string;
     "modelPath": string;
     "functionName": string;
-    "preprocessModulePath": string;
+    "datasetSize": string;
+    "datasetPathPreprocessed" : string
     QuantizeInputParams() {
         this.datasetPath = "";
         this.modelPath = "";
         this.functionName = "";
-        this.preprocessModulePath = "";
+        this.datasetSize = "";
+        this.datasetPathPreprocessed = "";
 
     }
 }

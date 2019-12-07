@@ -1,21 +1,22 @@
 {
     "name": "dl-toolkit",
     "publisher": "rgesteve",
-    "displayName": "DL Toolkit",
-    "description": "",
+    "displayName": "DL-Toolkit",
     "version": "0.0.3",
+    "description": "Helps with conversion of TF models conversion to ONNX, quantization of models and validation of the models using MLPerf, all without the need of the runtime/tools installed on your system",
     "engines": {
         "vscode": "^1.35.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/rgesteve/vscode-onnxvalidate.git"
     },
     "categories": [
         "Other"
     ],
     "activationEvents": [
         "onCommand:extension.initializeOnnxEcosystem",
-        "onCommand:firstextension.addCountToPanel",
-        "onCommand:firstextension.tryResults",
         "onCommand:extension.Validate",
-        "onCommand:extension.Display",
         "onCommand:extension.DLToolkit"
     ],
     "main": "./out/extension/extension.js",
@@ -61,6 +62,26 @@
                     "when": "resourceExtname =~ /.pb|.onnx/"
                 }
             ]
+        },
+        "configuration": {
+            "title": "dl-toolkit",
+            "properties": {
+                "dl-toolkit.mountLocation": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "default": null,
+                    "description": "Specifies the folder path to be mounted on the container."
+                },
+                "dl-toolkit.memory" :{
+                    "type" : [
+                        "string", "null"
+                    ],
+                    "default": "4g",
+                    "description" : "Specifies the amount of memory to allocate for the docker container (e.g. 2g, 4g). If default, docker default is used"
+                }
+            }
         }
     },
     "scripts": {
@@ -86,7 +107,7 @@
         "office-ui-fabric-react": "^7.0.2",
         "rimraf": "^2.6.3",
         "style-loader": "^0.23.1",
-        "ts-loader": "^6.0.2",
+        "ts-loader": "^6.2.1",
         "ts.data.json": "^0.2.0",
         "tslint": "^5.12.1",
         "typescript": "^3.3.1",

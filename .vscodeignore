@@ -2,8 +2,10 @@
 .vscode-test/**
 out/test/**
 src/**
+test_workspace/**
 .gitignore
 **/tsconfig.json
 **/tslint.json
 **/*.map
 **/*.ts
+

@@ -2,11 +2,12 @@ import * as vscode from 'vscode';
 import { contentProvider } from './contentProvider';
 import { dockerManager } from './dockerManager';
 import { dlToolkitChannel } from "./dlToolkitChannel";
+import { WorkspaceConfiguration } from 'vscode';
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 
     let extensionStatusBar: vscode.StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 25);
-
+    
     dlToolkitChannel.appendLine("info", `Extension "dl-toolkit" is now active from path ${context.extensionPath}`);
 
     let initialize = vscode.commands.registerCommand('extension.initializeOnnxEcosystem', () => {
@@ -16,6 +17,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
 
     let reinitializeEcosystem = vscode.commands.registerCommand('extension.reinitializeEcosystem', async () => {
+
         let containerType = await dockerManager.getContainerType().catch(error => dlToolkitChannel.appendLine("error", `getContainerType: ${error}`));
 
         if (containerType) {
@@ -29,6 +31,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     });
 
     let startDocker = vscode.commands.registerCommand('extension.startOnnxEcosystem', async () => {
+
         let imageID = await dockerManager.getImageId().catch(error => dlToolkitChannel.appendLine("error", `getImageId: ${error}`));
         if (imageID) {
             let containerId = await dockerManager.runImage().catch(error => dlToolkitChannel.appendLine("error", `runImage: ${error}`));;

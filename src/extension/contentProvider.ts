@@ -89,7 +89,7 @@ class ContentProvider implements vscode.Disposable {
             }
             case "setDataset": {
                 vscode.window.showOpenDialog({
-                    canSelectFolders: true, canSelectFiles: false, canSelectMany: false,
+                    canSelectFolders: true, 
                     openLabel: 'Select dataset'
                 }).then((folderUris) => {
                     if (folderUris) {
@@ -116,21 +116,38 @@ class ContentProvider implements vscode.Disposable {
                 });
                 break;
             }
+            case "setDatasetSingleFile": {
+                    vscode.window.showOpenDialog({
+                        canSelectFolders: false, 
+                        openLabel: 'Select dataset'
+                    }).then((folderUris) => {
+                        if (folderUris) {
+                            folderUris.forEach(value => {
+                                switch (subCommand) {
+                                    case "quantize": {
+                                        this.quantizeParam.set("dataset_path", value.fsPath);
+                                        if (this.currentPanel) {
+                                            this.currentPanel.webview.postMessage({ command: "datasetQuantizePreprocessed", payload: value.fsPath });
+                                        }
+                                        break;
+                                    }
+                                    case "validate": {
+                                        this.mlperfParam.set("dataset-path", value.fsPath);
+                                        if (this.currentPanel) {
+                                            this.currentPanel.webview.postMessage({ command: "datasetValidate", payload: this.mlperfParam.get("dataset-path") });
+                                        }
+                                        break;
+                                    }
+                                }
+                                this.mlperfParam.set("dataset-path", value.fsPath);
+                            });
+                        }
+                    });
+                    break;
+            }
 
-            case "setPreprocessModulePath": {
-                vscode.window.showOpenDialog({
-                    canSelectFolders: true, canSelectFiles: false, canSelectMany: false,
-                    openLabel: 'Select module path'
-                }).then((folderUris) => {
-                    if (folderUris) {
-                        folderUris.forEach(value => {
-                            this.quantizeParam.set("data_preprocess_filepath", value.fsPath);
-                            if (this.currentPanel) {
-                                this.currentPanel.webview.postMessage({ command: "preprocessModulePath", payload: value.fsPath });
-                            }
-                        });
-                    }
-                });
+            case "setDatasetSize": {
+                this.quantizeParam.set("dataset_size", msg.text);
                 break;
             }
             case "setProfileOption": {

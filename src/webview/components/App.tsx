@@ -56,6 +56,15 @@ class App extends Component<{}, IState> {
             );
             window.console.log(`Sent message to host: setFunctionName ${this.state.quantizeInputParams.functionName}`);
         }
+        if (this.state.quantizeInputParams.datasetSize !== prevState.quantizeInputParams.datasetSize) {
+            vscode.postMessage(
+                {
+                    command: 'setDatasetSize',
+                    text: this.state.quantizeInputParams.datasetSize
+                }
+            );
+            window.console.log(`Sent message to host: setDatasetSize ${this.state.quantizeInputParams.datasetSize}`);
+        }
         //update on input validation components
         if (this.state.validateInputParams.selectedItem !== prevState.validateInputParams.selectedItem) {
             vscode.postMessage(
@@ -154,9 +163,9 @@ class App extends Component<{}, IState> {
                 this.setState(state => ({ quantizeInputParams: myobjQuantize }));
                 break;
             }
-            case "preprocessModulePath": {
-                console.log(`Quantize: Got a message from the host preprocessModulePath ${ev.data.payload}`);
-                myobjQuantize.preprocessModulePath = ev.data.payload;
+            case "datasetSize": {
+                console.log(`Quantize: Got a message from the host datasetSize ${ev.data.payload}`);
+                myobjQuantize.datasetSize = ev.data.payload;
                 this.setState(state => ({ quantizeInputParams: myobjQuantize }));
                 break;
             }
@@ -169,7 +178,14 @@ class App extends Component<{}, IState> {
             }
             case "datasetQuantize": {
                 console.log(`Got a message from the host datasetQuantize ${ev.data.payload}`);
-                myobjQuantize.datasetPath = ev.data.payload;
+                myobjQuantize.datasetPath= ev.data.payload;
+                this.setState(state => ({ quantizeInputParams: myobjQuantize }));
+                break;
+            }
+
+            case "datasetQuantizePreprocessed": {
+                console.log(`Got a message from the host datasetQuantize ${ev.data.payload}`);
+                myobjQuantize.datasetPathPreprocessed= ev.data.payload;
                 this.setState(state => ({ quantizeInputParams: myobjQuantize }));
                 break;
             }
@@ -242,7 +258,8 @@ class App extends Component<{}, IState> {
                 myobjQuantize.datasetPath = "";
                 myobjQuantize.functionName = "";
                 myobjQuantize.modelPath = "";
-                myobjQuantize.preprocessModulePath = "";
+                myobjQuantize.datasetSize = "";
+                myobjQuantize.datasetPathPreprocessed ="";
 
                 this.setState(state => ({ quantizeInputParams: myobjQuantize }));
                 break;
@@ -271,7 +288,7 @@ class App extends Component<{}, IState> {
     pathToPreprocessModule = () => {
         window.console.log("Select path to preprocess module");
         vscode.postMessage({
-            command: 'setPreprocessModulePath',
+            command: 'setDatasetSingleFile:quantize',
             text: 'Select path to preprocess module path'
         });
         window.console.log(`Sent message to host: setPreprocessModulePath`);
@@ -350,6 +367,9 @@ class App extends Component<{}, IState> {
         switch (task) {
             case 'onFunctionNameChange':
                 deepcloned.functionName = event.target.value;
+                break;
+            case 'onDatasetSizeChange':
+                deepcloned.datasetSize = event.target.value;
                 break;
         }
         console.log("Setting state quantizeInputParams");
@@ -443,6 +463,7 @@ class App extends Component<{}, IState> {
                             pathToModel={this.pathToModelQuantize}
                             pathToPreprocessModule={this.pathToPreprocessModule}
                             quantizeFormHandler={this.quantizeFormHandler}
+                            datasetquantizeFormHandler={this.quantizeFormHandler}
                             startQuantization={this.startQuantization}
                             cancelQuantization={this.cancelQuantization}
                             pathToRepresentativeData={this.PathToRepresentativeData}

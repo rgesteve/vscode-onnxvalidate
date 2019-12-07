@@ -75,12 +75,9 @@ export const tensorflow_binaries : { [key: string]: {transform: string, summariz
 
 export const tensorflow_quantization_options : string  =
     'add_default_attributes \
-     strip_unused_nodes(type=float, shape="1,224,224,3") \
-     remove_nodes(op=Identity, op=CheckNumerics) \
-     fold_constants(ignore_errors=true) \
-     fold_batch_norms \
-     fold_old_batch_norms \
-     quantize_weights \
-     quantize_nodes \
-     strip_unused_nodes' ;
+    fold_batch_norms \
+    fold_old_batch_norms \
+    quantize_weights \
+    quantize_nodes \
+    strip_unused_nodes' ;
 
