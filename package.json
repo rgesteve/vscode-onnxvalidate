@@ -73,6 +73,13 @@
                     ],
                     "default": null,
                     "description": "Specifies the folder path to be mounted on the container."
+                },
+                "dl-toolkit.memory" :{
+                    "type" : [
+                        "string", "null"
+                    ],
+                    "default": "4g",
+                    "description" : "Specifies the amount of memory to allocate for the docker container (e.g. 2g, 4g). If default, docker default is used"
                 }
             }
         }

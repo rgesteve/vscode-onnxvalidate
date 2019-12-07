@@ -6,6 +6,7 @@ import * as os from 'os';
 import * as utils from './osUtils';
 import * as configs from './config';
 import { dlToolkitChannel } from "./dlToolkitChannel";
+import { WorkspaceConfiguration } from 'vscode';
 
 
 class DockerManager implements vscode.Disposable {
@@ -120,8 +121,7 @@ class DockerManager implements vscode.Disposable {
     public async getImageId(): Promise<string> {
         let imageID: string = "";
         if (utils.g_containerType === "linux") {
-            //imageID = await this.exeCmd("docker", ['images', "chanchala/mlperf_linux7:latest", '--format', '"{{.Repository}}"']);
-            imageID = await this.exeCmd("docker", ['images', "test5:latest", '--format', '"{{.Repository}}"']);
+            imageID = await this.exeCmd("docker", ['images', "chanchala7/mlperf_linux:latest", '--format', '"{{.Repository}}"']);
             if (!imageID || 0 === imageID.length) { // image doesnt exist
                 await this.exeCmd("docker", ["pull", "chanchala7/mlperf_linux:latest"])
                 try {
@@ -171,9 +171,12 @@ class DockerManager implements vscode.Disposable {
             return Promise.reject("No imageId found");
         }
 
+        const config: WorkspaceConfiguration = vscode.workspace.getConfiguration("dl-toolkit");
+        let memory: string | undefined = config.get<string>("memory");
+
         let userWorkspaceMount: string = `source=${utils.g_hostLocation},target=${utils.g_mountLocation},type=bind`;
         let extensionMount: string = `source=${utils.g_hostOutputLocation},target=${utils.g_mountOutputLocation},type=bind`;
-        let args: string[] = ['run', '-m', '4g', '-t', '-d', '--mount', userWorkspaceMount, '--mount', extensionMount, this._imageId];
+        let args: string[] = ['run', '-m', `${memory}`, '-t', '-d', '--mount', userWorkspaceMount, '--mount', extensionMount, this._imageId];
         let runningContainer = await this.exeCmdProgressBar("Starting your development environment...", "docker", args).catch(err => {
                 dlToolkitChannel.appendLine("error", err);
             });
@@ -325,12 +328,13 @@ class DockerManager implements vscode.Disposable {
         }
         else {
             args.push('calibrate.py');
-            // if (quantizeParam.has("data_preprocess") && !quantizeParam.has("dataset_size")) { 
-            //     return Promise.reject("Need dataset size for preprocessed protobuf input data");
-            // }
+
             let dataset = quantizeParam.get("dataset_path");
             if (dataset && dataset.endsWith('.pb') && !quantizeParam.has("dataset_size")) { 
                 return Promise.reject("Need dataset size for preprocessed protobuf input data");
+            }
+            if (dataset && dataset.endsWith('.pb') && quantizeParam.has("data_preprocess")) { 
+                quantizeParam.delete("data_preprocess"); // work around to get right params, clicking the radio buttons doesnt clear the fields yet
             }
             for (var [key, value] of quantizeParam) {
                 if (key === 'dataset_path' || key === 'model_path') {

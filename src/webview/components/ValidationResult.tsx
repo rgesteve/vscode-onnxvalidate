@@ -109,28 +109,21 @@ class ValidationResult extends Component<IVResultProps, {}> {
 export class SummarizeResult extends Component<ISummarizeResultProps, {}> {
     constructor(props: ISummarizeResultProps) {
         super(props);
-    } 
+    }
     render() {
         let result_instance = this.props.summarizeResult;
-        //result_instance = "teststststst"
         return (
             <Stack tokens={containerStackTokens}>
-
                 <Stack.Item grow styles={stackItemStyles}>
-
-                        <Text variant={'xLarge'} block>
-                            Summarize Result
+                    <Text variant={'xLarge'} block>
+                        Summarize Result
                         </Text>
-                        <Text variant={'large'} >
-                            {result_instance}
-                        </Text>
-
-
-
+                    <Text variant={'large'} >
+                        {result_instance}
+                    </Text>
                 </Stack.Item>
             </Stack>
         );
-
     }
 }
 // Styles definition
