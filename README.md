@@ -23,8 +23,16 @@ This extension enables you to
     *  All the models, representative dataset that the application developer has needs to be accessible to the container via mount points. So, the extension user can specify this mount location via `dl-toolkit.mountLocation` location or if it is not specified then the mount location is considered to be the open workspace in VSCode. If both of them are not specified then the extension will give an error when `Initialize ecosystem` command is invoked.
 
 ## Extension Settings
-1. `dl-toolkit.mountLocation` setting can be used to set the mount location of the 
+1. Once the extension is installed, VSCode user [settings](https://code.visualstudio.com/docs/getstarted/settings) `dl-toolkit.mountLocation` can be used to set the mount location of the docker container. `dl-toolkit.memory` can be used to set the amount of memory while running the docker container
+2. If `dl-toolkit.mountLocation` is not set, then the workspace that is currently open is used as the mount location. If this is not set either, then the extension will fail to `Initialize ecosystem`
+3. If `dl-toolkit.memory` is not set, docker default is used to start the container
 
+## Commands
+1. `DL-Toolkit: Initialize ecosystem` needs to be run first, it will check the pre-requisites and fail if some of them is not satisfied. `DLToolkitChannel` in the `Output` window can be used to see the logs in real time. The logs are also stored in the OS' temp folder. [Describe this more...]
+2. `DL-Toolkit: Reinitialize` should be use to reinitialize the ecosystem, if the initialization failed, after resolving the issues (if any) that `Initialize ecosystem` had.
+3. `DL-Toolkit: Start ecosystem` starts the ecosystem by running the docker image.
+4. `DL-Toolkit: Convert, Quantize, Validate` opens up the webview which allows the user to convert, quantize and validate the models.
+5. Closing the instance of the VSCode will stop the docker container.
 ## Known Issues
 
 
