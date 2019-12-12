@@ -9,9 +9,9 @@ This extension enables you to
 2. Quantize (Tensoflow and ONNX FP32 models to Int8 models)
     *  Both tensorflow models and ONNX models can be quantized
     *  Tensorflow models are quantized using [graph_transform](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/tools/graph_transforms#using-the-graph-transform-tool) tool from tensorflow. The quantization options currently used are [these](https://github.com/rgesteve/vscode-onnxvalidate/blob/master/src/extension/config.ts#L76). WIP for adding a way to change the quantization options by user from the UI.
-    *  Onnx models are quantized using the [quantization](https://github.com/microsoft/onnxruntime/tree/askhade/quantization_and_caliberation/onnxruntime/python/tools/quantization) from onnxruntime. It supports dynamic quantization with Integer ops and QLinear ops. 
+    *  Onnx models are quantized using the [quantization](https://github.com/microsoft/onnxruntime/tree/askhade/quantization_and_caliberation/onnxruntime/python/tools/quantization) scripts from onnxruntime. It supports dynamic quantization with Integer ops and QLinear ops. 
        * If no representative dataset is chosen, then a dynamic quantization with Integer ops is carried out
-       * If a representative dataset is choosen with a preprocessing method, then, that dataset is preprocessed using the preprocessing method and then a dynamic quantization of the QLinear ops is carried out. Available preprocessing methods are ...[put more data about the preprocessing methods available]
+       * If a representative dataset is choosen with a preprocessing method, then, that dataset is preprocessed using the preprocessing method and then a dynamic quantization of the QLinear ops is carried out. Available preprocessing methods are `preprocess_method1` and `preprocess_method1`...[put more data about the preprocessing methods available (to be put in when the feature branch is merged into master)]. A preprocessed protobuf input with a count of the number of images can also be used if you have a preprocessed protobuf image.
    
 3. Validate the models using MLPerf.
      *  Validation is done using MLPerf [v0.5](https://github.com/mlperf/inference/tree/master/v0.5/classification_and_detection)
