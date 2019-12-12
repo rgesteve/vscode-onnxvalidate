@@ -66,12 +66,10 @@ export function getLocationOnContainer(pathOnHost: string | undefined): string {
         else if (isWindows() && g_containerType === 'linux') {
             let temp: string = pathOnHost.replace(g_hostLocation, g_mountLocation);
             retString = temp.replace(/\\/g, "/");
-            dlToolkitChannel.appendLine("info", `Path ${pathOnHost} translates to ${retString}`);
         }
 
         else
             retString = `${g_mountLocation}${pathOnHost.replace(g_hostLocation, "")}`;
-        dlToolkitChannel.appendLine("info", `Path ${pathOnHost} translates to ${retString}`);
     }
 
     return retString;
