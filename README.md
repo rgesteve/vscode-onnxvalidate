@@ -34,9 +34,10 @@ This extension enables you to
 4. `DL-Toolkit: Convert, Quantize, Validate` opens up the webview which allows the user to convert, quantize and validate the models.
 5. Closing the instance of the VSCode will stop the docker container.
 ## Known Issues
-1. 
+1. The extension needs to be initialized, then the ecosystem should be started and then the webview commands can be executed. If the ecosystem isnt started, then the webview commands will return an error which would say that there are no running containers.
 
 ## Release Notes
+1. With multiple instances of VSCode, with this extension activated on all of those instances, each instance will start a container. Each containers will be stopped when the corresponding VSCode instance which started the container is closed.
 
 ### 0.0.1
 Version 0.1
