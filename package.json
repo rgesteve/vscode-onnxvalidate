@@ -2,7 +2,7 @@
     "name": "dl-toolkit",
     "publisher": "rgesteve",
     "displayName": "DL-Toolkit",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "description": "Helps with conversion of TF models conversion to ONNX, quantization of models and validation of the models using MLPerf, all without the need of the runtime/tools installed on your system",
     "engines": {
         "vscode": "^1.35.0"
@@ -15,9 +15,7 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:extension.initializeOnnxEcosystem",
-        "onCommand:extension.Validate",
-        "onCommand:extension.DLToolkit"
+        "onCommand:extension.initializeOnnxEcosystem"
     ],
     "main": "./out/extension/extension.js",
     "contributes": {
