@@ -38,6 +38,7 @@ This extension enables you to
 
 ## Release Notes
 1. With multiple instances of VSCode, with this extension activated on all of those instances, each instance will start a container. Each containers will be stopped when the corresponding VSCode instance which started the container is closed.
+2. This extension is supported only windows and linux hosts and the containers which are run on both these OSs are Linux containers. Suppport for windows container is coming up.
 
 ### 0.0.1
 Version 0.1
