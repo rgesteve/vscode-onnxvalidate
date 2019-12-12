@@ -2,7 +2,7 @@
     "name": "dl-toolkit",
     "publisher": "rgesteve",
     "displayName": "DL-Toolkit",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "description": "Helps with conversion of TF models conversion to ONNX, quantization of models and validation of the models using MLPerf, all without the need of the runtime/tools installed on your system",
     "engines": {
         "vscode": "^1.35.0"
@@ -15,9 +15,7 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:extension.initializeOnnxEcosystem",
-        "onCommand:extension.Validate",
-        "onCommand:extension.DLToolkit"
+        "onCommand:extension.initializeOnnxEcosystem"
     ],
     "main": "./out/extension/extension.js",
     "contributes": {
@@ -74,12 +72,13 @@
                     "default": null,
                     "description": "Specifies the folder path to be mounted on the container."
                 },
-                "dl-toolkit.memory" :{
-                    "type" : [
-                        "string", "null"
+                "dl-toolkit.memory": {
+                    "type": [
+                        "string",
+                        "null"
                     ],
                     "default": "4g",
-                    "description" : "Specifies the amount of memory to allocate for the docker container (e.g. 2g, 4g). If default, docker default is used"
+                    "description": "Specifies the amount of memory to allocate for the docker container (e.g. 2g, 4g). If default, docker default is used"
                 }
             }
         }
@@ -126,6 +125,7 @@
         "react-dom": "^16.8.6",
         "recharts": "^1.6.2",
         "time-stamp": "^2.2.0",
+        "vsce": "^1.71.0",
         "winston": "^3.2.1",
         "winston-daily-rotate-file": "^4.2.1"
     }
