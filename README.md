@@ -2,7 +2,7 @@ This is the README for the DL Toolkit extension.
 ## Features
 This extension enables you to
 </br>
-1. Convert (Tensorflow models to ONNX models)
+1.    Convert (Tensorflow models to ONNX models)
     *  Uses tf2onnx converter tool. 
     *  For resnet50 and mobilenet models the input and output nodes are considered to be [this](https://github.com/rgesteve/vscode-onnxvalidate/blob/master/src/extension/config.ts#L2). If the input/output nodes need to be different, they can be changed using the input/output node in the Convert UI
     * For other models with unknown input and output nodes, the "Summarize Graph" can be used to get the details of the model. The summarize graph uses the [summarize_tool](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/tools/graph_transforms/summarize_graph_main.cc) from tensorflow.
@@ -34,7 +34,7 @@ This extension enables you to
 4. `DL-Toolkit: Convert, Quantize, Validate` opens up the webview which allows the user to convert, quantize and validate the models.
 5. Closing the instance of the VSCode will stop the docker container.
 ## Known Issues
-
+1. 
 
 ## Release Notes
 
